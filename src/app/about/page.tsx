@@ -71,7 +71,7 @@ export default function AboutPage() {
             <div className="border-t border-foreground/10 pt-8 flex flex-wrap gap-8 items-center text-xs font-mono uppercase tracking-widest">
               <a
                 href="mailto:giulia@stills.com"
-                className="flex items-center gap-2 hover:opacity-75 transition-opacity cursor-none"
+                className="flex items-center gap-2 hover:opacity-75 transition-opacity"
               >
                 <Mail className="h-4 w-4" />
                 <span>giulia@stills.com</span>
@@ -80,7 +80,7 @@ export default function AboutPage() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 hover:opacity-75 transition-opacity cursor-none"
+                className="flex items-center gap-2 hover:opacity-75 transition-opacity"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

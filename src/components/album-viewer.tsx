@@ -4,36 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sliders, Camera, MapPin, Calendar } from "lucide-react";
-
-interface Photo {
-  id: string;
-  url: string;
-  thumbnail_url: string;
-  width: number;
-  height: number;
-  aspect_ratio: number;
-  location: string | null;
-  tags: string[];
-  color_palette: string[];
-  exif: {
-    camera?: string;
-    lens?: string;
-    iso?: number;
-    aperture?: string;
-    shutter?: string;
-    focal_length?: string;
-    date_taken?: string;
-  };
-}
-
-interface Album {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  date: string;
-  cover_image_url: string;
-}
+import { Album, Photo } from "@/lib/types";
 
 interface AlbumViewerProps {
   album: Album;
@@ -201,7 +172,7 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
                           {photo.color_palette.map((color, cIdx) => (
                             <div key={cIdx} className="group/color relative">
                               <div
-                                className="h-6 w-6 rounded-full border border-foreground/10 shadow-sm cursor-none hover:scale-125 transition-transform duration-300"
+                                className="h-6 w-6 rounded-full border border-foreground/10 shadow-sm hover:scale-125 transition-transform duration-300"
                                 style={{ backgroundColor: color }}
                               />
                               {/* Tooltip on hover */}
@@ -244,7 +215,7 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
                 <button
                   key={photo.id}
                   onClick={() => scrollToPhoto(`photo-${photo.id}`)}
-                  className={`group relative h-12 w-12 cursor-none overflow-hidden transition-all duration-300 border ${
+                  className={`group relative h-12 w-12 overflow-hidden transition-all duration-300 border ${
                     isActive
                       ? "border-foreground scale-110 opacity-100 z-10"
                       : "border-transparent opacity-30 hover:opacity-70 scale-95"

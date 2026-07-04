@@ -9,7 +9,7 @@ export function ApertureToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="group relative flex items-center gap-3 cursor-none focus:outline-none"
+      className="group relative flex items-center gap-3 focus:outline-none"
       aria-label="Toggle theme"
     >
       {/* Aperture Status F-stop numbers */}

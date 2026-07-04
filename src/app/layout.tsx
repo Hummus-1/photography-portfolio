@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LenisProvider } from "@/components/lenis-provider";
-import { CustomCursor } from "@/components/custom-cursor";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -40,7 +39,6 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground relative selection:bg-foreground selection:text-background overflow-x-hidden">
         <ThemeProvider>
           <LenisProvider>
-            <CustomCursor />
             <div className="grain" />
             <main className="flex-grow flex flex-col">{children}</main>
             <Toaster position="bottom-right" richColors />

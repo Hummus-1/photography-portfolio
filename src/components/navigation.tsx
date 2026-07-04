@@ -35,7 +35,7 @@ export function Navigation() {
         {/* Logo / Brand Name */}
         <Link
           href="/"
-          className="font-serif text-xl md:text-2xl font-bold tracking-wider hover:opacity-75 transition-opacity duration-300 cursor-none"
+          className="font-serif text-xl md:text-2xl font-bold tracking-wider hover:opacity-75 transition-opacity duration-300"
         >
           STILLS <span className="text-[10px] tracking-widest font-sans font-normal opacity-50 relative -top-3">©</span>
         </Link>
@@ -45,7 +45,7 @@ export function Navigation() {
           <nav className="hidden sm:flex items-center gap-8 text-xs font-mono tracking-widest uppercase">
             <Link
               href="/"
-              className={`hover:opacity-100 transition-opacity duration-300 cursor-none ${
+              className={`hover:opacity-100 transition-opacity duration-300 ${
                 pathname === "/" ? "opacity-100 font-bold" : "opacity-60"
               }`}
             >
@@ -54,7 +54,7 @@ export function Navigation() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`hover:opacity-100 transition-opacity duration-300 cursor-none ${
+                className={`hover:opacity-100 transition-opacity duration-300 ${
                   pathname?.startsWith("/admin") ? "opacity-100 font-bold" : "opacity-60"
                 }`}
               >
@@ -63,7 +63,7 @@ export function Navigation() {
             )}
             <Link
               href="/about"
-              className={`hover:opacity-100 transition-opacity duration-300 cursor-none ${
+              className={`hover:opacity-100 transition-opacity duration-300 ${
                 pathname === "/about" ? "opacity-100 font-bold" : "opacity-60"
               }`}
             >
