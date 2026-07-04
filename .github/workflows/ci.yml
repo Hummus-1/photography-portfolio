@@ -36,8 +36,8 @@ jobs:
         env:
           # Inject dummy variables if required during build time by Next.js
           NEXT_PUBLIC_SUPABASE_URL: https://dummy-project.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
-          SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: dummy-anon-key
+          SUPABASE_SECRET_KEY: dummy-service-role-key
           R2_ACCOUNT_ID: dummy-r2-account-id
           R2_ACCESS_KEY_ID: dummy-r2-access-key-id
           R2_SECRET_ACCESS_KEY: dummy-r2-secret-access-key

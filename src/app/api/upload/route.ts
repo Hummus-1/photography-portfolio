@@ -17,7 +17,7 @@ const CANDIDATE_PROMPTS = [
 
 // Initialize Supabase admin client (since we write to the database and bypass RLS policy checks for authenticated admin)
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseServiceRole = process.env.SUPABASE_SECRET_KEY || "";
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRole);
 
 export async function POST(request: NextRequest) {
