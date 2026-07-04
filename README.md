@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stills — Premium Photography Portfolio & Blog
+
+This is a premium, high-end photography portfolio and blog inspired by the aesthetics of [giuligartner.com](https://www.giuligartner.com/stills/visit-greenland). 
+
+Built with **Next.js 15**, **TypeScript**, and **Tailwind CSS v4**, the application is fully integrated with a cloud media pipeline using **Supabase** (Database + Auth) and **Cloudflare R2** (Storage) to host and serve high-resolution photos efficiently and for free.
+
+---
+
+## Key Features
+
+1. **Aperture Toggle Theme Switcher**: An interactive camera lens aperture SVG ring that morphs blades and spins on toggle, transitioning from F/1.4 light mode to F/22 dark mode.
+2. **Subtle Film Grain**: Animated, responsive fractal noise overlay generated entirely via inline CSS-SVG.
+3. **Custom Cursor**: A spring-physics dot that follows the mouse and automatically inverts colors using CSS `mix-blend-difference`.
+4. **Smooth Scroll**: Native integration of Lenis smooth scroll.
+5. **Asymmetric Gallery Grid**: Alternates image aspect ratios and grid sizes to produce an elegant masonry layout.
+6. **Timeline Scroll Navigation**: A sticky right-aligned timeline of thumbnails. Click to jump to photos, and scroll to auto-sync the active thumbnail via `IntersectionObserver`.
+7. **Interactive Image Metadata Overlays**: Hovering over photos reveals:
+   - Extracted EXIF camera metadata (Camera, Lens, ISO, Aperture, Shutter Speed, Focal Length).
+   - 5 dominant color palette circles extracted from the image.
+   - User-defined and AI-generated hashtags.
+8. **Admin Panel (`/admin`)**: A secure drag-and-drop dashboard to create albums, manage publication status, and upload photos.
+9. **Automatic AI Tagging Pipeline**: Photo uploads are sent to **Cloudflare Workers AI (CLIP model)** to automatically generate tags describing objects, setting, and mood.
+
+---
+
+## Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui
+- **Animations**: Lenis (Smooth Scroll), Framer Motion (Page Transitions)
+- **Backend / Database / Auth**: Supabase
+- **Image Storage & CDN**: Cloudflare R2
+- **Image & Data Processing**: `sharp` (compression), `exifr` (EXIF data)
+- **AI Classification**: Cloudflare Workers AI (`@cf/openai/clip-vit-base-patch32`)
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Database Setup
+Log in to your [Supabase Dashboard](https://supabase.com), open the SQL Editor for your project, and run the schema queries found in `ARCHITECTURE.md` to set up your tables and Row Level Security (RLS) policies.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 2. Configure Environment Variables
+Create a `.env.local` file at the root of the project and paste the following template, replacing the placeholders with your actual keys (see `.env.local.example` for details):
+
+```ini
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_SECRET_KEY=your-secret-key
+
+# Cloudflare R2
+R2_ACCOUNT_ID=your-cloudflare-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_BUCKET_NAME=your-r2-bucket-name
+NEXT_PUBLIC_R2_PUBLIC_URL=https://pub-your-id.r2.dev
+
+# Cloudflare Workers AI
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Install Dependencies & Start Development
+Execute the following commands in your terminal:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+pnpm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Start the development server
+pnpm dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to view the homepage.
+Open [http://localhost:3000/admin](http://localhost:3000/admin) to log in and upload your collections.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Note: If your database is empty, the homepage will automatically fall back to loading 3 mock collections (Greenland, Iceland, Mongolia) with sample photos, EXIF data, and palettes, allowing you to preview the design immediately.*
