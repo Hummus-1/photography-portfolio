@@ -81,9 +81,19 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
           {album.title}
         </h1>
 
-        <p className="text-lg md:text-xl text-foreground/80 leading-relaxed max-w-3xl">
+        <p className="text-lg md:text-xl text-foreground/80 leading-relaxed max-w-3xl mb-8">
           {album.description}
         </p>
+
+        {album.tags && album.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2.5 text-xs font-mono uppercase tracking-widest text-foreground/50">
+            {album.tags.map((tag, tIdx) => (
+              <span key={tIdx} className="border border-foreground/15 px-2.5 py-1 bg-foreground/[0.01]">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Main Layout: Asymmetrical grid and Sticky Thumbnail sidebar */}

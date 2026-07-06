@@ -35,4 +35,5 @@ export interface Album {
   date: string;
   cover_image_url: string | null;
   is_published: boolean;
+  tags: string[];
 }

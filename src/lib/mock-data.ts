@@ -11,6 +11,7 @@ export const MOCK_ALBUMS_MAP: { [key: string]: { album: Album; photos: Photo[] }
       date: "2023-03-15",
       cover_image_url: "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=1600",
       is_published: true,
+      tags: ["iceberg", "nature", "water"],
     },
     photos: [
       {
@@ -125,6 +126,7 @@ export const MOCK_ALBUMS_MAP: { [key: string]: { album: Album; photos: Photo[] }
       date: "2024-06-20",
       cover_image_url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1600",
       is_published: true,
+      tags: ["landscape", "nature", "moody"],
     },
     photos: [
       {
@@ -179,6 +181,7 @@ export const MOCK_ALBUMS_MAP: { [key: string]: { album: Album; photos: Photo[] }
       date: "2025-09-05",
       cover_image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?auto=format&fit=crop&q=80&w=1600",
       is_published: true,
+      tags: ["landscape", "mountains", "adventure"],
     },
     photos: [
       {

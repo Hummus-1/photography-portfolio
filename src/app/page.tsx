@@ -93,6 +93,16 @@ export default async function HomePage() {
                     {album.description}
                   </p>
 
+                  {album.tags && album.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-widest text-foreground/50 pt-2">
+                      {album.tags.slice(0, 4).map((tag, tIdx) => (
+                        <span key={tIdx} className="border border-foreground/10 px-2 py-0.5 bg-foreground/[0.01]">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="pt-4">
                     <Link
                       href={`/album/${album.slug}`}
