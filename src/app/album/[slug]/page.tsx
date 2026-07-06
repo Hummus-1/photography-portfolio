@@ -9,7 +9,7 @@ async function getAlbumData(slug: string) {
   // Try to load from database first
   try {
     const { data: album, error: albumError } = await supabase
-      .from("albums")
+      .from("albums_with_locations")
       .select("*")
       .eq("slug", slug)
       .single();

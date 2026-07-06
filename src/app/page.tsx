@@ -9,7 +9,7 @@ import { MOCK_ALBUMS_LIST } from "@/lib/mock-data";
 async function getPublishedAlbums() {
   try {
     const { data, error } = await supabase
-      .from("albums")
+      .from("albums_with_locations")
       .select("*")
       .eq("is_published", true)
       .order("date", { ascending: false });
@@ -81,7 +81,19 @@ export default async function HomePage() {
                     <span className="h-1.5 w-1.5 rounded-full bg-foreground/20" />
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      {album.location}
+                      {album.location_path && album.location_path.length > 0 ? (
+                        <span>
+                          {album.location_path.length >= 2 ? (
+                            `${album.location_path[album.location_path.length - 1].name}, ${
+                              album.location_path.find(n => n.type === 'country')?.name || album.location_path[0].name
+                            }`
+                          ) : (
+                            album.location_path[0].name
+                          )}
+                        </span>
+                      ) : (
+                        album.location
+                      )}
                     </span>
                   </div>
 

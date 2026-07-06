@@ -18,6 +18,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Album } from "@/lib/types";
+import { LocationSelector } from "./location-selector";
 
 interface CreateAlbumDialogProps {
   isOpen: boolean;
@@ -33,13 +34,14 @@ export function CreateAlbumDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [locationId, setLocationId] = useState<string | null>(null);
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date || !location) {
-      toast.error("Please fill in required fields");
+    if (!title || !date || !locationId) {
+      toast.error("Please fill in required fields (including a location selection)");
       return;
     }
 
@@ -60,6 +62,7 @@ export function CreateAlbumDialog({
           slug,
           description,
           location,
+          location_id: locationId,
           date,
           is_published: false,
         })
@@ -75,6 +78,7 @@ export function CreateAlbumDialog({
       setTitle("");
       setDescription("");
       setLocation("");
+      setLocationId(null);
       setDate("");
     } catch (err: any) {
       toast.error(err.message || "Failed to create album");
@@ -91,7 +95,7 @@ export function CreateAlbumDialog({
           Create Album
         </Button>
       } />
-      <DialogContent className="bg-[#14171a] border-white/10 text-white rounded-none max-w-lg">
+      <DialogContent className="bg-[#14171a] border-white/10 text-white rounded-none max-w-11/12 w-fit">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl font-bold uppercase tracking-wider">
             New Photo Album
@@ -114,20 +118,7 @@ export function CreateAlbumDialog({
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="location" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-                Location *
-              </Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Greenland"
-                className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-                required
-              />
-            </div>
+          <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="date" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
                 Date *
@@ -139,6 +130,16 @@ export function CreateAlbumDialog({
                 onChange={(e) => setDate(e.target.value)}
                 className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
                 required
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <LocationSelector
+                selectedLocationId={locationId}
+                onSelectLocation={(id, fullName) => {
+                  setLocationId(id);
+                  setLocation(fullName);
+                }}
               />
             </div>
           </div>

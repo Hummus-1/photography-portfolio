@@ -162,14 +162,16 @@ export async function POST(request: NextRequest) {
         .resize(512, 512, { fit: "inside" })
         .jpeg({ quality: 75 })
         .toBuffer();
-      const base64Image = clipInputBuffer.toString("base64");
+      const imageBytes = Array.from(clipInputBuffer);
 
       const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
       const cfApiToken = process.env.CLOUDFLARE_API_TOKEN;
+      const isDummyCF = !cfAccountId || cfAccountId.includes("dummy") || !cfApiToken || cfApiToken.includes("dummy");
 
-      if (cfAccountId && cfApiToken) {
+      if (cfAccountId && cfApiToken && !isDummyCF) {
+        console.log("Sending photo to Cloudflare Workers AI Llama 3.2 Vision...");
         const cfResponse = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/@cf/openai/clip-vit-base-patch32`,
+          `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`,
           {
             method: "POST",
             headers: {
@@ -177,22 +179,35 @@ export async function POST(request: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              image: base64Image,
-              prompt: CANDIDATE_PROMPTS,
+              image: imageBytes,
+              prompt: "Generate ten descriptive single-word descriptors of the image, separated by commas. Return ONLY the comma-separated hashtags (e.g. landscape, mountain, snow, grape, dog), nothing else. Do not write full sentences. Do not end with a period.",
             }),
           }
         );
 
-        const cfData = await cfResponse.json();
-        if (cfData.success && cfData.result) {
-          // Filter matching prompts with score > 0.15
-          aiTags = cfData.result
-            .filter((item: { label: string; score: number }) => item.score > 0.15)
-            .map((item: { label: string; score: number }) => item.label);
+        console.log("Cloudflare Workers AI API Status:", cfResponse.status);
+
+        if (!cfResponse.ok) {
+          const errText = await cfResponse.text();
+          console.error("Cloudflare Workers AI API error:", errText);
+        } else {
+          const cfData = await cfResponse.json();
+          if (cfData.success && cfData.result) {
+            const responseText = cfData.result.response || "";
+            aiTags = responseText
+              .split(",")
+              .map((tag: string) => tag.replace(/#/g, "").trim().toLowerCase())
+              .filter(Boolean);
+            console.log("Cloudflare Llama 3.2 Vision tags generated successfully:", aiTags);
+          } else {
+            console.warn("Cloudflare Workers AI success flag is false or result is missing:", cfData);
+          }
         }
+      } else {
+        console.log("Skipping Cloudflare Workers AI Llama 3.2 Vision (dummy keys detected or missing keys)");
       }
     } catch (cfErr) {
-      console.error("Cloudflare Workers AI CLIP generation failed:", cfErr);
+      console.error("Cloudflare Workers AI Llama 3.2 Vision tagging failed:", cfErr);
     }
 
     // Add smart EXIF rule-based tags
@@ -217,6 +232,9 @@ export async function POST(request: NextRequest) {
       aiTags.push("Sony");
     }
 
+    // Limit to a maximum of 10 tags
+    const finalTags = aiTags.slice(0, 10);
+
     // 10. Write to database (Supabase)
     const { data: photoData, error: dbError } = await supabaseAdmin
       .from("photos")
@@ -228,7 +246,7 @@ export async function POST(request: NextRequest) {
         height,
         aspect_ratio,
         location: parsedLocation,
-        tags: aiTags,
+        tags: finalTags,
         color_palette,
         exif,
         sort_order: sortOrder,

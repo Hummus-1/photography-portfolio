@@ -12,6 +12,12 @@ export interface EXIFData {
   };
 }
 
+export interface LocationNode {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface Photo {
   id: string;
   url: string;
@@ -31,9 +37,12 @@ export interface Album {
   title: string;
   slug: string;
   description: string;
-  location: string;
+  location: string | null; // legacy flat location string
+  location_id?: string | null;
+  location_path?: LocationNode[];
   date: string;
   cover_image_url: string | null;
   is_published: boolean;
   tags: string[];
 }
+

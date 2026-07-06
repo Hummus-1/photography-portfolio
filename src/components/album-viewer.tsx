@@ -71,9 +71,22 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
             {formatDate(album.date)}
           </span>
           <span className="h-1.5 w-1.5 rounded-full bg-foreground/20" />
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-3 w-3" />
-            {album.location}
+          <span className="flex items-center gap-1.5 flex-wrap">
+            <MapPin className="h-3 w-3 shrink-0" />
+            {album.location_path && album.location_path.length > 0 ? (
+              <span className="flex items-center gap-1 flex-wrap">
+                {album.location_path.map((node, nIdx) => (
+                  <span key={node.id} className="flex items-center gap-1">
+                    {nIdx > 0 && <span className="opacity-30 font-normal">/</span>}
+                    <span className="hover:text-foreground transition-colors duration-200 cursor-pointer" title={node.type}>
+                      {node.name}
+                    </span>
+                  </span>
+                ))}
+              </span>
+            ) : (
+              album.location
+            )}
           </span>
         </div>
 

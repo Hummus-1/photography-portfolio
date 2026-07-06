@@ -1,0 +1,1 @@
+use shadcn components when possible, use shadcn skill. use pnpm dlx instead of npx

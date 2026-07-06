@@ -62,7 +62,7 @@ export function AlbumSidebar({
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/40 uppercase">
                   <MapPin className="h-3 w-3" />
-                  <span>{album.location}</span>
+                  <span>{album.location_path && album.location_path.length > 0 ? album.location_path[album.location_path.length - 1].name : album.location}</span>
                 </div>
 
                 <div className="w-full flex items-center justify-between mt-4 pt-3 border-t border-white/5">

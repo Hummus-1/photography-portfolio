@@ -63,7 +63,7 @@ export default function AdminPage() {
     setAlbumLoading(true);
     try {
       const { data, error } = await supabase
-        .from("albums")
+        .from("albums_with_locations")
         .select("*")
         .order("date", { ascending: false });
 
@@ -226,7 +226,9 @@ export default function AdminPage() {
                 <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-white/40">
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
-                    {activeAlbum.location}
+                    {activeAlbum.location_path && activeAlbum.location_path.length > 0 
+                      ? activeAlbum.location_path.map(n => n.name).join(" / ") 
+                      : activeAlbum.location}
                   </span>
                   <span>•</span>
                   <span>{activeAlbum.date}</span>
