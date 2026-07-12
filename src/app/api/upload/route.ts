@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
               image: imageBytes,
-              prompt: "Generate ten descriptive single-word descriptors of the image, separated by commas. Return ONLY the comma-separated hashtags (e.g. landscape, mountain, snow, grape, dog), nothing else. Do not write full sentences. Do not end with a period.",
+              prompt: "Generate ten descriptive single-word hashtags, separated by commas. Return ONLY the comma-separated hashtags (e.g. landscape, mountain, snow, grape, dog), nothing else. Do not write full sentences. Do not end with a period.",
             }),
           }
         );

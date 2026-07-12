@@ -7,7 +7,7 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen bg-background transition-colors duration-400">
       <Navigation />
 
-      <div className="mx-auto max-w-[1800px] px-6 md:px-12 py-16 md:py-28 flex-grow flex items-center justify-center">
+      <div className="w-full px-6 md:px-12 py-16 md:py-28 flex-grow flex items-center justify-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
           
           {/* Portrait Image (5 cols) */}

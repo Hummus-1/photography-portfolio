@@ -10,16 +10,15 @@ Built with **Next.js 15**, **TypeScript**, and **Tailwind CSS v4**, the applicat
 
 1. **Aperture Toggle Theme Switcher**: An interactive camera lens aperture SVG ring that morphs blades and spins on toggle, transitioning from F/1.4 light mode to F/22 dark mode.
 2. **Subtle Film Grain**: Animated, responsive fractal noise overlay generated entirely via inline CSS-SVG.
-3. **Custom Cursor**: A spring-physics dot that follows the mouse and automatically inverts colors using CSS `mix-blend-difference`.
-4. **Smooth Scroll**: Native integration of Lenis smooth scroll.
-5. **Asymmetric Gallery Grid**: Alternates image aspect ratios and grid sizes to produce an elegant masonry layout.
-6. **Timeline Scroll Navigation**: A sticky right-aligned timeline of thumbnails. Click to jump to photos, and scroll to auto-sync the active thumbnail via `IntersectionObserver`.
-7. **Interactive Image Metadata Overlays**: Hovering over photos reveals:
+3. **Smooth Scroll**: Native integration of Lenis smooth scroll.
+4. **Asymmetric Gallery Grid**: Alternates image aspect ratios and grid sizes to produce an elegant masonry layout.
+5. **Timeline Scroll Navigation**: A sticky right-aligned timeline of thumbnails. Click to jump to photos, and scroll to auto-sync the active thumbnail via `IntersectionObserver`.
+6. **Interactive Image Metadata Overlays**: Hovering over photos reveals:
    - Extracted EXIF camera metadata (Camera, Lens, ISO, Aperture, Shutter Speed, Focal Length).
    - 5 dominant color palette circles extracted from the image.
    - User-defined and AI-generated hashtags.
-8. **Admin Panel (`/admin`)**: A secure drag-and-drop dashboard to create albums, manage publication status, and upload photos.
-9. **Automatic AI Tagging Pipeline**: Photo uploads are sent to **Cloudflare Workers AI (CLIP model)** to automatically generate tags describing objects, setting, and mood.
+7. **Admin Panel (`/admin`)**: A secure drag-and-drop dashboard to create albums, manage publication status, and upload photos.
+8. **Automatic AI Tagging Pipeline**: Photo uploads are sent to **Cloudflare Workers AI (CLIP model)** to automatically generate tags describing objects, setting, and mood.
 
 ---
 

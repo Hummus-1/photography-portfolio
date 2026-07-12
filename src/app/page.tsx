@@ -42,7 +42,7 @@ export default async function HomePage() {
       <Navigation />
 
       {/* Hero Welcome Section */}
-      <section className="px-6 md:px-12 py-20 md:py-32 max-w-[1800px] mx-auto w-full">
+      <section className="px-6 md:px-12 py-20 md:py-32 w-full">
         <div className="max-w-4xl space-y-6">
           <div className="text-xs font-mono tracking-widest uppercase text-foreground/50">
             stills portfolio
@@ -69,7 +69,7 @@ export default async function HomePage() {
                 isEven ? "bg-foreground/[0.01]" : "bg-transparent"
               }`}
             >
-              <div className="mx-auto max-w-[1800px] px-6 md:px-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              <div className="px-6 md:px-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
                 {/* Text details (5 cols) */}
                 <div className={`space-y-6 lg:col-span-5 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
@@ -128,16 +128,16 @@ export default async function HomePage() {
 
                 {/* Hero Case Image (7 cols) */}
                 <div className={`lg:col-span-7 ${isEven ? "lg:order-2" : "lg:order-1"}`}>
-                  <Link href={`/album/${album.slug}`} className="block relative overflow-hidden group aspect-[16/10] bg-foreground/5">
+                  <Link href={`/album/${album.slug}`} className="block relative overflow-hidden group aspect-[16/10] bg-foreground/5 rounded-3xl">
                     <Image
                       src={album.cover_image_url || "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=1600"}
                       alt={album.title}
                       fill
                       sizes="(max-width: 1024px) 100vw, 900px"
                       priority={index === 0}
-                      className="object-cover scale-100 group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                      className="object-cover scale-100 group-hover:scale-[1.03] transition-transform duration-700 ease-out rounded-2xl"
                     />
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
+                    <div className="absolute inset-0  group-hover:bg-black/10 transition-colors duration-300" />
                   </Link>
                 </div>
 

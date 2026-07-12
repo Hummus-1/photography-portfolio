@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-playfair);
@@ -41,13 +41,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
+  /* --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-4xl: calc(var(--radius) * 2.6); */
 }
 
 :root {
@@ -69,8 +69,7 @@
   --border: #1a457222;
   --input: #1a457222;
   --ring: #1a4572;
-  --radius: 0rem; /* Minimalist sharp edges */
-  
+
   --sidebar: #e8e5f0;
   --sidebar-foreground: #1a4572;
   --sidebar-primary: #1a4572;
@@ -99,7 +98,7 @@
   --border: #e8e5f022;
   --input: #e8e5f022;
   --ring: #e8e5f0;
-  
+
   --sidebar: #14171a;
   --sidebar-foreground: #e8e5f0;
   --sidebar-primary: #e8e5f0;
@@ -115,9 +114,11 @@
     @apply border-border outline-ring/50;
     transition: color 400ms ease, background-color 400ms ease, border-color 400ms ease;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
@@ -127,12 +128,15 @@
 html.lenis {
   height: auto;
 }
+
 .lenis-smooth {
   scroll-behavior: auto !important;
 }
+
 .lenis-smooth [data-lenis-prevent] {
   overflow: clip;
 }
+
 .lenis-target {
   scroll-behavior: inherit;
 }
@@ -141,13 +145,16 @@ html.lenis {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--foreground);
   opacity: 0.3;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground);
 }
@@ -173,16 +180,47 @@ html.lenis {
 }
 
 @keyframes noise {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-1%, -2%); }
-  20% { transform: translate(-3%, 1%); }
-  30% { transform: translate(2%, -4%); }
-  40% { transform: translate(4%, 3%); }
-  50% { transform: translate(-5%, 2%); }
-  60% { transform: translate(3%, 1%); }
-  70% { transform: translate(0%, 3%); }
-  80% { transform: translate(4%, 5%); }
-  90% { transform: translate(-2%, 2%); }
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  10% {
+    transform: translate(-1%, -2%);
+  }
+
+  20% {
+    transform: translate(-3%, 1%);
+  }
+
+  30% {
+    transform: translate(2%, -4%);
+  }
+
+  40% {
+    transform: translate(4%, 3%);
+  }
+
+  50% {
+    transform: translate(-5%, 2%);
+  }
+
+  60% {
+    transform: translate(3%, 1%);
+  }
+
+  70% {
+    transform: translate(0%, 3%);
+  }
+
+  80% {
+    transform: translate(4%, 5%);
+  }
+
+  90% {
+    transform: translate(-2%, 2%);
+  }
 }
 
 /* Custom Selection style */

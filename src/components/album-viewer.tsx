@@ -62,7 +62,7 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
   };
 
   return (
-    <div className="mx-auto max-w-[1800px] px-6 md:px-12 py-12 md:py-20">
+    <div className="w-full px-6 md:px-12 py-12 md:py-20">
       {/* Album Header Block */}
       <header className="mb-20 md:mb-32 max-w-4xl">
         <div className="flex items-center gap-4 text-xs font-mono tracking-widest uppercase text-foreground/60 mb-6">
@@ -134,93 +134,102 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
                 }}
                 className={`group relative overflow-hidden transition-all duration-500 ${widthClass}`}
               >
-                {/* Photo Element */}
                 <div
-                  className="relative overflow-hidden bg-foreground/5"
-                  style={{ aspectRatio: photo.aspect_ratio || 1.5 }}
+                  className={`flex flex-col ${
+                    isWide ? "mx-auto" : isNarrow ? "mr-auto" : "ml-auto"
+                  }`}
+                  style={{
+                    width: `min(100%, calc((100vh - 200px) * ${photo.aspect_ratio || 1.5}))`,
+                  }}
                 >
-                  <Image
-                    src={photo.url}
-                    alt={album.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-                    priority={index < 2}
-                    className="object-cover scale-100 group-hover:scale-[1.02] transition-transform duration-700 ease-out pointer-events-none"
-                  />
+                  {/* Photo Element */}
+                  <div
+                    className="relative overflow-hidden bg-foreground/5 w-full"
+                    style={{ aspectRatio: photo.aspect_ratio || 1.5 }}
+                  >
+                    <Image
+                      src={photo.url}
+                      alt={album.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                      priority={index < 2}
+                      className="object-cover scale-100 group-hover:scale-[1.02] transition-transform duration-700 ease-out pointer-events-none"
+                    />
 
-                  {/* Elegant Dark/Light Glassmorphism overlay showing EXIF + Colors on Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8">
-                    
-                    {/* Location Tag */}
-                    {photo.location && (
-                      <div className="text-[10px] font-mono tracking-widest uppercase text-foreground/60 mb-2 flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3" />
-                        {photo.location}
-                      </div>
-                    )}
-
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    {/* Elegant Dark/Light Glassmorphism overlay showing EXIF + Colors on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8">
                       
-                      {/* EXIF Information */}
-                      <div className="space-y-2">
-                        {photo.exif.camera && (
-                          <div className="flex items-center gap-2 text-sm font-semibold tracking-wide">
-                            <Camera className="h-4 w-4 opacity-75" />
-                            <span>{photo.exif.camera}</span>
-                            {photo.exif.lens && (
-                              <span className="text-foreground/60 font-normal">
-                                • {photo.exif.lens}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 text-xs font-mono text-foreground/70">
-                          <Sliders className="h-3.5 w-3.5 opacity-75" />
-                          <span>
-                            {[
-                              photo.exif.focal_length,
-                              photo.exif.aperture,
-                              photo.exif.shutter,
-                              photo.exif.iso ? `ISO ${photo.exif.iso}` : null,
-                            ]
-                              .filter(Boolean)
-                              .join("  •  ")}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Color Palette Indicators */}
-                      {photo.color_palette && photo.color_palette.length > 0 && (
-                        <div className="flex items-center gap-2.5">
-                          {photo.color_palette.map((color, cIdx) => (
-                            <div key={cIdx} className="group/color relative">
-                              <div
-                                className="h-6 w-6 rounded-full border border-foreground/10 shadow-sm hover:scale-125 transition-transform duration-300"
-                                style={{ backgroundColor: color }}
-                              />
-                              {/* Tooltip on hover */}
-                              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] font-mono py-1 px-2 rounded opacity-0 pointer-events-none group-hover/color:opacity-100 transition-opacity duration-300 tracking-wider">
-                                {color}
-                              </div>
-                            </div>
-                          ))}
+                      {/* Location Tag */}
+                      {photo.location && (
+                        <div className="text-[10px] font-mono tracking-widest uppercase text-foreground/60 mb-2 flex items-center gap-1.5">
+                          <MapPin className="h-3 w-3" />
+                          {photo.location}
                         </div>
                       )}
 
+                      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        
+                        {/* EXIF Information */}
+                        <div className="space-y-2">
+                          {photo.exif.camera && (
+                            <div className="flex items-center gap-2 text-sm font-semibold tracking-wide">
+                              <Camera className="h-4 w-4 opacity-75" />
+                              <span>{photo.exif.camera}</span>
+                              {photo.exif.lens && (
+                                <span className="text-foreground/60 font-normal">
+                                  • {photo.exif.lens}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 text-xs font-mono text-foreground/70">
+                            <Sliders className="h-3.5 w-3.5 opacity-75" />
+                            <span>
+                              {[
+                                photo.exif.focal_length,
+                                photo.exif.aperture,
+                                photo.exif.shutter,
+                                photo.exif.iso ? `ISO ${photo.exif.iso}` : null,
+                              ]
+                                .filter(Boolean)
+                                .join("  •  ")}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Color Palette Indicators */}
+                        {photo.color_palette && photo.color_palette.length > 0 && (
+                          <div className="flex items-center gap-2.5">
+                            {photo.color_palette.map((color, cIdx) => (
+                              <div key={cIdx} className="group/color relative">
+                                <div
+                                  className="h-6 w-6 rounded-full border border-foreground/10 shadow-sm hover:scale-125 transition-transform duration-300"
+                                  style={{ backgroundColor: color }}
+                                />
+                                {/* Tooltip on hover */}
+                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-[10px] font-mono py-1 px-2 rounded opacity-0 pointer-events-none group-hover/color:opacity-100 transition-opacity duration-300 tracking-wider">
+                                  {color}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Photo tags shown underneath the photo */}
-                {photo.tags && photo.tags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-widest text-foreground/50">
-                    {photo.tags.slice(0, 5).map((tag, tIdx) => (
-                      <span key={tIdx} className="hover:text-foreground transition-colors duration-300">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                  {/* Photo tags shown underneath the photo */}
+                  {photo.tags && photo.tags.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-widest text-foreground/50">
+                      {photo.tags.slice(0, 5).map((tag, tIdx) => (
+                        <span key={tIdx} className="hover:text-foreground transition-colors duration-300">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}

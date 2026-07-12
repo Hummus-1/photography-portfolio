@@ -31,7 +31,7 @@ export function Navigation() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-foreground/10 bg-background/70 backdrop-blur-md transition-colors duration-400">
-      <div className="mx-auto max-w-[1800px] px-6 md:px-12 h-20 flex items-center justify-between">
+      <div className="w-full px-6 md:px-12 h-20 flex items-center justify-between">
         {/* Logo / Brand Name */}
         <Link
           href="/"
