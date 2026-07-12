@@ -209,5 +209,11 @@ export const MOCK_ALBUMS_MAP: { [key: string]: { album: Album; photos: Photo[] }
 };
 
 export const MOCK_ALBUMS_LIST: Album[] = Object.values(MOCK_ALBUMS_MAP).map(
-  (entry) => entry.album
+  (entry) => {
+    const coverPhoto = entry.photos.find((p) => p.url === entry.album.cover_image_url);
+    return {
+      ...entry.album,
+      cover_color_palette: coverPhoto ? coverPhoto.color_palette : (entry.photos[0]?.color_palette || []),
+    };
+  }
 );

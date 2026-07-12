@@ -44,5 +44,6 @@ export interface Album {
   cover_image_url: string | null;
   is_published: boolean;
   tags: string[];
+  cover_color_palette?: string[];
 }
 

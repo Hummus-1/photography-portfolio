@@ -5,19 +5,35 @@ import Image from "next/image";
 import { MapPin, Calendar, ArrowRight } from "lucide-react";
 import { Album } from "@/lib/types";
 import { MOCK_ALBUMS_LIST } from "@/lib/mock-data";
+import { ColorPalettePill } from "@/components/color-palette-pill";
 
 async function getPublishedAlbums() {
   try {
     const { data, error } = await supabase
       .from("albums_with_locations")
-      .select("*")
+      .select(`
+        *,
+        photos (
+          url,
+          color_palette
+        )
+      `)
       .eq("is_published", true)
       .order("date", { ascending: false });
 
     if (error || !data || data.length === 0) {
       return MOCK_ALBUMS_LIST;
     }
-    return data as Album[];
+
+    return data.map((album: any) => {
+      const photos = album.photos || [];
+      const coverPhoto = photos.find((p: any) => p.url === album.cover_image_url);
+      const cover_color_palette = coverPhoto ? coverPhoto.color_palette : (photos[0]?.color_palette || []);
+      return {
+        ...album,
+        cover_color_palette,
+      } as Album;
+    });
   } catch {
     return MOCK_ALBUMS_LIST;
   }
@@ -100,6 +116,8 @@ export default async function HomePage() {
                   <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight text-foreground">
                     {album.title}
                   </h2>
+
+                  <ColorPalettePill colors={album.cover_color_palette} />
 
                   <p className="text-foreground/80 leading-relaxed text-sm md:text-base">
                     {album.description}
