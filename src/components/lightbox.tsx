@@ -229,6 +229,11 @@ export function Lightbox({
                   <Calendar className="h-3 w-3" />
                   <span>{formatDate(album.date)}</span>
                 </div>
+                {photos[selectedIndex].description && (
+                  <p className="text-sm text-foreground/80 mt-3 font-sans leading-relaxed">
+                    {photos[selectedIndex].description}
+                  </p>
+                )}
               </div>
 
               {/* EXIF Metadata card */}

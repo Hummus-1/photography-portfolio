@@ -146,6 +146,32 @@ export default function AdminPage() {
     }
   };
 
+  const handleUpdatePhoto = async (
+    photoId: string,
+    updates: { tags: string[]; score: number | null; description: string | null }
+  ) => {
+    try {
+      const { error } = await supabase
+        .from("photos")
+        .update(updates)
+        .eq("id", photoId);
+
+      if (error) throw error;
+      toast.success("Photo updated successfully");
+      
+      // Update local photo list state
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === photoId ? { ...p, ...updates } : p))
+      );
+
+      // Re-fetch albums to refresh average album scores/tags in the sidebar
+      fetchAlbums();
+    } catch (err: any) {
+      toast.error(`Update failed: ${err.message}`);
+      throw err;
+    }
+  };
+
   const handleAlbumCoverUpdated = (albumId: string, coverUrl: string) => {
     setAlbums((prev) =>
       prev.map((a) => (a.id === albumId ? { ...a, cover_image_url: coverUrl } : a))
@@ -249,6 +275,7 @@ export default function AdminPage() {
                 photos={photos}
                 photosLoading={photosLoading}
                 onDeletePhoto={handleDeletePhoto}
+                onUpdatePhoto={handleUpdatePhoto}
               />
             </>
           ) : (

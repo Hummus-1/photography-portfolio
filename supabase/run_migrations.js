@@ -45,11 +45,16 @@ async function run() {
   }
 
   // Step 2: Read the SQL migration file
-  const migrationFile = path.join(__dirname, 'migrations/20260706203100_locations.sql');
+  const targetMigration = process.argv[2] || '20260706203100_locations.sql';
+  const migrationFile = path.isAbsolute(targetMigration)
+    ? targetMigration
+    : path.join(__dirname, 'migrations', targetMigration);
+  
   if (!fs.existsSync(migrationFile)) {
     console.error(`Error: Migration file not found at ${migrationFile}`);
     process.exit(1);
   }
+  console.log(`Reading migration file: ${path.basename(migrationFile)}...`);
   const sqlContent = fs.readFileSync(migrationFile, 'utf8');
 
   // Step 3: Trigger the Edge Function over HTTPS (works over IPv4)
@@ -78,15 +83,17 @@ async function run() {
     process.exit(1);
   }
 
-  // Step 4: Run the seed script
-  console.log("\nRunning locations seeding script...");
-  try {
-    execSync(`node "${path.join(__dirname, 'seed_locations.js')}"`, { stdio: 'inherit' });
-    console.log("✓ Seeding complete!");
-    console.log("\nHierarchical locations setup is complete and ready to use.");
-  } catch (err) {
-    console.error("\n✗ Seeding failed:", err.message);
-    process.exit(1);
+  // Step 4: Run the seed script (only for locations migration)
+  if (path.basename(migrationFile) === '20260706203100_locations.sql') {
+    console.log("\nRunning locations seeding script...");
+    try {
+      execSync(`node "${path.join(__dirname, 'seed_locations.js')}"`, { stdio: 'inherit' });
+      console.log("✓ Seeding complete!");
+      console.log("\nHierarchical locations setup is complete and ready to use.");
+    } catch (err) {
+      console.error("\n✗ Seeding failed:", err.message);
+      process.exit(1);
+    }
   }
 }
 

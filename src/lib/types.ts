@@ -30,6 +30,8 @@ export interface Photo {
   color_palette: string[];
   sort_order: number;
   exif: EXIFData;
+  score?: number | null;
+  description?: string | null;
 }
 
 export interface Album {
@@ -45,5 +47,6 @@ export interface Album {
   is_published: boolean;
   tags: string[];
   cover_color_palette?: string[];
+  score?: number | null;
 }
 

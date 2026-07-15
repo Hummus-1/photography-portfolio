@@ -155,12 +155,72 @@ export async function POST(request: NextRequest) {
     const imageUrl = `${R2_PUBLIC_URL}/${mainKey}`;
     const thumbnailUrl = `${R2_PUBLIC_URL}/${thumbKey}`;
 
-    // 9. Generate AI Tags using Cloudflare Workers AI (CLIP)
+    // Helper to safely parse JSON from model responses, even if wrapped in conversational text or markdown code fences
+    function tryParseJSON(str: any): any {
+      if (typeof str === "object" && str !== null) {
+        return str;
+      }
+      if (typeof str !== "string") {
+        return {};
+      }
+      const trimmed = str.trim();
+      
+      // 1. Try direct parse
+      try {
+        return JSON.parse(trimmed);
+      } catch (e) {}
+
+      // 2. Try stripping markdown codeblocks (e.g. ```json ... ```)
+      let cleanStr = trimmed;
+      if (cleanStr.startsWith("```")) {
+        cleanStr = cleanStr.replace(/^```[a-zA-Z]*\n?/, "").replace(/\n?```$/, "").trim();
+        try {
+          return JSON.parse(cleanStr);
+        } catch (e) {}
+      }
+
+      // 3. Try regex boundary match { ... } to isolate the JSON object
+      const braceMatch = cleanStr.match(/\{[\s\S]*\}/);
+      if (braceMatch) {
+        try {
+          return JSON.parse(braceMatch[0]);
+        } catch (e) {}
+      }
+
+      // 4. Try manual key-value regex fallback if the JSON structure itself is malformed
+      const descMatch = cleanStr.match(/"description"\s*:\s*"([^"]*?)"/);
+      const scoreMatch = cleanStr.match(/"score"\s*:\s*([0-9.]+)/);
+      const tagsMatch = cleanStr.match(/"tags"\s*:\s*\[([\s\S]*?)\]/);
+
+      let tags: string[] = [];
+      if (tagsMatch) {
+        tags = tagsMatch[1]
+          .split(",")
+          .map((t) => t.replace(/["']/g, "").trim())
+          .filter(Boolean);
+      }
+
+      if (descMatch || scoreMatch || tags.length > 0) {
+        return {
+          description: descMatch ? descMatch[1] : null,
+          score: scoreMatch ? parseFloat(scoreMatch[1]) : null,
+          tags: tags.length > 0 ? tags : [],
+        };
+      }
+
+      // If all else fails, attempt standard parse to raise the proper syntax error
+      return JSON.parse(str);
+    }
+
+    // 9. Generate AI Metadata using Cloudflare Workers AI Llama 3.2 Vision
     let aiTags: string[] = [];
+    let aiDescription: string | null = null;
+    let aiScore: number | null = null;
+
     try {
       const clipInputBuffer = await sharp(buffer)
-        .resize(512, 512, { fit: "inside" })
-        .jpeg({ quality: 75 })
+        .resize(1024, 1024, { fit: "inside", withoutEnlargement: true })
+        .jpeg({ quality: 80 })
         .toBuffer();
       const imageBytes = Array.from(clipInputBuffer);
 
@@ -169,7 +229,7 @@ export async function POST(request: NextRequest) {
       const isDummyCF = !cfAccountId || cfAccountId.includes("dummy") || !cfApiToken || cfApiToken.includes("dummy");
 
       if (cfAccountId && cfApiToken && !isDummyCF) {
-        console.log("Sending photo to Cloudflare Workers AI Llama 3.2 Vision...");
+        console.log("Sending photo to Cloudflare Workers AI Llama 3.2 Vision (JSON Mode)...");
         const cfResponse = await fetch(
           `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`,
           {
@@ -180,7 +240,19 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
               image: imageBytes,
-              prompt: "Generate ten descriptive single-word hashtags, separated by commas. Return ONLY the comma-separated hashtags (e.g. landscape, mountain, snow, grape, dog), nothing else. Do not write full sentences. Do not end with a period.",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a professional metadata tagger. You analyze the photo and output ONLY a raw JSON object containing the metadata. Do not write any conversational text, thinking, explanation, or markdown fences. The JSON object must strictly match this schema: { \"description\": \"one-sentence description of the image\", \"tags\": [\"exactly 10 lowercase hashtags without #\"], \"score\": a rating score between 0 and 10 representing the photo quality }."
+                },
+                {
+                  role: "user",
+                  content: "Analyze this image and return the JSON metadata."
+                }
+              ],
+              response_format: {
+                type: "json_object"
+              }
             }),
           }
         );
@@ -194,11 +266,19 @@ export async function POST(request: NextRequest) {
           const cfData = await cfResponse.json();
           if (cfData.success && cfData.result) {
             const responseText = cfData.result.response || "";
-            aiTags = responseText
-              .split(",")
-              .map((tag: string) => tag.replace(/#/g, "").trim().toLowerCase())
-              .filter(Boolean);
-            console.log("Cloudflare Llama 3.2 Vision tags generated successfully:", aiTags);
+            try {
+              const parsed = tryParseJSON(responseText);
+              if (parsed) {
+                aiDescription = parsed.description || null;
+                aiScore = parsed.score !== undefined ? parseFloat(parsed.score) : null;
+                if (Array.isArray(parsed.tags)) {
+                  aiTags = parsed.tags.map((t: string) => t.replace(/#/g, "").trim().toLowerCase()).filter(Boolean);
+                }
+                console.log("Successfully generated AI metadata using Cloudflare Workers AI:", { aiDescription, aiTags, aiScore });
+              }
+            } catch (parseErr: any) {
+              console.error("Failed parsing Cloudflare JSON response, raw text was:", responseText, "Error:", parseErr.message);
+            }
           } else {
             console.warn("Cloudflare Workers AI success flag is false or result is missing:", cfData);
           }
@@ -250,6 +330,8 @@ export async function POST(request: NextRequest) {
         color_palette,
         exif,
         sort_order: sortOrder,
+        description: aiDescription,
+        score: aiScore,
       })
       .select()
       .single();

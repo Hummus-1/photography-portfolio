@@ -60,9 +60,15 @@ export function AlbumSidebar({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/40 uppercase">
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/40 uppercase flex-wrap">
                   <MapPin className="h-3 w-3" />
                   <span>{album.location_path && album.location_path.length > 0 ? album.location_path[album.location_path.length - 1].name : album.location}</span>
+                  {album.score !== undefined && album.score !== null && (
+                    <>
+                      <span>•</span>
+                      <span className="text-amber-500 font-semibold flex items-center gap-0.5">★ {album.score}</span>
+                    </>
+                  )}
                 </div>
 
                 <div className="w-full flex items-center justify-between mt-4 pt-3 border-t border-white/5">
