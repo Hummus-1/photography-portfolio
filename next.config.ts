@@ -13,10 +13,7 @@ if (r2PublicUrl) {
 }
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["sharp", "@img/sharp-linux-x64", "@img/sharp-libvips-linux-x64"],
-  outputFileTracingIncludes: {
-    "/api/**/*": ["./node_modules/@img/**/*", "./node_modules/sharp/**/*"],
-  },
+  serverExternalPackages: ["sharp"],
   images: {
     remotePatterns: [
       {
