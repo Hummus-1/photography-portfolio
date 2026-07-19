@@ -13,6 +13,7 @@ if (r2PublicUrl) {
 }
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["sharp"],
   images: {
     remotePatterns: [
       {
