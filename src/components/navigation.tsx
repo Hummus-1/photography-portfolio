@@ -51,6 +51,14 @@ export function Navigation() {
             >
               Gallery
             </Link>
+            <Link
+              href="/destinations"
+              className={`hover:opacity-100 transition-opacity duration-300 ${
+                pathname?.startsWith("/destinations") ? "opacity-100 font-bold" : "opacity-60"
+              }`}
+            >
+              Destinations
+            </Link>
             {isAdmin && (
               <Link
                 href="/admin"

@@ -16,6 +16,9 @@ export interface LocationNode {
   id: string;
   name: string;
   type: string;
+  iso_code?: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface Photo {
@@ -48,5 +51,8 @@ export interface Album {
   tags: string[];
   cover_color_palette?: string[];
   score?: number | null;
+  lat?: number;
+  lng?: number;
+  country_code?: string;
 }
 
