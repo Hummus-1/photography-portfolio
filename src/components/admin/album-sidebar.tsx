@@ -12,6 +12,7 @@ interface AlbumSidebarProps {
   onSelectAlbum: (id: string) => void;
   albumLoading: boolean;
   onPublishToggle: (albumId: string, isPublished: boolean) => void;
+  onFeaturedToggle: (albumId: string, isFeatured: boolean) => void;
   onDeleteAlbum: (albumId: string) => void;
 }
 
@@ -21,6 +22,7 @@ export function AlbumSidebar({
   onSelectAlbum,
   albumLoading,
   onPublishToggle,
+  onFeaturedToggle,
   onDeleteAlbum,
 }: AlbumSidebarProps) {
   return (
@@ -54,11 +56,18 @@ export function AlbumSidebar({
                   <h4 className="font-serif font-bold text-sm tracking-wide truncate">
                     {album.title}
                   </h4>
-                  {!album.is_published && (
-                    <span className="text-[8px] font-mono tracking-widest bg-white/10 text-white/60 px-1.5 py-0.5 uppercase">
-                      Draft
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {album.is_featured && (
+                      <span className="text-[8px] font-mono tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 uppercase rounded">
+                        ★ Home
+                      </span>
+                    )}
+                    {!album.is_published && (
+                      <span className="text-[8px] font-mono tracking-widest bg-white/10 text-white/60 px-1.5 py-0.5 uppercase rounded">
+                        Draft
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/40 uppercase flex-wrap">
                   <MapPin className="h-3 w-3" />
@@ -71,18 +80,32 @@ export function AlbumSidebar({
                   )}
                 </div>
 
-                <div className="w-full flex items-center justify-between mt-4 pt-3 border-t border-white/5">
-                  {/* Publish Switcher */}
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      id={`pub-${album.id}`}
-                      checked={album.is_published}
-                      onCheckedChange={(checked) => onPublishToggle(album.id, checked)}
-                      className="scale-75"
-                    />
-                    <Label htmlFor={`pub-${album.id}`} className="text-[9px] font-mono uppercase tracking-widest text-white/50">
-                      Published
-                    </Label>
+                <div className="w-full flex items-center justify-between mt-4 pt-3 border-t border-white/5 gap-2 flex-wrap">
+                  {/* Publish & Featured Controls */}
+                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1">
+                      <Switch
+                        id={`pub-${album.id}`}
+                        checked={album.is_published}
+                        onCheckedChange={(checked) => onPublishToggle(album.id, checked)}
+                        className="scale-75"
+                      />
+                      <Label htmlFor={`pub-${album.id}`} className="text-[9px] font-mono uppercase tracking-widest text-white/50">
+                        Public
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <Switch
+                        id={`feat-${album.id}`}
+                        checked={album.is_featured || false}
+                        onCheckedChange={(checked) => onFeaturedToggle(album.id, checked)}
+                        className="scale-75"
+                      />
+                      <Label htmlFor={`feat-${album.id}`} className="text-[9px] font-mono uppercase tracking-widest text-amber-400/70">
+                        Featured
+                      </Label>
+                    </div>
                   </div>
 
                   {/* Delete album */}

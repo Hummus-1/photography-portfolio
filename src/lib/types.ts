@@ -54,5 +54,6 @@ export interface Album {
   lat?: number;
   lng?: number;
   country_code?: string;
+  is_featured?: boolean;
 }
 

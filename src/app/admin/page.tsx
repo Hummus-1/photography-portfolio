@@ -119,6 +119,23 @@ export default function AdminPage() {
     }
   };
 
+  const handleFeaturedToggle = async (albumId: string, isFeatured: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("albums")
+        .update({ is_featured: isFeatured })
+        .eq("id", albumId);
+
+      if (error) throw error;
+      toast.success(isFeatured ? "Album featured on homepage" : "Album removed from homepage feature");
+      setAlbums((prev) =>
+        prev.map((alb) => (alb.id === albumId ? { ...alb, is_featured: isFeatured } : alb))
+      );
+    } catch (err: any) {
+      toast.error(`Failed to update featured status: ${err.message}`);
+    }
+  };
+
   const handleDeleteAlbum = async (albumId: string) => {
     if (!confirm("Are you sure you want to delete this album and all its photos?")) return;
     try {
@@ -232,6 +249,7 @@ export default function AdminPage() {
           onSelectAlbum={setSelectedAlbumId}
           albumLoading={albumLoading}
           onPublishToggle={handlePublishToggle}
+          onFeaturedToggle={handleFeaturedToggle}
           onDeleteAlbum={handleDeleteAlbum}
         />
 
