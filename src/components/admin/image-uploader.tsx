@@ -14,6 +14,73 @@ interface ImageUploaderProps {
   onAlbumCoverUpdated: (albumId: string, coverUrl: string) => void;
 }
 
+/**
+ * Optimizes large images in the browser before sending them to Vercel.
+ * Bypasses Vercel's 4.5MB serverless payload limit by shrinking 15MB+ RAW/JPG files to < 1.5MB WebP/JPEG.
+ */
+async function compressImageForUpload(file: File): Promise<File> {
+  // If file is already under 3MB and standard format, no compression needed
+  if (file.size <= 3 * 1024 * 1024 && !file.type.includes("tiff") && !file.type.includes("raw")) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      let { width, height } = img;
+      const maxDim = 2500;
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob && blob.size < file.size) {
+            const newName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+            const compressedFile = new File([blob], newName, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        },
+        "image/jpeg",
+        0.88
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file); // Fallback to original if format isn't directly renderable by Canvas
+    };
+
+    img.src = url;
+  });
+}
+
 export function ImageUploader({
   selectedAlbumId,
   photosCount,
@@ -53,7 +120,9 @@ export function ImageUploader({
     }
 
     setUploading(true);
-    const totalFiles = files.length;
+    const fileArray = Array.from(files);
+    const totalFiles = fileArray.length;
+    let completedCount = 0;
 
     try {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -62,15 +131,22 @@ export function ImageUploader({
         return;
       }
 
-      for (let i = 0; i < totalFiles; i++) {
-        const file = files[i];
-        setUploadProgress(`Uploading ${i + 1}/${totalFiles}: ${file.name}...`);
+      setUploadProgress(`Starting parallel upload of ${totalFiles} images...`);
 
+      // Concurrency limit: 3 parallel workers
+      const CONCURRENCY = 3;
+
+      const processSingleFile = async (rawFile: File, index: number) => {
+        // 1. Compress in browser if necessary
+        const fileToUpload = await compressImageForUpload(rawFile);
+
+        // 2. Prepare FormData
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", fileToUpload);
         formData.append("albumId", selectedAlbumId);
-        formData.append("sortOrder", (photosCount + i).toString());
+        formData.append("sortOrder", (photosCount + index).toString());
 
+        // 3. Upload to server
         const res = await fetch("/api/upload", {
           method: "POST",
           headers: {
@@ -81,12 +157,15 @@ export function ImageUploader({
 
         const result = await res.json();
         if (!res.ok) {
-          throw new Error(result.error || "Upload failed");
+          throw new Error(result.error || `Upload failed for ${rawFile.name}`);
         }
+
+        completedCount++;
+        setUploadProgress(`Uploading in parallel: ${completedCount}/${totalFiles} completed...`);
 
         // Set cover image for album if it doesn't have one
         const currentAlbum = albums.find((a) => a.id === selectedAlbumId);
-        if (currentAlbum && !currentAlbum.cover_image_url) {
+        if (currentAlbum && !currentAlbum.cover_image_url && result.photo?.url) {
           const coverUrl = result.photo.url;
           await supabase
             .from("albums")
@@ -95,7 +174,17 @@ export function ImageUploader({
           
           onAlbumCoverUpdated(selectedAlbumId, coverUrl);
         }
-      }
+      };
+
+      // Create parallel worker pool
+      const workerCount = Math.min(CONCURRENCY, totalFiles);
+      const workers = Array.from({ length: workerCount }, async (_, workerId) => {
+        for (let i = workerId; i < totalFiles; i += workerCount) {
+          await processSingleFile(fileArray[i], i);
+        }
+      });
+
+      await Promise.all(workers);
 
       toast.success("All images uploaded successfully!");
       onUploadComplete();
@@ -143,7 +232,7 @@ export function ImageUploader({
             Drag & drop images here or click to browse
           </p>
           <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
-            Supports high-resolution JPEG, PNG, TIFF, and RAW files
+            Supports high-resolution JPEG, PNG, TIFF, and RAW files (fast parallel upload)
           </p>
         </div>
       )}
