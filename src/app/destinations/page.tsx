@@ -9,6 +9,8 @@ export const metadata = {
   description: "Browse photo collections by continent, country, island, and specific geographic spots around the world.",
 };
 
+export const dynamic = "force-dynamic";
+
 async function getAlbumsWithLocations() {
   try {
     const { data, error } = await supabase

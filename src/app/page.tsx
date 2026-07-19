@@ -12,6 +12,8 @@ export const metadata = {
   description: "Curated photography collections documenting landscapes, architectural studies, and travel series.",
 };
 
+export const dynamic = "force-dynamic";
+
 async function getFeaturedAlbums() {
   try {
     const { data, error } = await supabase
