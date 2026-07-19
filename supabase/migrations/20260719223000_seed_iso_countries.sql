@@ -20,6 +20,9 @@ BEGIN
   INSERT INTO public.locations (name, type, parent_id)
   VALUES ('Americas', 'continent', NULL)
   ON CONFLICT (name, parent_id) DO NOTHING;
+  INSERT INTO public.locations (name, type, parent_id)
+  VALUES ('Antarctica', 'continent', NULL)
+  ON CONFLICT (name, parent_id) DO NOTHING;
 
   -- 2. Insert Sub-regions
   SELECT id INTO v_cont_id FROM public.locations WHERE name = 'Asia' AND type = 'continent' AND parent_id IS NULL;
@@ -62,6 +65,12 @@ BEGIN
   IF v_cont_id IS NOT NULL THEN
     INSERT INTO public.locations (name, type, parent_id)
     VALUES ('Latin America and the Caribbean', 'sub-region', v_cont_id)
+    ON CONFLICT (name, parent_id) DO NOTHING;
+  END IF;
+  SELECT id INTO v_cont_id FROM public.locations WHERE name = 'Antarctica' AND type = 'continent' AND parent_id IS NULL;
+  IF v_cont_id IS NOT NULL THEN
+    INSERT INTO public.locations (name, type, parent_id)
+    VALUES ('Antarctica', 'sub-region', v_cont_id)
     ON CONFLICT (name, parent_id) DO NOTHING;
   END IF;
   SELECT id INTO v_cont_id FROM public.locations WHERE name = 'Asia' AND type = 'continent' AND parent_id IS NULL;
@@ -190,9 +199,14 @@ BEGIN
       VALUES ('Anguilla', 'country', v_sub_id, 'AI', 'AIA')
       ON CONFLICT (name, parent_id) DO NOTHING;
     END IF;
-  INSERT INTO public.locations (name, type, parent_id, iso_code, alpha_3)
-    VALUES ('Antarctica', 'country', NULL, 'AQ', 'ATA')
-    ON CONFLICT (name, parent_id) DO NOTHING;
+  SELECT id INTO v_sub_id FROM public.locations l
+    WHERE l.name = 'Antarctica' AND l.type = 'sub-region'
+    AND l.parent_id = (SELECT id FROM public.locations WHERE name = 'Antarctica' AND type = 'continent' LIMIT 1);
+    IF v_sub_id IS NOT NULL THEN
+      INSERT INTO public.locations (name, type, parent_id, iso_code, alpha_3)
+      VALUES ('Antarctica', 'country', v_sub_id, 'AQ', 'ATA')
+      ON CONFLICT (name, parent_id) DO NOTHING;
+    END IF;
   SELECT id INTO v_sub_id FROM public.locations l
     WHERE l.name = 'Latin America and the Caribbean' AND l.type = 'sub-region'
     AND l.parent_id = (SELECT id FROM public.locations WHERE name = 'Americas' AND type = 'continent' LIMIT 1);
@@ -1857,9 +1871,14 @@ BEGIN
       VALUES ('Syrian Arab Republic', 'country', v_sub_id, 'SY', 'SYR')
       ON CONFLICT (name, parent_id) DO NOTHING;
     END IF;
-  INSERT INTO public.locations (name, type, parent_id, iso_code, alpha_3)
-    VALUES ('Taiwan, Province of China', 'country', NULL, 'TW', 'TWN')
-    ON CONFLICT (name, parent_id) DO NOTHING;
+  SELECT id INTO v_sub_id FROM public.locations l
+    WHERE l.name = 'Eastern Asia' AND l.type = 'sub-region'
+    AND l.parent_id = (SELECT id FROM public.locations WHERE name = 'Asia' AND type = 'continent' LIMIT 1);
+    IF v_sub_id IS NOT NULL THEN
+      INSERT INTO public.locations (name, type, parent_id, iso_code, alpha_3)
+      VALUES ('Taiwan, Province of China', 'country', v_sub_id, 'TW', 'TWN')
+      ON CONFLICT (name, parent_id) DO NOTHING;
+    END IF;
   SELECT id INTO v_sub_id FROM public.locations l
     WHERE l.name = 'Central Asia' AND l.type = 'sub-region'
     AND l.parent_id = (SELECT id FROM public.locations WHERE name = 'Asia' AND type = 'continent' LIMIT 1);
