@@ -61,10 +61,10 @@ export function Timeline({ photos, activePhotoId }: TimelineProps) {
   return (
     <>
       {/* Sticky Interactive Timeline Sidebar (Desktop only) */}
-      <aside className="hidden lg:block w-20 shrink-0 relative">
+      <aside className="hidden lg:block w-20 shrink-0 relative z-30">
         <motion.div
           style={{ opacity: timelineOpacity, x: timelineTranslateX }}
-          className="sticky top-28 h-[calc(100vh-200px)] flex flex-col items-center justify-center"
+          className="sticky top-28 h-[calc(100vh-200px)] flex flex-col items-center justify-center z-30"
         >
           {/* Timeline Vertical Track */}
           <div className="relative h-[65vh] flex flex-col justify-between py-4 items-center">

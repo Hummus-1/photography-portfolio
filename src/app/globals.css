@@ -112,7 +112,23 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    transition: color 400ms ease, background-color 400ms ease, border-color 400ms ease;
+  }
+
+  body,
+  header,
+  nav,
+  main,
+  footer,
+  article,
+  section,
+  aside,
+  .card,
+  button,
+  input,
+  textarea {
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+                color 250ms cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   body {
@@ -123,6 +139,28 @@
     @apply font-sans;
   }
 }
+
+/* Smooth View Transition for circular ripple theme toggle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+.dark::view-transition-old(root) {
+  z-index: 1;
+}
+.dark::view-transition-new(root) {
+  z-index: 999;
+}
+
+::view-transition-old(root) {
+  z-index: 999;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
 
 /* Lenis Custom Scrollbar and Smooth Scroll Settings */
 html.lenis {

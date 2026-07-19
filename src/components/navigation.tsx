@@ -37,7 +37,7 @@ export function Navigation() {
           href="/"
           className="font-serif text-xl md:text-2xl font-bold tracking-wider hover:opacity-75 transition-opacity duration-300"
         >
-          STILLS <span className="text-[10px] tracking-widest font-sans font-normal opacity-50 relative -top-3">©</span>
+          DANIEL GARCÍA <span className="text-[10px] tracking-widest font-sans font-normal opacity-50 relative -top-3">©</span>
         </Link>
 
         {/* Links & Theme Switcher */}

@@ -64,12 +64,12 @@ export default async function HomePage() {
             stills portfolio
           </div>
           <h1 className="font-serif text-5xl md:text-8xl font-bold tracking-tight leading-none text-foreground">
-            Giulia Gartner
+            Daniel García
             <br />
-            <span className="opacity-55 font-normal italic">Inspired.</span>
+            <span className="opacity-55 font-normal italic">Creator.</span>
           </h1>
           <p className="text-lg md:text-xl font-sans text-foreground/80 leading-relaxed max-w-2xl pt-4">
-            A visual journal documenting landscapes, cultures, and quiet moments from around the world.
+            A visual journal documenting landscapes, cityscapes, and creative projects from Santa Cruz de Tenerife and beyond.
           </p>
         </div>
       </section>
@@ -166,9 +166,19 @@ export default async function HomePage() {
       </section>
 
       {/* Minimal Footer */}
-      <footer className="mt-auto py-16 px-6 md:px-12 border-t border-foreground/10 text-center text-xs font-mono tracking-widest uppercase text-foreground/40">
-        <div>© {new Date().getFullYear()} Stills. All Rights Reserved.</div>
-        <div className="mt-2 text-[10px]">Inspired by Giulia Gartner</div>
+      <footer className="mt-auto py-16 px-6 md:px-12 border-t border-foreground/10 text-center text-xs font-mono tracking-widest uppercase text-foreground/40 space-y-2">
+        <div>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</div>
+        <div className="text-[10px]">Software Engineer & Visual Creator</div>
+        <div className="pt-2">
+          <a
+            href="https://www.danigh.dev/"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-foreground transition-colors duration-300 border-b border-foreground/20 hover:border-foreground"
+          >
+            danigh.dev
+          </a>
+        </div>
       </footer>
     </div>
   );

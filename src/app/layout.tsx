@@ -21,8 +21,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Stills — Photography Portfolio",
-  description: "A premium photography portfolio and blog of my stills and collections.",
+  title: "Daniel García — Photography & Dev Portfolio",
+  description: "A personal photography portfolio and creative dev journal of Daniel García.",
 };
 
 export default function RootLayout({
