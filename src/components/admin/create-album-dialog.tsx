@@ -40,37 +40,46 @@ export function CreateAlbumDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date || !locationId) {
-      toast.error("Please fill in required fields (including a location selection)");
-      return;
-    }
 
     setLoading(true);
 
-    const slug = title
+    const finalTitle = title.trim() || "Untitled Album";
+    const finalDate = date || new Date().toISOString().split("T")[0];
+    
+    let slug = finalTitle
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, "")
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
+    if (!slug || slug === "untitled-album") {
+      slug = `untitled-album-${Math.random().toString(36).substring(2, 9)}`;
+    }
+
     try {
       const { data, error } = await supabase
         .from("albums")
         .insert({
-          title,
+          title: finalTitle,
           slug,
           description,
-          location,
-          location_id: locationId,
-          date,
+          location: location || null,
+          location_id: locationId || null,
+          date: finalDate,
           is_published: false,
         })
         .select()
         .single();
 
       if (error) throw error;
-      toast.success("Album created successfully");
+      
+      if (!title || !locationId || !date) {
+        toast.success("Album created! Upload photos to auto-fill title, date, and location.");
+      } else {
+        toast.success("Album created successfully");
+      }
+
       onAlbumCreated(data as Album);
       onOpenChange(false);
 
@@ -101,27 +110,34 @@ export function CreateAlbumDialog({
             New Photo Album
           </DialogTitle>
           <DialogDescription className="text-white/60 text-xs">
-            Create a new album container to organize and upload your photos.
+            Create an album container. You can leave fields empty to auto-fill title, location, and date when photos are uploaded.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+
+        <div className="bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-200/90 flex items-start gap-2.5 rounded-none mt-2 font-mono">
+          <span className="text-base leading-none">✨</span>
+          <span>
+            <strong>Auto-fill feature:</strong> Leave title or location blank. Once you upload photos, AI will generate title suggestions and fill the date based on the earliest photo creation time.
+          </span>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
           <div className="space-y-1.5">
             <Label htmlFor="title" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-              Album Title *
+              Album Title <span className="text-white/40 font-normal">(Optional)</span>
             </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Visit Greenland"
+              placeholder="e.g. Visit Greenland (Leave empty to auto-generate)"
               className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-              required
             />
           </div>
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="date" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-                Date *
+                Date <span className="text-white/40 font-normal">(Optional - auto-detects earliest photo date)</span>
               </Label>
               <Input
                 id="date"
@@ -129,7 +145,6 @@ export function CreateAlbumDialog({
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-                required
               />
             </div>
             
@@ -145,14 +160,14 @@ export function CreateAlbumDialog({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="description" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-              Description
+              Description <span className="text-white/40 font-normal">(Optional)</span>
             </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe this photo collection..."
-              rows={4}
+              rows={3}
               className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white resize-none"
             />
           </div>
@@ -163,7 +178,7 @@ export function CreateAlbumDialog({
               </Button>
             } />
             <Button type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs">
-              {loading ? "Creating..." : "Create"}
+              {loading ? "Creating..." : "Create Album"}
             </Button>
           </div>
         </form>

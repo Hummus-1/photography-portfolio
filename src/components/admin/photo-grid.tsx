@@ -15,7 +15,13 @@ interface PhotoGridProps {
   onDeletePhoto: (photoId: string) => void;
   onUpdatePhoto: (
     photoId: string,
-    updates: { tags: string[]; score: number | null; description: string | null }
+    updates: {
+      location?: string | null;
+      tags: string[];
+      score: number | null;
+      description: string | null;
+      exif?: any;
+    }
   ) => Promise<void>;
 }
 
@@ -31,21 +37,39 @@ export function PhotoGrid({
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [editScore, setEditScore] = useState<string>("");
   const [editTags, setEditTags] = useState<string>("");
+  const [editLocation, setEditLocation] = useState<string>("");
   const [editDescription, setEditDescription] = useState<string>("");
+  const [editCamera, setEditCamera] = useState<string>("");
+  const [editLens, setEditLens] = useState<string>("");
+  const [editAperture, setEditAperture] = useState<string>("");
+  const [editShutter, setEditShutter] = useState<string>("");
+  const [editIso, setEditIso] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
 
   const startEditing = (photo: Photo) => {
     setEditingPhotoId(photo.id);
     setEditScore(photo.score !== undefined && photo.score !== null ? String(photo.score) : "");
     setEditTags(photo.tags ? photo.tags.join(", ") : "");
+    setEditLocation(photo.location || "");
     setEditDescription(photo.description || "");
+    setEditCamera(photo.exif?.camera || "");
+    setEditLens(photo.exif?.lens || "");
+    setEditAperture(photo.exif?.aperture || "");
+    setEditShutter(photo.exif?.shutter || "");
+    setEditIso(photo.exif?.iso ? String(photo.exif.iso) : "");
   };
 
   const cancelEditing = () => {
     setEditingPhotoId(null);
     setEditScore("");
     setEditTags("");
+    setEditLocation("");
     setEditDescription("");
+    setEditCamera("");
+    setEditLens("");
+    setEditAperture("");
+    setEditShutter("");
+    setEditIso("");
   };
 
   const handleSave = async (photoId: string) => {
@@ -61,10 +85,24 @@ export function PhotoGrid({
         .map((t) => t.trim().toLowerCase())
         .filter(Boolean);
 
+      const targetPhoto = photos.find((p) => p.id === photoId);
+      const existingExif = targetPhoto?.exif || {};
+
+      const updatedExif = {
+        ...existingExif,
+        camera: editCamera.trim() || undefined,
+        lens: editLens.trim() || undefined,
+        aperture: editAperture.trim() || undefined,
+        shutter: editShutter.trim() || undefined,
+        iso: editIso.trim() ? parseInt(editIso, 10) : undefined,
+      };
+
       await onUpdatePhoto(photoId, {
+        location: editLocation.trim() || null,
         tags: tagsArray,
         score: parsedScore,
         description: editDescription.trim() || null,
+        exif: updatedExif,
       });
       setEditingPhotoId(null);
     } catch (err: any) {
@@ -209,6 +247,20 @@ export function PhotoGrid({
                         />
                       </div>
 
+                      {/* Location Input */}
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
+                          Location Spot
+                        </label>
+                        <input
+                          type="text"
+                          value={editLocation}
+                          onChange={(e) => setEditLocation(e.target.value)}
+                          className="w-full bg-black/40 border border-white/10 px-2.5 py-1.5 text-xs font-mono text-white rounded-none focus:outline-none focus:border-white/30"
+                          placeholder="e.g. Diamond Beach, Iceland"
+                        />
+                      </div>
+
                       {/* Tags Input */}
                       <div className="space-y-1">
                         <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
@@ -221,6 +273,74 @@ export function PhotoGrid({
                           className="w-full bg-black/40 border border-white/10 px-2.5 py-1.5 text-xs font-mono text-white rounded-none focus:outline-none focus:border-white/30"
                           placeholder="e.g. landscape, sunset, water"
                         />
+                      </div>
+
+                      {/* EXIF Camera & Lens */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
+                            Camera
+                          </label>
+                          <input
+                            type="text"
+                            value={editCamera}
+                            onChange={(e) => setEditCamera(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 px-2.5 py-1 text-[11px] font-mono text-white rounded-none focus:outline-none focus:border-white/30"
+                            placeholder="e.g. Sony A7IV"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
+                            Lens
+                          </label>
+                          <input
+                            type="text"
+                            value={editLens}
+                            onChange={(e) => setEditLens(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 px-2.5 py-1 text-[11px] font-mono text-white rounded-none focus:outline-none focus:border-white/30"
+                            placeholder="e.g. 24-70mm f/2.8"
+                          />
+                        </div>
+                      </div>
+
+                      {/* EXIF Settings: Aperture, Shutter, ISO */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
+                            Aperture
+                          </label>
+                          <input
+                            type="text"
+                            value={editAperture}
+                            onChange={(e) => setEditAperture(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 px-2 py-1 text-[11px] font-mono text-white rounded-none focus:outline-none focus:border-white/30"
+                            placeholder="f/2.8"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
+                            Shutter
+                          </label>
+                          <input
+                            type="text"
+                            value={editShutter}
+                            onChange={(e) => setEditShutter(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 px-2 py-1 text-[11px] font-mono text-white rounded-none focus:outline-none focus:border-white/30"
+                            placeholder="1/500s"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono uppercase tracking-widest text-white/40 block">
+                            ISO
+                          </label>
+                          <input
+                            type="text"
+                            value={editIso}
+                            onChange={(e) => setEditIso(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 px-2 py-1 text-[11px] font-mono text-white rounded-none focus:outline-none focus:border-white/30"
+                            placeholder="100"
+                          />
+                        </div>
                       </div>
 
                       {/* Description Input */}

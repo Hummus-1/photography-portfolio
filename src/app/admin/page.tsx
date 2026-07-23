@@ -10,6 +10,7 @@ import { CreateAlbumDialog } from "@/components/admin/create-album-dialog";
 import { AlbumSidebar } from "@/components/admin/album-sidebar";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { EditorialGroupEditor } from "@/components/admin/editorial-group-editor";
+import { AlbumAutoFillToolbar } from "@/components/admin/album-auto-fill-toolbar";
 import { Album, Photo } from "@/lib/types";
 
 export default function AdminPage() {
@@ -165,7 +166,13 @@ export default function AdminPage() {
 
   const handleUpdatePhoto = async (
     photoId: string,
-    updates: { tags: string[]; score: number | null; description: string | null }
+    updates: {
+      location?: string | null;
+      tags: string[];
+      score: number | null;
+      description: string | null;
+      exif?: any;
+    }
   ) => {
     try {
       const { error } = await supabase
@@ -206,6 +213,12 @@ export default function AdminPage() {
   const handleAlbumCoverUpdated = (albumId: string, coverUrl: string) => {
     setAlbums((prev) =>
       prev.map((a) => (a.id === albumId ? { ...a, cover_image_url: coverUrl } : a))
+    );
+  };
+
+  const handleAlbumUpdated = (updatedAlbum: Album) => {
+    setAlbums((prev) =>
+      prev.map((a) => (a.id === updatedAlbum.id ? { ...a, ...updatedAlbum } : a))
     );
   };
 
@@ -268,7 +281,7 @@ export default function AdminPage() {
         />
 
         {/* Main Section: Drag & Drop Upload and Interactive Collage Editor */}
-        <div className="lg:col-span-3 space-y-12">
+        <div className="lg:col-span-3 space-y-8">
           {activeAlbum ? (
             <>
               {/* Album metadata info */}
@@ -286,19 +299,29 @@ export default function AdminPage() {
                     <MapPin className="h-3.5 w-3.5" />
                     {activeAlbum.location_path && activeAlbum.location_path.length > 0 
                       ? activeAlbum.location_path.map(n => n.name).join(" / ") 
-                      : activeAlbum.location}
+                      : activeAlbum.location || "Unspecified Location"}
                   </span>
                   <span>•</span>
                   <span>{activeAlbum.date}</span>
                 </div>
               </div>
 
+              {/* AI Auto-Fill & Title Suggestions Toolbar */}
+              <AlbumAutoFillToolbar
+                album={activeAlbum}
+                photosCount={photos.length}
+                onAlbumUpdated={handleAlbumUpdated}
+              />
+
               {/* Upload Drag & Drop Uploader */}
               <ImageUploader
                 selectedAlbumId={selectedAlbumId}
                 photosCount={photos.length}
                 albums={albums}
-                onUploadComplete={() => fetchPhotos(selectedAlbumId)}
+                onUploadComplete={() => {
+                  fetchPhotos(selectedAlbumId);
+                  fetchAlbums();
+                }}
                 onAlbumCoverUpdated={handleAlbumCoverUpdated}
               />
 

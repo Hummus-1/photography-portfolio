@@ -186,6 +186,31 @@ export function ImageUploader({
 
       await Promise.all(workers);
 
+      // Trigger auto-fill to generate AI title, location, and set earliest photo date
+      setUploadProgress("Analyzing photos to auto-fill title, date & location...");
+      try {
+        const autoFillRes = await fetch("/api/albums/auto-fill", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${currentSession.access_token}`,
+          },
+          body: JSON.stringify({ albumId: selectedAlbumId }),
+        });
+
+        if (autoFillRes.ok) {
+          const autoFillData = await autoFillRes.json();
+          if (autoFillData.appliedUpdates?.title) {
+            toast.success(`AI Title Generated: "${autoFillData.appliedUpdates.title}"`);
+          }
+          if (autoFillData.earliestDate) {
+            toast.info(`Album date set to earliest photo date: ${autoFillData.earliestDate}`);
+          }
+        }
+      } catch (autoErr) {
+        console.error("Auto fill trigger failed:", autoErr);
+      }
+
       toast.success("All images uploaded successfully!");
       onUploadComplete();
     } catch (err: any) {
