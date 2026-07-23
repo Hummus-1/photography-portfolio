@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Edit, MapPin, Tag, Star, Calendar, Globe, Sliders } from "lucide-react";
+import { Edit, MapPin, Tag, Star, Calendar, Globe, Sliders, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,6 +72,20 @@ export function EditAlbumDialog({
     setIsFeatured(album.is_featured || false);
   }, [album]);
 
+  const generateSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    setSlug(generateSlug(newTitle));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -90,12 +104,7 @@ export function EditAlbumDialog({
 
     let finalSlug = slug.trim();
     if (!finalSlug) {
-      finalSlug = title
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/[\s_-]+/g, "-")
-        .replace(/^-+|-+$/g, "");
+      finalSlug = generateSlug(title);
     }
 
     try {
@@ -172,7 +181,7 @@ export function EditAlbumDialog({
               <Input
                 id="edit-title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Album Title"
                 className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
                 required
@@ -296,15 +305,27 @@ export function EditAlbumDialog({
           </div>
 
           {/* Submit buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <DialogClose render={
-              <Button type="button" variant="outline" className="border-white/10 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
-                Cancel
+          <div className="flex justify-between items-center pt-4 border-t border-white/10">
+            <a
+              href={`/album/${album.slug}?preview=true`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs uppercase tracking-wider transition-all"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Preview Album
+            </a>
+
+            <div className="flex gap-3">
+              <DialogClose render={
+                <Button type="button" variant="outline" className="border-white/10 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
+                  Cancel
+                </Button>
+              } />
+              <Button type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs">
+                {loading ? "Saving..." : "Save Album Changes"}
               </Button>
-            } />
-            <Button type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs">
-              {loading ? "Saving..." : "Save Album Changes"}
-            </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

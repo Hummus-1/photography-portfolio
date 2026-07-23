@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FolderOpen, Loader2, MapPin, Trash2 } from "lucide-react";
+import { FolderOpen, Loader2, MapPin, Trash2, Eye } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Album } from "@/lib/types";
@@ -108,17 +108,30 @@ export function AlbumSidebar({
                     </div>
                   </div>
 
-                  {/* Delete album */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteAlbum(album.id);
-                    }}
-                    className="text-white/40 hover:text-red-400 p-1 transition-colors"
-                    title="Delete Album"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <a
+                      href={`/album/${album.slug}?preview=true`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-white/40 hover:text-amber-400 p-1 transition-colors"
+                      title="Preview Album"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </a>
+
+                    {/* Delete album */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteAlbum(album.id);
+                      }}
+                      className="text-white/40 hover:text-red-400 p-1 transition-colors"
+                      title="Delete Album"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );

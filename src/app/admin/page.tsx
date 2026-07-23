@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, MapPin, Loader2, FolderOpen } from "lucide-react";
+import { LogOut, MapPin, Loader2, FolderOpen, Eye } from "lucide-react";
 import { AdminLogin } from "@/components/admin/admin-login";
 import { CreateAlbumDialog } from "@/components/admin/create-album-dialog";
 import { AlbumSidebar } from "@/components/admin/album-sidebar";
@@ -294,15 +294,27 @@ export default function AdminPage() {
                     {activeAlbum.description || "No description provided."}
                   </p>
                 </div>
-                <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-white/40">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {activeAlbum.location_path && activeAlbum.location_path.length > 0 
-                      ? activeAlbum.location_path.map(n => n.name).join(" / ") 
-                      : activeAlbum.location || "Unspecified Location"}
-                  </span>
-                  <span>•</span>
-                  <span>{activeAlbum.date}</span>
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                  <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-white/40">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {activeAlbum.location_path && activeAlbum.location_path.length > 0 
+                        ? activeAlbum.location_path.map(n => n.name).join(" / ") 
+                        : activeAlbum.location || "Unspecified Location"}
+                    </span>
+                    <span>•</span>
+                    <span>{activeAlbum.date}</span>
+                  </div>
+
+                  <a
+                    href={`/album/${activeAlbum.slug}?preview=true`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs uppercase tracking-wider transition-all"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Preview Album
+                  </a>
                 </div>
               </div>
 

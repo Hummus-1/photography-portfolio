@@ -2,18 +2,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Check, Loader2, ChevronRight, Search } from "lucide-react";
+import { Plus, Check, Loader2, ChevronRight, Search, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-
-interface LocationNode {
-  id: string;
-  name: string;
-  type: string;
-  parent_id: string | null;
-}
+import { EditLocationDialog, LocationNode } from "./edit-location-dialog";
 
 interface LocationSelectorProps {
   selectedLocationId: string | null;
@@ -36,6 +30,10 @@ export function LocationSelector({
   // Input state for new children per column index
   const [newChildName, setNewChildName] = useState<{ [key: number]: string }>({});
   const [creatingChildAt, setCreatingChildAt] = useState<number | null>(null);
+
+  // Editing state for location items
+  const [editingNode, setEditingNode] = useState<LocationNode | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Ref for horizontal ScrollArea container
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -91,6 +89,26 @@ export function LocationSelector({
       toast.error("Failed to load locations hierarchy");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenEdit = (node: LocationNode, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setEditingNode(node);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleLocationUpdated = async (updatedNodeId: string, action: "update" | "delete") => {
+    await fetchLocations();
+    if (action === "delete" && selectedLocationId === updatedNodeId) {
+      onSelectLocation(null, "");
+      setSelectedPath([]);
+    } else {
+      // Re-trigger select to update fullName if active node was edited
+      const updatedNode = locations.find((l) => l.id === selectedLocationId);
+      if (updatedNode) {
+        onSelectLocation(updatedNode.id, buildFullName(updatedNode));
+      }
     }
   };
 
@@ -232,8 +250,20 @@ export function LocationSelector({
           Hierarchical Location Selector
         </div>
         {selectedLocationId && (
-          <div className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-            <Check className="h-3 w-3" /> Selection Active
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+              <Check className="h-3 w-3" /> Selection Active
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const activeNode = locations.find((l) => l.id === selectedLocationId);
+                if (activeNode) handleOpenEdit(activeNode);
+              }}
+              className="text-[10px] font-mono text-amber-400 hover:text-amber-300 underline uppercase tracking-wider flex items-center gap-1 transition-colors"
+            >
+              <Pencil className="h-2.5 w-2.5" /> Edit Selected Hierarchy
+            </button>
           </div>
         )}
       </div>
@@ -268,35 +298,48 @@ export function LocationSelector({
               </div>
             ) : (
               searchResults.map(({ node, fullName, displayPath }) => (
-                <button
+                <div
                   key={node.id}
-                  type="button"
-                  className="w-full text-left px-4 py-2.5 hover:bg-white/5 transition-all text-xs flex flex-col gap-0.5 border-none outline-none focus:bg-white/5"
-                  onClick={() => {
-                    const path: string[] = [];
-                    let currentId: string | null = node.id;
-                    while (currentId) {
-                      const n = locations.find((l) => l.id === currentId);
-                      if (n) {
-                        path.unshift(n.id);
-                        currentId = n.parent_id;
-                      } else {
-                        break;
-                      }
-                    }
-                    setSelectedPath(path);
-                    onSelectLocation(node.id, fullName);
-                    setSearchQuery("");
-                    toast.success(`Selected location: ${node.name}`);
-                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-white/5 transition-all text-xs flex items-center justify-between group border-b border-white/5"
                 >
-                  <span className="text-white font-semibold tracking-wide">{node.name}</span>
-                  {displayPath && (
-                    <span className="text-[9px] text-white/40 font-mono uppercase tracking-widest truncate">
-                      {displayPath}
-                    </span>
-                  )}
-                </button>
+                  <button
+                    type="button"
+                    className="flex-grow text-left border-none outline-none flex flex-col gap-0.5 cursor-pointer"
+                    onClick={() => {
+                      const path: string[] = [];
+                      let currentId: string | null = node.id;
+                      while (currentId) {
+                        const n = locations.find((l) => l.id === currentId);
+                        if (n) {
+                          path.unshift(n.id);
+                          currentId = n.parent_id;
+                        } else {
+                          break;
+                        }
+                      }
+                      setSelectedPath(path);
+                      onSelectLocation(node.id, fullName);
+                      setSearchQuery("");
+                      toast.success(`Selected location: ${node.name}`);
+                    }}
+                  >
+                    <span className="text-white font-semibold tracking-wide">{node.name}</span>
+                    {displayPath && (
+                      <span className="text-[9px] text-white/40 font-mono uppercase tracking-widest truncate">
+                        {displayPath}
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    title={`Edit ${node.name} location & hierarchy`}
+                    onClick={(e) => handleOpenEdit(node, e)}
+                    className="p-1.5 text-white/40 hover:text-amber-400 hover:bg-white/10 shrink-0 transition-colors"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))
             )}
           </div>
@@ -339,23 +382,42 @@ export function LocationSelector({
                             const hasChildren = locations.some((l) => l.parent_id === node.id);
 
                             return (
-                              <button
+                              <div
                                 key={node.id}
-                                type="button"
-                                className={`w-full text-left px-3.5 py-2 text-xs font-sans tracking-wide transition-all flex items-center justify-between ${
+                                className={`group w-full text-left px-3 py-1.5 text-xs font-sans tracking-wide transition-all flex items-center justify-between ${
                                   isSelected
                                     ? "bg-white/10 text-white font-semibold"
                                     : "text-white/60 hover:bg-white/5 hover:text-white"
                                 }`}
-                                onClick={() => handleSelectNode(node.id, colIndex)}
                               >
-                                <span className="truncate pr-1">{node.name}</span>
-                                {hasChildren ? (
-                                  <ChevronRight className="h-3.5 w-3.5 opacity-40 shrink-0" />
-                                ) : isSelected && selectedLocationId === node.id ? (
-                                  <Check className="h-3 w-3 text-emerald-400 shrink-0" />
-                                ) : null}
-                              </button>
+                                <button
+                                  type="button"
+                                  className="flex-grow text-left truncate pr-1"
+                                  onClick={() => handleSelectNode(node.id, colIndex)}
+                                >
+                                  {node.name}
+                                </button>
+                                
+                                <div className="flex items-center gap-0.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    title={`Edit ${node.name} location & hierarchy`}
+                                    onClick={(e) => handleOpenEdit(node, e)}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-white/40 hover:text-amber-400 hover:bg-white/10 rounded-xs"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                  </button>
+                                  
+                                  {hasChildren ? (
+                                    <ChevronRight
+                                      className="h-3.5 w-3.5 opacity-40 shrink-0 cursor-pointer"
+                                      onClick={() => handleSelectNode(node.id, colIndex)}
+                                    />
+                                  ) : isSelected && selectedLocationId === node.id ? (
+                                    <Check className="h-3 w-3 text-emerald-400 shrink-0" />
+                                  ) : null}
+                                </div>
+                              </div>
                             );
                           })}
                       </div>
@@ -406,6 +468,15 @@ export function LocationSelector({
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       )}
+
+      {/* Location Hierarchy Edit Modal */}
+      <EditLocationDialog
+        node={editingNode}
+        allLocations={locations}
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onLocationUpdated={handleLocationUpdated}
+      />
     </div>
   );
 }

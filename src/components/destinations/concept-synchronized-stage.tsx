@@ -111,15 +111,6 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white text-xs font-mono">
-                    <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/15">
-                      <Camera className="h-3.5 w-3.5" />
-                      {activeAlbum.title}
-                    </span>
-                    <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/15">
-                      {new Date(activeAlbum.date).getFullYear()}
-                    </span>
-                  </div>
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -288,13 +279,20 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                           )}
                         </div>
 
-                        {/* Arrow */}
+                        {/* Arrow link to album page */}
                         <div className="shrink-0 pl-2">
-                          <div className={`p-2 rounded-full transition-all ${
-                            isActive ? "bg-foreground text-background" : "bg-foreground/5 text-foreground/50 group-hover:text-foreground"
-                          }`}>
+                          <Link
+                            href={`/album/${album.slug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            title={`Open ${album.title} album`}
+                            className={`p-2.5 rounded-full transition-all flex items-center justify-center ${
+                              isActive
+                                ? "bg-foreground text-background hover:scale-110 shadow-sm"
+                                : "bg-foreground/10 text-foreground/70 hover:bg-foreground hover:text-background hover:scale-110"
+                            }`}
+                          >
                             <ArrowRight className="h-4 w-4" />
-                          </div>
+                          </Link>
                         </div>
                       </div>
                     );
