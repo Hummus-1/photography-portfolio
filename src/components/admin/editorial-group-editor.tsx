@@ -65,10 +65,68 @@ export function EditorialGroupEditor({
   // Drag and Drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggedBlockIndex, setDraggedBlockIndex] = useState<number | null>(null);
+  const [dragOverBlockIndex, setDragOverBlockIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setPhotos(initialPhotos || []);
   }, [initialPhotos]);
+
+  const cleanupGroups = (list: Photo[]): Photo[] => {
+    const groupCounts: Record<string, number> = {};
+    list.forEach((p) => {
+      if (p.group_id) {
+        groupCounts[p.group_id] = (groupCounts[p.group_id] || 0) + 1;
+      }
+    });
+
+    const step1 = list.map((p) => {
+      if (p.group_id && groupCounts[p.group_id] < 2) {
+        return { ...p, group_id: null };
+      }
+      return p;
+    });
+
+    const result: Photo[] = [];
+    let currentGroupOriginalId: string | null = null;
+    let currentGroupNewId: string | null = null;
+    const processedGroups = new Set<string>();
+
+    for (let idx = 0; idx < step1.length; idx++) {
+      const photo = step1[idx];
+      if (!photo.group_id) {
+        result.push(photo);
+        currentGroupOriginalId = null;
+        currentGroupNewId = null;
+      } else {
+        if (photo.group_id === currentGroupOriginalId) {
+          result.push({ ...photo, group_id: currentGroupNewId! });
+        } else {
+          currentGroupOriginalId = photo.group_id;
+          if (processedGroups.has(photo.group_id)) {
+            currentGroupNewId = `row_${Date.now()}_${Math.random().toString(36).substring(2, 7)}_${idx}`;
+          } else {
+            processedGroups.add(photo.group_id);
+            currentGroupNewId = photo.group_id;
+          }
+          result.push({ ...photo, group_id: currentGroupNewId });
+        }
+      }
+    }
+
+    const finalCounts: Record<string, number> = {};
+    result.forEach((p) => {
+      if (p.group_id) {
+        finalCounts[p.group_id] = (finalCounts[p.group_id] || 0) + 1;
+      }
+    });
+
+    return result.map((p, idx) => ({
+      ...p,
+      group_id: p.group_id && finalCounts[p.group_id] >= 2 ? p.group_id : null,
+      sort_order: idx,
+    }));
+  };
 
   const toggleSelectPhoto = (id: string) => {
     setSelectedPhotoIds((prev) =>
@@ -93,7 +151,7 @@ export function EditorialGroupEditor({
 
     const newGroupId = `row_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     setPhotos((prev) =>
-      prev.map((p) => (selectedPhotoIds.includes(p.id) ? { ...p, group_id: newGroupId } : p))
+      cleanupGroups(prev.map((p) => (selectedPhotoIds.includes(p.id) ? { ...p, group_id: newGroupId } : p)))
     );
     setSelectedPhotoIds([]);
     toast.success(`Grouped ${selectedPhotoIds.length} photos into a side-by-side row!`);
@@ -101,14 +159,14 @@ export function EditorialGroupEditor({
 
   const handleUngroupRow = (groupId: string) => {
     setPhotos((prev) =>
-      prev.map((p) => (p.group_id === groupId ? { ...p, group_id: null } : p))
+      cleanupGroups(prev.map((p) => (p.group_id === groupId ? { ...p, group_id: null } : p)))
     );
     toast.info("Row group removed.");
   };
 
   const handleRemoveFromGroup = (photoId: string) => {
     setPhotos((prev) =>
-      prev.map((p) => (p.id === photoId ? { ...p, group_id: null } : p))
+      cleanupGroups(prev.map((p) => (p.id === photoId ? { ...p, group_id: null } : p)))
     );
   };
 
@@ -118,12 +176,14 @@ export function EditorialGroupEditor({
     const groupId = currentPhoto.group_id || `row_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
     setPhotos((prev) =>
-      prev.map((p, idx) => {
-        if (idx === index || idx === index + 1) {
-          return { ...p, group_id: groupId };
-        }
-        return p;
-      })
+      cleanupGroups(
+        prev.map((p, idx) => {
+          if (idx === index || idx === index + 1) {
+            return { ...p, group_id: groupId };
+          }
+          return p;
+        })
+      )
     );
     toast.success("Grouped with next photo!");
   };
@@ -134,14 +194,63 @@ export function EditorialGroupEditor({
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(toIndex, 0, moved);
 
-    const reordered = updated.map((p, idx) => ({ ...p, sort_order: idx }));
-    setPhotos(reordered);
+    setPhotos(cleanupGroups(updated));
   };
 
   const handleDrop = (fromIdx: number, toIdx: number) => {
-    movePhotoInList(fromIdx, toIdx);
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= photos.length || toIdx >= photos.length) return;
+
+    const updated = [...photos];
+    const [draggedPhoto] = updated.splice(fromIdx, 1);
+
+    const targetIdxInUpdated = toIdx > fromIdx ? toIdx - 1 : toIdx;
+    const targetPhoto = updated[targetIdxInUpdated];
+
+    if (targetPhoto && targetPhoto.group_id) {
+      const targetGroupId = targetPhoto.group_id;
+      const groupMembers = updated.filter((p) => p.group_id === targetGroupId);
+      if (groupMembers.length < 4) {
+        draggedPhoto.group_id = targetGroupId;
+      } else {
+        draggedPhoto.group_id = null;
+      }
+    } else {
+      draggedPhoto.group_id = null;
+    }
+
+    updated.splice(toIdx, 0, draggedPhoto);
+    setPhotos(cleanupGroups(updated));
     setDraggedIndex(null);
     setDragOverIndex(null);
+  };
+
+  const moveBlockInList = (fromBlockIdx: number, toBlockIdx: number) => {
+    if (fromBlockIdx < 0 || toBlockIdx < 0 || fromBlockIdx >= visualBlocks.length || toBlockIdx >= visualBlocks.length || fromBlockIdx === toBlockIdx) return;
+
+    const fromBlock = visualBlocks[fromBlockIdx];
+    const toBlock = visualBlocks[toBlockIdx];
+
+    const movedPhotoIds = new Set(fromBlock.items.map((item) => item.photo.id));
+    const movedPhotos = photos.filter((p) => movedPhotoIds.has(p.id));
+    const remainingPhotos = photos.filter((p) => !movedPhotoIds.has(p.id));
+
+    let targetId = toBlock.items[0].photo.id;
+    let insertIdx = remainingPhotos.findIndex((p) => p.id === targetId);
+
+    if (fromBlockIdx < toBlockIdx) {
+      const targetLastId = toBlock.items[toBlock.items.length - 1].photo.id;
+      insertIdx = remainingPhotos.findIndex((p) => p.id === targetLastId) + 1;
+    }
+    if (insertIdx < 0) insertIdx = remainingPhotos.length;
+
+    remainingPhotos.splice(insertIdx, 0, ...movedPhotos);
+    setPhotos(cleanupGroups(remainingPhotos));
+  };
+
+  const handleDropBlock = (fromBlockIdx: number, toBlockIdx: number) => {
+    moveBlockInList(fromBlockIdx, toBlockIdx);
+    setDraggedBlockIndex(null);
+    setDragOverBlockIndex(null);
   };
 
   const handleSaveAll = async () => {
@@ -254,7 +363,7 @@ export function EditorialGroupEditor({
             <span>Album Photo Manager ({photos.length} Stills)</span>
           </h4>
           <p className="font-mono text-[10px] uppercase tracking-widest text-white/40 mt-1">
-            Click image thumbnail to expand full size & details • Drag handle to reorder
+            Drag photo grip handles or whole row headers to reorder • Select photos to create side-by-side rows
           </p>
         </div>
 
@@ -288,25 +397,79 @@ export function EditorialGroupEditor({
       <div className="space-y-6">
         {visualBlocks.map((block, blockIndex) => {
           if (block.type === "group" && block.groupId) {
+            const isGroupDragging = draggedBlockIndex === blockIndex;
+            const isGroupDragOver = dragOverBlockIndex === blockIndex;
+
             return (
               <div
                 key={`block-${block.groupId}-${blockIndex}`}
-                className="bg-amber-500/5 border-2 border-dashed border-amber-500/30 p-4 rounded-lg space-y-4 relative"
+                draggable
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  setDraggedBlockIndex(blockIndex);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDragOverBlockIndex(blockIndex);
+                }}
+                onDragEnd={() => {
+                  setDraggedBlockIndex(null);
+                  setDragOverBlockIndex(null);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (draggedBlockIndex !== null && draggedBlockIndex !== blockIndex) {
+                    handleDropBlock(draggedBlockIndex, blockIndex);
+                  }
+                }}
+                className={`bg-amber-500/5 border-2 border-dashed rounded-lg p-4 space-y-4 relative transition-all ${
+                  isGroupDragging
+                    ? "opacity-30 border-amber-400 scale-[0.99]"
+                    : isGroupDragOver
+                    ? "border-amber-400 border-2 bg-amber-500/15 scale-[1.01]"
+                    : "border-amber-500/30"
+                }`}
               >
-                {/* Group Header Bar */}
+                {/* Group Header Bar with Move Handles */}
                 <div className="flex items-center justify-between border-b border-amber-500/20 pb-2.5">
                   <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold uppercase tracking-wider">
+                    <div className="cursor-grab active:cursor-grabbing p-1 text-amber-400/80 hover:text-amber-300 transition-colors" title="Drag to move entire group row">
+                      <GripVertical className="h-4 w-4" />
+                    </div>
                     <Layers className="h-4 w-4" />
                     <span>Side-by-Side Row Group ({block.items.length} Photos)</span>
                   </div>
-                  <button
-                    onClick={() => handleUngroupRow(block.groupId!)}
-                    className="text-amber-400/80 hover:text-amber-300 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded transition-all cursor-pointer"
-                    title="Break row into individual photos"
-                  >
-                    <Unlink className="h-3.5 w-3.5" />
-                    <span>Ungroup Row</span>
-                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      disabled={blockIndex === 0}
+                      onClick={() => moveBlockInList(blockIndex, blockIndex - 1)}
+                      className="hover:bg-amber-500/20 disabled:opacity-20 p-1.5 rounded text-amber-400 text-xs font-mono flex items-center gap-1 transition-colors"
+                      title="Move Row Group Up"
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Move Row Up</span>
+                    </button>
+                    <button
+                      disabled={blockIndex === visualBlocks.length - 1}
+                      onClick={() => moveBlockInList(blockIndex, blockIndex + 1)}
+                      className="hover:bg-amber-500/20 disabled:opacity-20 p-1.5 rounded text-amber-400 text-xs font-mono flex items-center gap-1 transition-colors"
+                      title="Move Row Group Down"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Move Row Down</span>
+                    </button>
+                    <button
+                      onClick={() => handleUngroupRow(block.groupId!)}
+                      className="text-amber-400/80 hover:text-amber-300 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded transition-all cursor-pointer"
+                      title="Break row into individual photos"
+                    >
+                      <Unlink className="h-3.5 w-3.5" />
+                      <span>Ungroup Row</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Compact Split Cards for Grouped Row */}
