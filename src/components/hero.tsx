@@ -64,7 +64,10 @@ export function Hero({
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
+      const dateObj = new Date(dateStr);
+      if (isNaN(dateObj.getTime())) return dateStr;
+      return dateObj.toLocaleDateString("es-ES", {
+        day: "numeric",
         month: "long",
         year: "numeric",
       });

@@ -91,22 +91,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 4. Calculate earliest photo creation date
+    // 4. Calculate earliest photo creation date from EXIF
     let earliestDateStr: string | null = null;
     let minTimestamp = Infinity;
 
     for (const photo of photos) {
       let photoDate: Date | null = null;
 
-      // Check EXIF date_taken
-      if (photo.exif && photo.exif.date_taken) {
-        const parsed = new Date(photo.exif.date_taken);
-        if (!isNaN(parsed.getTime())) {
-          photoDate = parsed;
+      // Check EXIF date fields
+      if (photo.exif) {
+        const rawExifDate =
+          photo.exif.date_taken ||
+          photo.exif.DateTimeOriginal ||
+          photo.exif.CreateDate ||
+          photo.exif.ModifyDate;
+
+        if (rawExifDate) {
+          const parsed = new Date(rawExifDate);
+          if (!isNaN(parsed.getTime())) {
+            photoDate = parsed;
+          }
         }
       }
 
-      // Fallback to photo.created_at if EXIF date_taken is missing/invalid
+      // Fallback to photo.created_at if EXIF date is missing
       if (!photoDate && photo.created_at) {
         const parsed = new Date(photo.created_at);
         if (!isNaN(parsed.getTime())) {
@@ -265,8 +273,9 @@ Photo Collection Summary:
     // 7. Determine database updates
     const updates: Record<string, any> = {};
 
-    // Update date to earliest photo creation date if available
-    if (earliestDateStr && album.date !== earliestDateStr) {
+    // Update date to earlier EXIF creation date if album date is not defined or is empty
+    const isDateNotDefined = !album.date || album.date.trim() === "";
+    if (earliestDateStr && (isDateNotDefined || album.date !== earliestDateStr)) {
       updates.date = earliestDateStr;
     }
 

@@ -44,7 +44,7 @@ export function CreateAlbumDialog({
     setLoading(true);
 
     const finalTitle = title.trim() || "Untitled Album";
-    const finalDate = date || new Date().toISOString().split("T")[0];
+    const finalDate = date.trim() ? date.trim() : null;
     
     let slug = finalTitle
       .toLowerCase()
