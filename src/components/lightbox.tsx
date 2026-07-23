@@ -234,6 +234,11 @@ export function Lightbox({
                     {photos[selectedIndex].description}
                   </p>
                 )}
+                {photos[selectedIndex].score !== undefined && photos[selectedIndex].score !== null && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 font-mono text-xs font-bold mt-3">
+                    ★ Score: {photos[selectedIndex].score} / 10
+                  </div>
+                )}
               </div>
 
               {/* EXIF Metadata card */}

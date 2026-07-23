@@ -2,13 +2,16 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Camera, Image as ImageIcon, Loader2, Tag, Trash2, Pencil, Check, X } from "lucide-react";
+import { Camera, Image as ImageIcon, Loader2, Tag, Trash2, Pencil, Check, X, Star, ArrowLeft, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Photo } from "@/lib/types";
 
 interface PhotoGridProps {
   photos: Photo[];
   photosLoading: boolean;
+  coverImageUrl?: string | null;
+  onSetCoverPhoto: (photoUrl: string) => void;
+  onReorderPhotos: (reorderedPhotos: Photo[]) => void;
   onDeletePhoto: (photoId: string) => void;
   onUpdatePhoto: (
     photoId: string,
@@ -16,7 +19,15 @@ interface PhotoGridProps {
   ) => Promise<void>;
 }
 
-export function PhotoGrid({ photos, photosLoading, onDeletePhoto, onUpdatePhoto }: PhotoGridProps) {
+export function PhotoGrid({
+  photos,
+  photosLoading,
+  coverImageUrl,
+  onSetCoverPhoto,
+  onReorderPhotos,
+  onDeletePhoto,
+  onUpdatePhoto,
+}: PhotoGridProps) {
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [editScore, setEditScore] = useState<string>("");
   const [editTags, setEditTags] = useState<string>("");
@@ -63,6 +74,19 @@ export function PhotoGrid({ photos, photosLoading, onDeletePhoto, onUpdatePhoto 
     }
   };
 
+  const movePhoto = (index: number, direction: "left" | "right") => {
+    const newIndex = direction === "left" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= photos.length) return;
+
+    const newPhotos = [...photos];
+    const [moved] = newPhotos.splice(index, 1);
+    newPhotos.splice(newIndex, 0, moved);
+
+    // Update sort_order properties
+    const updated = newPhotos.map((p, idx) => ({ ...p, sort_order: idx }));
+    onReorderPhotos(updated);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -70,6 +94,9 @@ export function PhotoGrid({ photos, photosLoading, onDeletePhoto, onUpdatePhoto 
           <ImageIcon className="h-5 w-5 opacity-70" />
           <span>Album Photos ({photos.length})</span>
         </h4>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+          Use arrows to reorder • Set album cover
+        </p>
       </div>
 
       {photosLoading ? (
@@ -82,12 +109,16 @@ export function PhotoGrid({ photos, photosLoading, onDeletePhoto, onUpdatePhoto 
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {photos.map((photo) => {
+          {photos.map((photo, index) => {
             const isEditing = editingPhotoId === photo.id;
+            const isCover = coverImageUrl === photo.url;
+
             return (
               <Card
                 key={photo.id}
-                className="bg-[#14171a] border-white/10 rounded-none text-white overflow-hidden flex flex-col justify-between"
+                className={`bg-[#14171a] border rounded-none text-white overflow-hidden flex flex-col justify-between transition-all ${
+                  isCover ? "border-amber-500/60 ring-1 ring-amber-500/30" : "border-white/10"
+                }`}
               >
                 <div className="relative aspect-[3/2] w-full bg-black/20">
                   <Image
@@ -97,22 +128,61 @@ export function PhotoGrid({ photos, photosLoading, onDeletePhoto, onUpdatePhoto 
                     sizes="(max-width: 768px) 100vw, 350px"
                     className="object-cover"
                   />
-                  <div className="absolute top-3 right-3 flex gap-2 animate-fade-in">
+
+                  {/* Cover Badge */}
+                  {isCover && (
+                    <div className="absolute top-3 left-3 bg-amber-500 text-black font-mono text-[9px] font-bold uppercase tracking-widest px-2 py-1 flex items-center gap-1 shadow-md">
+                      <Star className="h-3 w-3 fill-black text-black" />
+                      <span>Album Cover</span>
+                    </div>
+                  )}
+
+                  {/* Reorder and Card Action Overlay */}
+                  <div className="absolute top-3 right-3 flex gap-1.5 animate-fade-in">
+                    {/* Reorder buttons */}
+                    <button
+                      disabled={index === 0}
+                      onClick={() => movePhoto(index, "left")}
+                      className="bg-black/75 hover:bg-white/20 disabled:opacity-30 p-1.5 rounded-none transition-colors border border-white/10 text-white cursor-pointer"
+                      title="Move Up / Earlier"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      disabled={index === photos.length - 1}
+                      onClick={() => movePhoto(index, "right")}
+                      className="bg-black/75 hover:bg-white/20 disabled:opacity-30 p-1.5 rounded-none transition-colors border border-white/10 text-white cursor-pointer"
+                      title="Move Down / Later"
+                    >
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+
+                    {/* Cover Photo selector button */}
+                    {!isCover && (
+                      <button
+                        onClick={() => onSetCoverPhoto(photo.url)}
+                        className="bg-black/75 hover:bg-amber-500/80 p-1.5 rounded-none transition-colors border border-white/10 text-white cursor-pointer"
+                        title="Set as Album Cover"
+                      >
+                        <Star className="h-3.5 w-3.5 text-amber-400" />
+                      </button>
+                    )}
+
                     {!isEditing && (
                       <>
                         <button
                           onClick={() => startEditing(photo)}
-                          className="bg-black/75 hover:bg-white/10 p-2 rounded-none transition-colors border border-white/10 cursor-pointer"
+                          className="bg-black/75 hover:bg-white/20 p-1.5 rounded-none transition-colors border border-white/10 cursor-pointer"
                           title="Edit Photo Info"
                         >
-                          <Pencil className="h-4 w-4 text-white" />
+                          <Pencil className="h-3.5 w-3.5 text-white" />
                         </button>
                         <button
                           onClick={() => onDeletePhoto(photo.id)}
-                          className="bg-black/75 hover:bg-red-500/80 p-2 rounded-none transition-colors border border-white/10 cursor-pointer"
+                          className="bg-black/75 hover:bg-red-500/80 p-1.5 rounded-none transition-colors border border-white/10 cursor-pointer"
                           title="Delete Photo"
                         >
-                          <Trash2 className="h-4 w-4 text-white" />
+                          <Trash2 className="h-3.5 w-3.5 text-white" />
                         </button>
                       </>
                     )}
@@ -194,7 +264,7 @@ export function PhotoGrid({ photos, photosLoading, onDeletePhoto, onUpdatePhoto 
                   </CardContent>
                 ) : (
                   <CardContent className="p-4 space-y-4">
-                    {/* Score display (internal only) */}
+                    {/* Score display */}
                     {photo.score !== undefined && photo.score !== null && (
                       <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-500">
                         <span>★ Score: {photo.score} / 10</span>

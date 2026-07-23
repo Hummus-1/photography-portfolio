@@ -35,6 +35,8 @@ export interface Photo {
   exif: EXIFData;
   score?: number | null;
   description?: string | null;
+  group_id?: string | null;
+  grid_layout?: { x: number; y: number; w: number; h: number } | null;
 }
 
 export interface Album {

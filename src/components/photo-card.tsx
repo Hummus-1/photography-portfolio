@@ -13,9 +13,10 @@ interface PhotoCardProps {
   id?: string;
   innerRef?: React.Ref<HTMLDivElement>;
   onSelect: () => void;
+  fillWidth?: boolean;
 }
 
-export function PhotoCard({ photo, album, index, id, innerRef, onSelect }: PhotoCardProps) {
+export function PhotoCard({ photo, album, index, id, innerRef, onSelect, fillWidth }: PhotoCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -23,9 +24,9 @@ export function PhotoCard({ photo, album, index, id, innerRef, onSelect }: Photo
       viewport={{ once: true, margin: "-100px" }}
       transition={{ type: "spring", stiffness: 60, damping: 20 }}
       onClick={onSelect}
-      className="group cursor-pointer select-none mx-auto"
+      className="group cursor-pointer select-none mx-auto w-full"
       style={{
-        width: `min(100%, calc((100vh - 90px) * ${photo.aspect_ratio || 1.5}))`,
+        width: fillWidth ? "100%" : `min(100%, calc((100vh - 90px) * ${photo.aspect_ratio || 1.5}))`,
       }}
     >
       <div className="relative flex flex-col w-full">

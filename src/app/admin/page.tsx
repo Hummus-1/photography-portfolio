@@ -9,7 +9,7 @@ import { AdminLogin } from "@/components/admin/admin-login";
 import { CreateAlbumDialog } from "@/components/admin/create-album-dialog";
 import { AlbumSidebar } from "@/components/admin/album-sidebar";
 import { ImageUploader } from "@/components/admin/image-uploader";
-import { PhotoGrid } from "@/components/admin/photo-grid";
+import { EditorialGroupEditor } from "@/components/admin/editorial-group-editor";
 import { Album, Photo } from "@/lib/types";
 
 export default function AdminPage() {
@@ -176,16 +176,30 @@ export default function AdminPage() {
       if (error) throw error;
       toast.success("Photo updated successfully");
       
-      // Update local photo list state
       setPhotos((prev) =>
         prev.map((p) => (p.id === photoId ? { ...p, ...updates } : p))
       );
 
-      // Re-fetch albums to refresh average album scores/tags in the sidebar
       fetchAlbums();
     } catch (err: any) {
       toast.error(`Update failed: ${err.message}`);
       throw err;
+    }
+  };
+
+  const handleSetCoverPhoto = async (photoUrl: string) => {
+    if (!selectedAlbumId) return;
+    try {
+      const { error } = await supabase
+        .from("albums")
+        .update({ cover_image_url: photoUrl })
+        .eq("id", selectedAlbumId);
+
+      if (error) throw error;
+      toast.success("Album cover updated!");
+      handleAlbumCoverUpdated(selectedAlbumId, photoUrl);
+    } catch (err: any) {
+      toast.error(`Failed to update cover photo: ${err.message}`);
     }
   };
 
@@ -253,7 +267,7 @@ export default function AdminPage() {
           onDeleteAlbum={handleDeleteAlbum}
         />
 
-        {/* Main Section: Drag & Drop Upload and Photo management */}
+        {/* Main Section: Drag & Drop Upload and Interactive Collage Editor */}
         <div className="lg:col-span-3 space-y-12">
           {activeAlbum ? (
             <>
@@ -288,12 +302,16 @@ export default function AdminPage() {
                 onAlbumCoverUpdated={handleAlbumCoverUpdated}
               />
 
-              {/* Photos List display */}
-              <PhotoGrid
+              {/* Editorial Layout & Row Grouping Editor */}
+              <EditorialGroupEditor
+                album={activeAlbum}
                 photos={photos}
                 photosLoading={photosLoading}
+                coverImageUrl={activeAlbum.cover_image_url}
+                onSetCoverPhoto={handleSetCoverPhoto}
                 onDeletePhoto={handleDeletePhoto}
                 onUpdatePhoto={handleUpdatePhoto}
+                onSaveSuccess={() => fetchPhotos(selectedAlbumId)}
               />
             </>
           ) : (
@@ -312,4 +330,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
