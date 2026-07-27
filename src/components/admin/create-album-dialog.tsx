@@ -104,7 +104,7 @@ export function CreateAlbumDialog({
           Create Album
         </Button>
       } />
-      <DialogContent className="bg-[#14171a] border-white/10 text-white rounded-none max-w-11/12 w-fit">
+      <DialogContent className="bg-[#14171a] border-white/10 text-white rounded-none max-w-11/12 w-fit max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl font-bold uppercase tracking-wider">
             New Photo Album

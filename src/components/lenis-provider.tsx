@@ -13,6 +13,15 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
+      prevent: (node: Element) => {
+        return (
+          node.hasAttribute("data-lenis-prevent") ||
+          node.closest("[data-lenis-prevent]") !== null ||
+          node.closest('[data-slot="dialog-content"]') !== null ||
+          node.closest('[data-slot="dialog-overlay"]') !== null ||
+          node.closest('[role="dialog"]') !== null
+        );
+      },
     });
 
     lenisRef.current = lenis;

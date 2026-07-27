@@ -18,8 +18,13 @@ async function getAlbumsWithLocations() {
       .select(`
         *,
         photos (
+          id,
           url,
-          color_palette
+          thumbnail_url,
+          color_palette,
+          aspect_ratio,
+          location,
+          tags
         )
       `)
       .eq("is_published", true)
@@ -35,6 +40,7 @@ async function getAlbumsWithLocations() {
       const cover_color_palette = coverPhoto ? coverPhoto.color_palette : (photos[0]?.color_palette || []);
       return {
         ...album,
+        photos,
         cover_color_palette,
       } as Album;
     });

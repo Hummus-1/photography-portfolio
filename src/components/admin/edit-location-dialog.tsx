@@ -20,17 +20,21 @@ import {
   Check,
   Loader2,
   Trash2,
-  AlertTriangle,
   ArrowRight,
+  Sparkles,
+  MapPin,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { geocodeLocation } from "@/lib/geocoding";
 
 export interface LocationNode {
   id: string;
   name: string;
   type: string;
   parent_id: string | null;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 interface EditLocationDialogProps {
@@ -98,16 +102,21 @@ export function EditLocationDialog({
   const [name, setName] = useState("");
   const [type, setType] = useState("region");
   const [parentId, setParentId] = useState<string | null>(null);
+  const [lat, setLat] = useState<string>("");
+  const [lng, setLng] = useState<string>("");
 
   const [parentSearch, setParentSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
     if (node) {
       setName(node.name);
       setType(node.type);
       setParentId(node.parent_id);
+      setLat(node.lat != null ? String(node.lat) : "");
+      setLng(node.lng != null ? String(node.lng) : "");
       setParentSearch("");
     }
   }, [node]);
@@ -144,6 +153,36 @@ export function EditLocationDialog({
     previewPath = `${previewPath} (Root Level)`;
   }
 
+  const handleAutoGeocode = async () => {
+    const cleanName = name.trim();
+    if (!cleanName) {
+      toast.error("Enter a location name first to detect GPS coordinates.");
+      return;
+    }
+
+    setGeocoding(true);
+    try {
+      let parentName = "";
+      if (parentId) {
+        const parentNode = allLocations.find((l) => l.id === parentId);
+        if (parentNode) parentName = parentNode.name;
+      }
+
+      const res = await geocodeLocation(cleanName, parentName);
+      if (res) {
+        setLat(String(res.lat));
+        setLng(String(res.lng));
+        toast.success(`Found coordinates: ${res.lat}° N, ${res.lng}° E`);
+      } else {
+        toast.error(`Could not automatically locate "${cleanName}". Enter coordinates manually.`);
+      }
+    } catch (err) {
+      toast.error("Geocoding failed.");
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanName = name.trim();
@@ -160,6 +199,9 @@ export function EditLocationDialog({
       finalType = "region";
     }
 
+    const parsedLat = lat.trim() !== "" ? parseFloat(lat) : null;
+    const parsedLng = lng.trim() !== "" ? parseFloat(lng) : null;
+
     setSaving(true);
     try {
       const { error } = await supabase
@@ -168,6 +210,8 @@ export function EditLocationDialog({
           name: cleanName,
           type: finalType,
           parent_id: parentId,
+          lat: parsedLat,
+          lng: parsedLng,
         })
         .eq("id", node.id);
 
@@ -222,14 +266,14 @@ export function EditLocationDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#14171a] border border-white/10 text-white rounded-none max-w-xl w-full p-6">
+      <DialogContent className="bg-[#14171a] border border-white/10 text-white rounded-none max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-lg font-bold uppercase tracking-wider flex items-center gap-2 text-white">
             <Pencil className="h-4 w-4 text-amber-400" />
             Edit Location Item & Hierarchy
           </DialogTitle>
           <DialogDescription className="text-white/60 text-xs font-sans">
-            Rename this location or re-parent it to change its hierarchical position in the global location tree.
+            Rename this location, re-parent it in the tree, or update GPS coordinates.
           </DialogDescription>
         </DialogHeader>
 
@@ -274,6 +318,54 @@ export function EditLocationDialog({
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          {/* GPS Coordinates Section with Auto-Geocode Button */}
+          <div className="p-3.5 bg-black/40 border border-white/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-mono text-amber-400 uppercase tracking-widest">
+                <MapPin className="h-3.5 w-3.5" />
+                <span>GPS Coordinates</span>
+              </div>
+              <Button
+                type="button"
+                onClick={handleAutoGeocode}
+                disabled={geocoding || !name.trim()}
+                className="h-7 px-3 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-mono uppercase tracking-widest cursor-pointer"
+              >
+                {geocoding ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <Sparkles className="h-3 w-3 mr-1 text-amber-400" />
+                )}
+                Auto-Detect GPS
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="font-mono text-[9px] uppercase text-white/50">Latitude (°N)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  placeholder="e.g. 69.2200"
+                  className="bg-black/40 border-white/10 text-xs text-white h-8"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="font-mono text-[9px] uppercase text-white/50">Longitude (°E)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  placeholder="e.g. -51.1000"
+                  className="bg-black/40 border-white/10 text-xs text-white h-8"
+                />
+              </div>
             </div>
           </div>
 
