@@ -70,7 +70,7 @@ export function HeroShowcase({ featuredAlbums, hoverEffect = "focus" }: HeroShow
             className="lg:col-span-7 space-y-6 sm:space-y-8"
           >
             <div className="space-y-4 sm:space-y-6">
-              <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-[0.88] text-foreground">
+              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.88] text-foreground">
                 Daniel García
                 <br />
                 <span className="opacity-40 font-normal italic">Visual Journal.</span>
