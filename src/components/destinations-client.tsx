@@ -185,34 +185,34 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
     <div className="w-full min-h-screen pb-24 space-y-8">
       
       {/* Global Expedition Header & Atlas Banner */}
-      <section className="px-6 md:px-12 max-w-6xl mx-auto pt-10">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-foreground/10 pb-8 gap-6">
+      <section className="px-4 sm:px-6 md:px-12 max-w-6xl mx-auto pt-6 sm:pt-10">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-foreground/10 pb-6 sm:pb-8 gap-6">
           <div className="space-y-3">
-            <div className="text-xs font-mono tracking-widest uppercase text-film-amber font-semibold flex items-center gap-2">
-              <Compass className="h-4 w-4 animate-spin-slow text-film-amber" />
-              <span>02 • Geographic Spatial Index & Location Archive</span>
+            <div className="text-[11px] sm:text-xs font-mono tracking-widest uppercase text-film-amber font-semibold flex items-center gap-2">
+              <Compass className="h-4 w-4 animate-spin-slow text-film-amber shrink-0" />
+              <span>02 • Spatial Index & Location Archive</span>
             </div>
-            <h1 className="font-serif text-4xl sm:text-6xl font-bold tracking-tight text-foreground">
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
               Spatial Index
             </h1>
-            <p className="text-sm font-sans text-foreground/75 max-w-xl">
+            <p className="text-xs sm:text-sm font-sans text-foreground/75 max-w-xl leading-relaxed">
               Geographic photo series indexed by continent, country, volcanic landmass, and verified GPS coordinates.
             </p>
           </div>
 
-          <div className="flex items-center gap-6 text-xs font-mono text-foreground/70 border border-foreground/15 px-6 py-3 rounded-2xl bg-foreground/[0.015] shadow-sm">
+          <div className="flex items-center justify-around sm:justify-start gap-4 sm:gap-6 text-xs font-mono text-foreground/70 border border-foreground/15 px-4 sm:px-6 py-3 rounded-2xl bg-foreground/[0.015] shadow-sm">
             <div className="text-center">
-              <span className="block font-bold text-film-amber text-lg">{albums.length}</span>
+              <span className="block font-bold text-film-amber text-base sm:text-lg">{albums.length}</span>
               <span className="text-[10px] text-foreground/50 uppercase tracking-wider">Series</span>
             </div>
-            <div className="h-8 w-px bg-foreground/10" />
+            <div className="h-7 w-px bg-foreground/10" />
             <div className="text-center">
-              <span className="block font-bold text-foreground text-lg">{countriesList.length}</span>
+              <span className="block font-bold text-foreground text-base sm:text-lg">{countriesList.length}</span>
               <span className="text-[10px] text-foreground/50 uppercase tracking-wider">Countries</span>
             </div>
-            <div className="h-8 w-px bg-foreground/10" />
+            <div className="h-7 w-px bg-foreground/10" />
             <div className="text-center">
-              <span className="block font-bold text-foreground text-lg">{continentsList.length}</span>
+              <span className="block font-bold text-foreground text-base sm:text-lg">{continentsList.length}</span>
               <span className="text-[10px] text-foreground/50 uppercase tracking-wider">Continents</span>
             </div>
           </div>
@@ -220,8 +220,8 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
       </section>
 
       {/* Advanced Filter Toolbar */}
-      <section className="px-6 md:px-12 max-w-6xl mx-auto">
-        <div className="p-4 rounded-3xl border border-foreground/10 bg-foreground/[0.015] space-y-4 shadow-sm">
+      <section className="px-4 sm:px-6 md:px-12 max-w-6xl mx-auto">
+        <div className="p-3.5 sm:p-4 rounded-3xl border border-foreground/10 bg-foreground/[0.015] space-y-4 shadow-sm">
           
           {/* Top Row: Search + Country Select + Sort + Density Button */}
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -234,7 +234,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
                 placeholder="Search destinations, spots, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full pl-10 pr-4 text-xs font-mono uppercase tracking-wider bg-background/60 border border-foreground/15 rounded-full placeholder:text-foreground/40 focus:outline-none focus:border-foreground/40 transition-colors"
+                className="h-10 sm:h-9 w-full pl-10 pr-4 text-xs font-mono uppercase tracking-wider bg-background/60 border border-foreground/15 rounded-full placeholder:text-foreground/40 focus:outline-none focus:border-foreground/40 transition-colors"
               />
             </div>
 
@@ -245,7 +245,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
                 if (val) setSelectedCountry(val);
               }}
             >
-              <SelectTrigger className="h-9 w-[190px] sm:w-[220px] rounded-full text-xs font-mono bg-background/60 border-foreground/15">
+              <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[220px] rounded-full text-xs font-mono bg-background/60 border-foreground/15">
                 <div className="flex items-center gap-1.5 truncate">
                   <MapPin className="h-3.5 w-3.5 text-film-amber shrink-0" />
                   <SelectValue placeholder="All Countries" />
@@ -268,7 +268,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
                 if (val) setSortBy(val as any);
               }}
             >
-              <SelectTrigger className="h-9 w-[160px] sm:w-[185px] rounded-full text-xs font-mono bg-background/60 border-foreground/15">
+              <SelectTrigger className="h-10 sm:h-9 w-full sm:w-[185px] rounded-full text-xs font-mono bg-background/60 border-foreground/15">
                 <div className="flex items-center gap-1.5 truncate">
                   <ArrowUpDown className="h-3.5 w-3.5 text-foreground/50 shrink-0" />
                   <SelectValue placeholder="Sort by" />
@@ -285,18 +285,18 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
             {/* Density Toggle Button */}
             <button
               onClick={() => setDensity(density === "expanded" ? "compact" : "expanded")}
-              className="h-9 flex items-center justify-center gap-1.5 px-4 bg-background/60 border border-foreground/15 rounded-full text-xs font-mono text-foreground/80 hover:text-foreground hover:bg-foreground/[0.04] transition-colors shrink-0 cursor-pointer"
+              className="h-10 sm:h-9 flex items-center justify-center gap-1.5 px-4 bg-background/60 border border-foreground/15 rounded-full text-xs font-mono text-foreground/80 hover:text-foreground hover:bg-foreground/[0.04] transition-colors shrink-0 cursor-pointer"
               title="Toggle Layout Density"
             >
               {density === "expanded" ? (
                 <>
                   <Minimize2 className="h-3.5 w-3.5 text-foreground/60" />
-                  <span className="hidden sm:inline">Compact</span>
+                  <span>Compact</span>
                 </>
               ) : (
                 <>
                   <Maximize2 className="h-3.5 w-3.5 text-foreground/60" />
-                  <span className="hidden sm:inline">Expanded</span>
+                  <span>Expanded</span>
                 </>
               )}
             </button>
@@ -379,7 +379,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
       </section>
 
       {/* Main Content Area Rendering Synchronized Stage View */}
-      <main className="px-6 md:px-12 max-w-6xl mx-auto pt-4">
+      <main className="px-4 sm:px-6 md:px-12 max-w-6xl mx-auto pt-4">
         {filteredCountryGroups.length === 0 ? (
           <div className="py-24 text-center space-y-4">
             <Compass className="h-12 w-12 mx-auto text-foreground/30 animate-pulse" />

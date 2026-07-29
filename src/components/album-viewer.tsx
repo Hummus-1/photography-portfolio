@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Album, Photo } from "@/lib/types";
-import { FolderOpen } from "lucide-react";
+import Link from "next/link";
+import { FolderOpen, ArrowLeft } from "lucide-react";
+import { selectBestAccentColor } from "@/lib/color-utils";
 
 // Import modular subcomponents
 import { Hero } from "@/components/hero";
@@ -57,20 +59,21 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
   const photoRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const galleryRef = useRef<HTMLDivElement>(null);
 
-  // Intersection observer to track active photo on scroll for Timeline sidebar
+  // Intersection observer & scroll position fallback to track active photo on scroll
   useEffect(() => {
     const observerOptions = {
       root: null,
-      rootMargin: "-25% 0px -45% 0px",
-      threshold: 0.1,
+      rootMargin: "-15% 0px -35% 0px",
+      threshold: [0.1, 0.4, 0.8],
     };
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActivePhotoId(entry.target.id);
-        }
-      });
+      // Find the entry with the highest intersection ratio
+      const visibleEntries = entries.filter((e) => e.isIntersecting);
+      if (visibleEntries.length > 0) {
+        visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        setActivePhotoId(visibleEntries[0].target.id);
+      }
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
@@ -84,10 +87,29 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
     };
   }, [photos]);
 
+  const coverPhoto = photos.find((p) => p.url === album.cover_image_url) || photos[0];
+  const albumPalette = (album.cover_color_palette && album.cover_color_palette.length > 0)
+    ? album.cover_color_palette
+    : (coverPhoto?.color_palette && coverPhoto.color_palette.length > 0)
+    ? coverPhoto.color_palette
+    : null;
+  const accentColor = selectBestAccentColor(albumPalette, "#d96b27");
   const chunks = getPhotoChunks(photos);
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center relative">
+      {/* Floating Return to Spatial Index Bar */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 md:left-12 z-30">
+        <Link
+          href="/destinations"
+          style={{ borderColor: `${accentColor}30` }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-background/85 backdrop-blur-md border text-[11px] sm:text-xs font-mono uppercase tracking-widest text-foreground/75 hover:border-film-amber/60 transition-all shadow-md group"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-1 transition-transform" style={{ color: accentColor }} />
+          <span>Spatial Index</span>
+        </Link>
+      </div>
+
       {/* Hero Section */}
       <Hero
         album={album}
@@ -99,10 +121,19 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
         onExploreClick={() => {
           const target = galleryRef.current;
           if (target) {
+            const firstPhotoEl = target.querySelector("[id^='photo-']");
+            const elementToScroll = firstPhotoEl || target;
+            const rect = elementToScroll.getBoundingClientRect();
+            const elementTop = rect.top + window.scrollY;
+            const elementHeight = rect.height;
+            const viewportHeight = window.innerHeight;
+
+            const targetScroll = Math.max(0, elementTop - (viewportHeight / 2) + (elementHeight / 2));
+
             if (typeof window !== "undefined" && (window as any).lenis) {
-              (window as any).lenis.scrollTo(target, { align: "start", duration: 1.2 });
+              (window as any).lenis.scrollTo(targetScroll, { duration: 1.0 });
             } else {
-              target.scrollIntoView({ behavior: "smooth", block: "start" });
+              window.scrollTo({ top: targetScroll, behavior: "smooth" });
             }
           }
         }}
@@ -113,16 +144,16 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
         <div className="w-full max-w-xl mx-auto my-16 p-10 bg-white/5 border border-dashed border-white/20 text-center flex flex-col items-center justify-center">
           <FolderOpen className="h-10 w-10 text-white/30 mb-3" />
           <p className="font-serif font-bold text-sm tracking-widest uppercase text-white/80">
-            No Photos Uploaded Yet
+            No Stills Available
           </p>
-          <p className="text-xs text-white/50 mt-1 max-w-xs font-sans">
-            Upload photos to this album in the admin dashboard to populate the gallery grid and slideshow.
+          <p className="text-xs text-white/50 pt-1">
+            This photo collection currently has no published stills.
           </p>
         </div>
       ) : (
-        <div className="w-full flex gap-12 lg:gap-24 relative max-w-340 mx-auto px-6 md:px-12 py-12 md:py-20">
+        <div className="w-full flex gap-12 lg:gap-24 relative max-w-340 mx-auto px-4 sm:px-6 md:px-12 py-12 md:py-20">
           {/* Timeline Tracker */}
-          <Timeline photos={photos} activePhotoId={activePhotoId} />
+          <Timeline photos={photos} activePhotoId={activePhotoId} accentColor={accentColor} />
 
           {/* Gallery Content Area */}
           <div ref={galleryRef} className="flex-grow space-y-24 md:space-y-36">

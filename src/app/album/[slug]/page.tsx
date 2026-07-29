@@ -46,9 +46,19 @@ async function getAlbumData(slug: string, isPreview: boolean = false) {
       throw photosError;
     }
 
+    const photoList = (photos || []) as Photo[];
+    const coverPhoto = photoList.find((p) => p.url === album.cover_image_url) || photoList[0];
+    const cover_color_palette =
+      album.cover_color_palette && album.cover_color_palette.length > 0
+        ? album.cover_color_palette
+        : coverPhoto?.color_palette || [];
+
     return {
-      album: album as Album,
-      photos: (photos || []) as Photo[],
+      album: {
+        ...album,
+        cover_color_palette,
+      } as Album,
+      photos: photoList,
     };
   } catch {
     if (MOCK_ALBUMS_MAP[slug]) {

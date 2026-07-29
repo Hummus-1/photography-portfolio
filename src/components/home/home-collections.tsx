@@ -36,7 +36,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
   return (
     <section id="featured-collections" className="w-full py-20 md:py-32 relative">
       {/* Header Bar */}
-      <div className="px-6 md:px-12 max-w-7xl mx-auto space-y-6">
+      <div className="px-4 sm:px-6 md:px-12 max-w-7xl mx-auto space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline border-b border-foreground/10 pb-8">
           
           <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
@@ -99,7 +99,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                   }}
                 />
 
-                <div className="px-6 md:px-12 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                <div className="px-4 sm:px-6 md:px-12 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                   
                   {/* Text Details Side (5 cols) */}
                   <div className={`space-y-6 lg:col-span-5 ${isEven ? "lg:order-1" : "lg:order-2"}`}>

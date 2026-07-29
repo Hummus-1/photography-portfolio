@@ -41,42 +41,36 @@ export function HeroShowcase({ featuredAlbums, hoverEffect = "focus" }: HeroShow
       {/* Hairline Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--foreground-rgb),0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--foreground-rgb),0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 space-y-12 relative z-10">
         
-        {/* Left-Margin Numbered Eyebrow Bar */}
+        {/* Sleek Numbered Eyebrow Line */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-wrap items-center justify-between gap-4 border-b border-foreground/10 pb-6 text-xs font-mono tracking-widest uppercase text-foreground/60"
+          className="flex items-center justify-between border-b border-foreground/10 pb-4 text-xs font-mono tracking-widest uppercase text-foreground/60"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-film-amber font-bold flex items-center gap-1.5">
-              01
-            </span>
-            <span className="w-6 h-px bg-foreground/20" />
-            <div className="flex items-center gap-2 text-foreground/80">
-              <Aperture className="h-3.5 w-3.5" />
-              <span>Photography Portfolio & Visual Journal</span>
-            </div>
+          <div className="flex items-center gap-2 text-film-amber font-bold">
+            <Aperture className="h-4 w-4 shrink-0" />
+            <span>01 — Visual Journal</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span className="text-foreground/50 tracking-widest font-mono">SELECTED EXHIBITION ARCHIVE</span>
-          </div>
+          <span className="text-[11px] text-foreground/50 tracking-widest hidden sm:block">
+            Selected Exhibition Archive
+          </span>
         </motion.div>
 
         {/* Main Grid: Typography & Photo Showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           
           {/* Left Column: Title & Copy (7 Cols) */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="lg:col-span-7 space-y-8"
+            className="lg:col-span-7 space-y-6 sm:space-y-8"
           >
-            <div className="space-y-6">
-              <h1 className="font-serif text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.92] text-foreground">
+            <div className="space-y-4 sm:space-y-6">
+              <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight leading-[0.88] text-foreground">
                 Daniel García
                 <br />
                 <span className="opacity-40 font-normal italic">Visual Journal.</span>
@@ -88,10 +82,10 @@ export function HeroShowcase({ featuredAlbums, hoverEffect = "focus" }: HeroShow
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={handleScrollToCollections}
-                className="inline-flex items-center gap-2.5 bg-foreground text-background px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
               >
                 <span>View Collections</span>
                 <ArrowDown className="h-3.5 w-3.5 group-hover:translate-y-1 transition-transform duration-300" />
@@ -99,7 +93,7 @@ export function HeroShowcase({ featuredAlbums, hoverEffect = "focus" }: HeroShow
 
               <Link
                 href="/destinations"
-                className="inline-flex items-center gap-2.5 border border-foreground/25 hover:border-film-amber px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber/5 active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 border border-foreground/25 hover:border-film-amber px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber/5 active:scale-[0.98] transition-all"
               >
                 <Globe className="h-4 w-4 text-foreground/70" />
                 <span>Spatial Index</span>

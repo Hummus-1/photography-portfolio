@@ -8,6 +8,7 @@ import { Photo } from "@/lib/types";
 interface TimelineProps {
   photos: Photo[];
   activePhotoId: string;
+  accentColor?: string;
 }
 
 interface TimelineNodeItem {
@@ -57,7 +58,7 @@ function getTimelineNodes(photos: Photo[]): TimelineNodeItem[] {
   return nodes;
 }
 
-export function Timeline({ photos, activePhotoId }: TimelineProps) {
+export function Timeline({ photos, activePhotoId, accentColor = "#d96b27" }: TimelineProps) {
   const nodes = getTimelineNodes(photos);
 
   // Find active node index
@@ -83,16 +84,13 @@ export function Timeline({ photos, activePhotoId }: TimelineProps) {
       const elementHeight = rect.height;
       const viewportHeight = window.innerHeight;
 
-      let targetScroll = elementTop - viewportHeight / 2 + elementHeight / 2;
-      const minTopSpacing = 110;
-      if (elementTop - targetScroll < minTopSpacing) {
-        targetScroll = elementTop - minTopSpacing;
-      }
+      // Perfectly center the image in the viewport:
+      const targetScroll = Math.max(0, elementTop - (viewportHeight / 2) + (elementHeight / 2));
 
       if (typeof window !== "undefined" && (window as any).lenis) {
-        (window as any).lenis.scrollTo(targetScroll, { duration: 1.2 });
+        (window as any).lenis.scrollTo(targetScroll, { duration: 1.0 });
       } else {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        window.scrollTo({ top: targetScroll, behavior: "smooth" });
       }
     }
   };
@@ -117,13 +115,14 @@ export function Timeline({ photos, activePhotoId }: TimelineProps) {
             {/* Background and Foreground tracks */}
             <div className="absolute top-0 bottom-0 left-[11px] w-[2px] bg-foreground/10 rounded-full">
               <motion.div
-                className="absolute top-0 left-0 right-0 bg-foreground origin-top rounded-full"
+                className="absolute top-0 left-0 right-0 origin-top rounded-full"
+                style={{ backgroundColor: accentColor }}
                 animate={{ height: `${timelineFillPercentage * 100}%` }}
                 transition={{ type: "spring", stiffness: 80, damping: 20 }}
               />
             </div>
 
-            {/* Render 1 Dot per Node (grouped rows collapsed into 1 single dot) */}
+            {/* Render 1 Dot per Node */}
             {nodes.map((node, nodeIdx) => {
               const isActive = node.photos.some((p) => `photo-${p.id}` === activePhotoId);
               const isGroup = node.type === "group";
@@ -142,11 +141,11 @@ export function Timeline({ photos, activePhotoId }: TimelineProps) {
                     <motion.div
                       animate={{
                         scale: isActive ? (isGroup ? 1.4 : 1.3) : 1,
-                        backgroundColor: isActive ? "var(--foreground)" : "var(--background)",
-                        borderColor: isActive ? "var(--foreground)" : "var(--foreground)",
+                        backgroundColor: isActive ? accentColor : "var(--background)",
+                        borderColor: isActive ? accentColor : "var(--foreground)",
                       }}
                       transition={{ duration: 0.3 }}
-                      className={`rounded-full border-2 border-foreground ${
+                      className={`rounded-full border-2 ${
                         isGroup ? "w-4 h-4 ring-2 ring-foreground/20" : "w-3.5 h-3.5"
                       }`}
                     />
