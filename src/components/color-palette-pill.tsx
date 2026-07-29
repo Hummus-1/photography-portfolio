@@ -6,9 +6,10 @@ import { Check, Copy } from "lucide-react";
 
 interface ColorPalettePillProps {
   colors?: string[];
+  size?: "sm" | "md";
 }
 
-export function ColorPalettePill({ colors }: ColorPalettePillProps) {
+export function ColorPalettePill({ colors, size = "md" }: ColorPalettePillProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
   const [isPillHovered, setIsPillHovered] = useState(false);

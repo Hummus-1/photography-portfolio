@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Compass, ArrowRight, MapPin, Navigation, Globe2, Sparkles } from "lucide-react";
+import { Compass, ArrowRight, MapPin, Navigation, Globe2, Film } from "lucide-react";
 import { Album } from "@/lib/types";
 
 export interface DestinationSpot {
@@ -71,82 +71,96 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
       slug: album.slug,
       imageUrl: album.cover_image_url,
     };
-  }).slice(0, 8);
+  }).slice(0, 4);
 
   return (
-    <section className="px-6 md:px-12 py-20 bg-foreground/[0.02] border-b border-foreground/10 relative overflow-hidden">
-      {/* Ambient map grid pattern background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#888888_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+    <section className="px-6 md:px-12 py-24 md:py-32 bg-foreground/[0.015] border-b border-foreground/10 relative overflow-hidden">
+      {/* Ambient Grid Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#888888_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.08] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto space-y-12 relative z-10">
-        {/* Banner Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold">
-              <Compass className="h-4 w-4 animate-spin-slow text-emerald-500" />
-              <span>Geographic Spatial Atlas • Real DB Coordinates</span>
+      <div className="max-w-7xl mx-auto space-y-16 relative z-10">
+        
+        {/* Specimen Header */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline border-b border-foreground/10 pb-8">
+          
+          <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
+            <span className="text-film-amber font-bold flex items-center gap-1">
+              <Film className="h-3.5 w-3.5" />
+              03
+            </span>
+            <span className="w-6 h-px bg-foreground/20" />
+            <span>Spatial Index</span>
+          </div>
+
+          <div className="md:col-span-9 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+                <Compass className="h-4 w-4" />
+                <span>Geographic Index • Expedition Coordinates</span>
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+                Expedition Coordinates & Locations
+              </h2>
+              <p className="text-sm md:text-base font-sans text-foreground/75 leading-relaxed">
+                Each photographic series is geotagged with exact geographic coordinates, mapped across volcanic islands, coastal headlands, and sub-arctic wilderness.
+              </p>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight">
-              Spatial Coordinates & Global Destinations
-            </h2>
-            <p className="text-sm md:text-base font-sans text-foreground/75 leading-relaxed">
-              Every photo series is dynamically linked to real latitude and longitude GPS coordinates stored in the database, organized by continents, volcanic landmasses, and geographic taxonomies.
-            </p>
+
+            <div>
+              <Link
+                href="/destinations"
+                className="inline-flex items-center gap-2.5 bg-foreground text-background px-7 py-3.5 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
+              >
+                <Globe2 className="h-4 w-4" />
+                <span>Destinations Index</span>
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
 
-          <div>
-            <Link
-              href="/destinations"
-              className="inline-flex items-center gap-2.5 bg-foreground text-background px-7 py-3.5 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl cursor-pointer group"
-            >
-              <Globe2 className="h-4 w-4" />
-              <span>Open Destinations Index</span>
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
         </div>
 
-        {/* Featured Coordinates Grid (Powered 100% by real DB data) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Featured Spatial Coordinates Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {realSpots.map((spot, idx) => (
             <motion.div
               key={spot.id || idx}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.1 }}
+              transition={{ duration: 0.4, delay: idx * 0.08 }}
             >
               <Link
                 href={`/album/${spot.slug}`}
-                className="block p-5 rounded-2xl border border-foreground/10 bg-background/60 backdrop-blur-md hover:border-foreground/30 hover:bg-background/90 transition-all group shadow-sm h-full"
+                className="block p-6 rounded-2xl border border-foreground/15 bg-background/70 backdrop-blur-md hover:border-film-amber/50 hover:shadow-lg transition-all group h-full flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between text-xs font-mono text-foreground/60 uppercase tracking-widest mb-3">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3 text-emerald-500" />
-                    {spot.country}
-                  </span>
-                  <Navigation className="h-3.5 w-3.5 text-foreground/30 group-hover:text-foreground/80 transition-colors" />
+                <div>
+                  <div className="flex items-center justify-between text-xs font-mono text-foreground/60 uppercase tracking-widest mb-3">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-film-amber" />
+                      {spot.country}
+                    </span>
+                    <Navigation className="h-3.5 w-3.5 text-foreground/30 group-hover:text-film-amber transition-colors" />
+                  </div>
+
+                  <h3 className="font-serif text-xl font-bold text-foreground group-hover:text-film-amber transition-colors line-clamp-1">
+                    {spot.name}
+                  </h3>
+
+                  <p className="text-xs text-foreground/60 font-sans mt-1 truncate">
+                    {spot.region}
+                  </p>
                 </div>
 
-                <h4 className="font-serif text-lg font-bold text-foreground group-hover:text-foreground/90 transition-colors line-clamp-1">
-                  {spot.name}
-                </h4>
-
-                <p className="text-xs text-foreground/60 font-sans mt-1 truncate">
-                  {spot.region}
-                </p>
-
-                <div className="mt-4 pt-3 border-t border-foreground/10 flex items-center justify-between text-[11px] font-mono text-foreground/60">
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="h-2.5 w-2.5 text-emerald-500" />
-                    LAT: {spot.latFormatted}
-                  </span>
+                <div className="mt-6 pt-4 border-t border-foreground/10 flex items-center justify-between text-[11px] font-mono text-foreground/60">
+                  <span>LAT: {spot.latFormatted}</span>
                   <span>LNG: {spot.lngFormatted}</span>
                 </div>
               </Link>
             </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   );

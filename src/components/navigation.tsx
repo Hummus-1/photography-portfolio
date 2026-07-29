@@ -30,58 +30,75 @@ export function Navigation() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-foreground/10 bg-background/70 backdrop-blur-md transition-colors duration-400">
+    <header className="sticky top-0 z-50 w-full border-b border-foreground/10 bg-background/80 backdrop-blur-lg transition-colors duration-300">
       <div className="w-full px-6 md:px-12 h-20 flex items-center justify-between">
-        {/* Logo / Brand Name */}
+        
+        {/* Brand Logo */}
         <Link
           href="/"
-          className="font-serif text-xl md:text-2xl font-bold tracking-wider hover:opacity-75 transition-opacity duration-300"
+          className="group flex items-center gap-3 font-serif text-xl md:text-2xl font-bold tracking-wider hover:opacity-85 transition-opacity"
         >
-          DANIEL GARCÍA <span className="text-[10px] tracking-widest font-sans font-normal opacity-50 relative -top-3">©</span>
+          <span>DANIEL GARCÍA</span>
+          <span className="text-[10px] tracking-widest font-sans font-normal opacity-40 relative -top-2">©</span>
         </Link>
 
-        {/* Links & Theme Switcher */}
+        {/* Links & Aperture Switcher */}
         <div className="flex items-center gap-8">
           <nav className="hidden sm:flex items-center gap-8 text-xs font-mono tracking-widest uppercase">
             <Link
               href="/"
-              className={`hover:opacity-100 transition-opacity duration-300 ${
-                pathname === "/" ? "opacity-100 font-bold" : "opacity-60"
+              className={`relative py-1 transition-colors duration-300 ${
+                pathname === "/" ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              Gallery
+              <span>Exhibition</span>
+              {pathname === "/" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+              )}
             </Link>
+
             <Link
               href="/destinations"
-              className={`hover:opacity-100 transition-opacity duration-300 ${
-                pathname?.startsWith("/destinations") ? "opacity-100 font-bold" : "opacity-60"
+              className={`relative py-1 transition-colors duration-300 ${
+                pathname?.startsWith("/destinations") ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              Destinations
+              <span>Spatial Index</span>
+              {pathname?.startsWith("/destinations") && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+              )}
             </Link>
+
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`hover:opacity-100 transition-opacity duration-300 ${
-                  pathname?.startsWith("/admin") ? "opacity-100 font-bold" : "opacity-60"
+                className={`relative py-1 transition-colors duration-300 ${
+                  pathname?.startsWith("/admin") ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
                 }`}
               >
-                Dashboard
+                <span>Dashboard</span>
+                {pathname?.startsWith("/admin") && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+                )}
               </Link>
             )}
+
             <Link
               href="/about"
-              className={`hover:opacity-100 transition-opacity duration-300 ${
-                pathname === "/about" ? "opacity-100 font-bold" : "opacity-60"
+              className={`relative py-1 transition-colors duration-300 ${
+                pathname === "/about" ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
-              About
+              <span>About</span>
+              {pathname === "/about" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+              )}
             </Link>
           </nav>
 
           <div className="h-6 w-px bg-foreground/15 hidden sm:block" />
 
-          {/* Theme Toggle */}
+          {/* Aperture Theme Toggle */}
           <ApertureToggle />
         </div>
       </div>

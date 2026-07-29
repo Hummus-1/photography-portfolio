@@ -188,21 +188,21 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
       <section className="px-6 md:px-12 max-w-6xl mx-auto pt-10">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-foreground/10 pb-8 gap-6">
           <div className="space-y-3">
-            <div className="text-xs font-mono tracking-widest uppercase text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-2">
-              <Compass className="h-4 w-4 animate-spin-slow text-emerald-500" />
-              <span>Geographic Spatial Atlas & Location Archive</span>
+            <div className="text-xs font-mono tracking-widest uppercase text-film-amber font-semibold flex items-center gap-2">
+              <Compass className="h-4 w-4 animate-spin-slow text-film-amber" />
+              <span>02 • Geographic Spatial Index & Location Archive</span>
             </div>
             <h1 className="font-serif text-4xl sm:text-6xl font-bold tracking-tight text-foreground">
-              Destinations
+              Spatial Index
             </h1>
             <p className="text-sm font-sans text-foreground/75 max-w-xl">
-              Browse photo series organized by continents, countries, volcanic landmasses, and verified GPS coordinates.
+              Geographic photo series indexed by continent, country, volcanic landmass, and verified GPS coordinates.
             </p>
           </div>
 
           <div className="flex items-center gap-6 text-xs font-mono text-foreground/70 border border-foreground/15 px-6 py-3 rounded-2xl bg-foreground/[0.015] shadow-sm">
             <div className="text-center">
-              <span className="block font-bold text-foreground text-lg">{albums.length}</span>
+              <span className="block font-bold text-film-amber text-lg">{albums.length}</span>
               <span className="text-[10px] text-foreground/50 uppercase tracking-wider">Series</span>
             </div>
             <div className="h-8 w-px bg-foreground/10" />
@@ -247,7 +247,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
             >
               <SelectTrigger className="h-9 w-[190px] sm:w-[220px] rounded-full text-xs font-mono bg-background/60 border-foreground/15">
                 <div className="flex items-center gap-1.5 truncate">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <MapPin className="h-3.5 w-3.5 text-film-amber shrink-0" />
                   <SelectValue placeholder="All Countries" />
                 </div>
               </SelectTrigger>

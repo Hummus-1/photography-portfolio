@@ -289,7 +289,7 @@ export function LocationSelector({
       {/* Top Bar: Title & Active Selection Card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-emerald-400" />
+          <Globe className="h-4 w-4 text-film-amber" />
           <span className="font-mono text-xs uppercase tracking-wider font-semibold">
             Location Atlas Selector
           </span>
@@ -302,7 +302,7 @@ export function LocationSelector({
             onClick={() => setActiveTab("search")}
             className={`px-3 py-1 transition-all cursor-pointer ${
               activeTab === "search"
-                ? "bg-amber-400 text-black font-bold shadow-sm"
+                ? "bg-film-amber text-white font-bold shadow-sm"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -313,7 +313,7 @@ export function LocationSelector({
             onClick={() => setActiveTab("cascade")}
             className={`px-3 py-1 transition-all cursor-pointer ${
               activeTab === "cascade"
-                ? "bg-amber-400 text-black font-bold shadow-sm"
+                ? "bg-film-amber text-white font-bold shadow-sm"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -324,16 +324,16 @@ export function LocationSelector({
 
       {/* Active Selection Display Banner */}
       {activeNode ? (
-        <div className="p-3 bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs">
+        <div className="p-3 bg-film-amber/10 border border-film-amber/30 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5 truncate">
-            <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400 shrink-0">
+            <div className="p-1.5 rounded-full bg-film-amber/20 text-film-amber shrink-0">
               <Check className="h-3.5 w-3.5" />
             </div>
             <div className="flex flex-col truncate">
-              <div className="font-semibold text-emerald-200 truncate">
+              <div className="font-semibold text-film-amber truncate">
                 {buildFullName(activeNode)}
               </div>
-              <div className="text-[10px] font-mono text-emerald-400/70 uppercase tracking-widest flex items-center gap-2">
+              <div className="text-[10px] font-mono text-film-amber/70 uppercase tracking-widest flex items-center gap-2">
                 <span>Type: {activeNode.type}</span>
                 {activeNode.lat != null && activeNode.lng != null && (
                   <span>• GPS: {activeNode.lat}°, {activeNode.lng}°</span>
@@ -388,7 +388,7 @@ export function LocationSelector({
                     onClick={() => handleSelectNode(loc)}
                     className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-white/80 hover:text-white font-sans transition-all cursor-pointer flex items-center gap-1.5"
                   >
-                    <MapPin className="h-3 w-3 text-emerald-400" />
+                    <MapPin className="h-3 w-3 text-film-amber" />
                     <span>{loc.name}</span>
                   </button>
                 ))}
@@ -450,7 +450,7 @@ export function LocationSelector({
                             {node.type}
                           </span>
                           {node.lat != null && node.lng != null && (
-                            <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-0.5">
+                            <span className="text-[9px] font-mono text-film-amber flex items-center gap-0.5">
                               <MapPin className="h-2.5 w-2.5" /> {node.lat}°, {node.lng}°
                             </span>
                           )}
@@ -542,7 +542,7 @@ export function LocationSelector({
           {selectedRegionId && spotsList.length > 0 && (
             <div className="space-y-1">
               <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-emerald-400" />
+                <MapPin className="h-3 w-3 text-film-amber" />
                 3. Select Specific Spot or City (Optional)
               </label>
               <select

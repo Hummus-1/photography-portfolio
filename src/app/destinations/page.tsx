@@ -5,7 +5,7 @@ import { Album } from "@/lib/types";
 import { MOCK_ALBUMS_LIST } from "@/lib/mock-data";
 
 export const metadata = {
-  title: "Destinations & Locations | Daniel García Photography",
+  title: "Spatial Index & Locations | Daniel García Photography",
   description: "Browse photo collections by continent, country, island, and specific geographic spots around the world.",
 };
 

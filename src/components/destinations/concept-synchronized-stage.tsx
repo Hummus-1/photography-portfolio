@@ -135,7 +135,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                       {activeAlbum.location_path.map((node, index) => (
                         <span key={node.id || index} className="flex items-center gap-1">
                           {index > 0 && <ChevronRight className="h-3 w-3 opacity-40" />}
-                          <span className={index === activeAlbum.location_path!.length - 1 ? "text-emerald-500 font-bold" : ""}>
+                          <span className={index === activeAlbum.location_path!.length - 1 ? "text-film-amber font-bold" : ""}>
                             {node.name}
                           </span>
                         </span>
@@ -151,7 +151,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                         href={`https://maps.google.com/?q=${activeAlbum.lat},${activeAlbum.lng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors flex items-center gap-1"
+                        className="text-[10px] text-film-amber font-mono bg-film-amber/10 px-2 py-0.5 rounded border border-film-amber/20 hover:bg-film-amber/20 transition-colors flex items-center gap-1"
                         title="View GPS Pin on Google Maps"
                       >
                         {activeAlbum.lat >= 0 ? `${activeAlbum.lat.toFixed(2)}° N` : `${Math.abs(activeAlbum.lat).toFixed(2)}° S`},{" "}
@@ -266,7 +266,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                             </div>
 
                             <div className="text-xs font-mono text-foreground/60 flex items-center gap-1.5 truncate">
-                              <MapPin className="h-3 w-3 shrink-0 text-emerald-500" />
+                              <MapPin className="h-3 w-3 shrink-0 text-film-amber" />
                               <span className="truncate">{album.location}</span>
                             </div>
 
@@ -301,26 +301,6 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                             </Link>
                           </div>
                         </div>
-
-                        {/* Thumbnail Strip Preview (if photos present) */}
-                        {photosPreview.length > 1 && density === "expanded" && (
-                          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-foreground/10">
-                            {photosPreview.map((photo: any, pIdx: number) => (
-                              <div
-                                key={photo.id || pIdx}
-                                className="relative aspect-[3/2] rounded-lg overflow-hidden border border-foreground/10 bg-foreground/5"
-                              >
-                                <Image
-                                  src={photo.thumbnail_url || photo.url}
-                                  alt=""
-                                  fill
-                                  sizes="150px"
-                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
 
                       </div>
                     );
