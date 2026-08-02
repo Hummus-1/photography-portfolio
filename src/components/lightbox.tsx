@@ -245,62 +245,84 @@ export function Lightbox({
               </div>
 
               {/* EXIF Metadata card */}
-              <div className="bg-foreground/[0.02] border border-foreground/10 rounded-2xl p-5 space-y-4">
-                <h3 className="text-xs font-mono font-semibold uppercase tracking-widest text-foreground/60 flex items-center gap-2 border-b border-foreground/10 pb-2">
-                  <Sliders className="h-3.5 w-3.5" />
-                  <span>EXIF DATA</span>
-                </h3>
+              {(() => {
+                const currentExif = photos[selectedIndex]?.exif || {};
+                const hasExif = Boolean(
+                  currentExif.camera ||
+                    currentExif.lens ||
+                    currentExif.focal_length ||
+                    currentExif.aperture ||
+                    currentExif.shutter ||
+                    currentExif.iso
+                );
 
-                <div className="grid grid-cols-2 gap-4">
-                  {photos[selectedIndex].exif.camera && (
-                    <div className="col-span-2 space-y-1">
-                      <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Camera</span>
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                        <Camera className="h-3.5 w-3.5 text-foreground/60" />
-                        <span>{photos[selectedIndex].exif.camera}</span>
-                      </div>
+                if (!hasExif) {
+                  return (
+                    <div className="bg-foreground/[0.02] border border-foreground/10 rounded-2xl p-4 text-[11px] font-mono text-foreground/40 italic text-center">
+                      EXIF metadata not embedded in file.
                     </div>
-                  )}
+                  );
+                }
 
-                  {photos[selectedIndex].exif.lens && (
-                    <div className="col-span-2 space-y-1">
-                      <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Lens</span>
-                      <div className="flex items-center gap-1.5 text-xs text-foreground/80">
-                        <span className="w-1.5 h-1.5 rounded-full bg-foreground/30" />
-                        <span className="truncate">{photos[selectedIndex].exif.lens}</span>
-                      </div>
-                    </div>
-                  )}
+                return (
+                  <div className="bg-foreground/[0.02] border border-foreground/10 rounded-2xl p-5 space-y-4">
+                    <h3 className="text-xs font-mono font-semibold uppercase tracking-widest text-foreground/60 flex items-center gap-2 border-b border-foreground/10 pb-2">
+                      <Sliders className="h-3.5 w-3.5 text-film-amber" />
+                      <span>EXIF DATA</span>
+                    </h3>
 
-                  {photos[selectedIndex].exif.focal_length && (
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Focal Length</span>
-                      <span className="text-xs font-mono font-medium text-foreground">{photos[selectedIndex].exif.focal_length}</span>
-                    </div>
-                  )}
+                    <div className="grid grid-cols-2 gap-4">
+                      {currentExif.camera && (
+                        <div className="col-span-2 space-y-1">
+                          <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Camera</span>
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                            <Camera className="h-3.5 w-3.5 text-film-amber" />
+                            <span>{currentExif.camera}</span>
+                          </div>
+                        </div>
+                      )}
 
-                  {photos[selectedIndex].exif.aperture && (
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Aperture</span>
-                      <span className="text-xs font-mono font-medium text-foreground">{photos[selectedIndex].exif.aperture}</span>
-                    </div>
-                  )}
+                      {currentExif.lens && (
+                        <div className="col-span-2 space-y-1">
+                          <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Lens</span>
+                          <div className="flex items-center gap-1.5 text-xs text-foreground/80">
+                            <span className="w-1.5 h-1.5 rounded-full bg-film-amber" />
+                            <span className="truncate">{currentExif.lens}</span>
+                          </div>
+                        </div>
+                      )}
 
-                  {photos[selectedIndex].exif.shutter && (
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Shutter</span>
-                      <span className="text-xs font-mono font-medium text-foreground">{photos[selectedIndex].exif.shutter}</span>
-                    </div>
-                  )}
+                      {currentExif.focal_length && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Focal Length</span>
+                          <span className="text-xs font-mono font-medium text-foreground">{currentExif.focal_length}</span>
+                        </div>
+                      )}
 
-                  {photos[selectedIndex].exif.iso && (
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">ISO</span>
-                      <span className="text-xs font-mono font-medium text-foreground">ISO {photos[selectedIndex].exif.iso}</span>
+                      {currentExif.aperture && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Aperture</span>
+                          <span className="text-xs font-mono font-medium text-foreground">{currentExif.aperture}</span>
+                        </div>
+                      )}
+
+                      {currentExif.shutter && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Shutter</span>
+                          <span className="text-xs font-mono font-medium text-foreground">{currentExif.shutter}</span>
+                        </div>
+                      )}
+
+                      {currentExif.iso && (
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">ISO</span>
+                          <span className="text-xs font-mono font-medium text-foreground">ISO {currentExif.iso}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                );
+              })()}
 
               {/* Color Palette */}
               {photos[selectedIndex].color_palette && (

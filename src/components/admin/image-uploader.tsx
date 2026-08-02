@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Sparkles, Image as ImageIcon, Zap } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Album } from "@/lib/types";
+import { ThinkingOrb } from "./thinking-orb";
+import exifr from "exifr";
 
 interface ImageUploaderProps {
   selectedAlbumId: string;
@@ -15,11 +17,55 @@ interface ImageUploaderProps {
 }
 
 /**
+ * Extracts raw EXIF metadata directly from the original File object before canvas compression.
+ */
+async function extractRawExif(file: File) {
+  try {
+    const rawExif = await exifr.parse(file, {
+      tiff: true,
+      xmp: true,
+      gps: true,
+    });
+
+    if (!rawExif) return null;
+
+    return {
+      camera: rawExif.Make && rawExif.Model
+        ? `${rawExif.Make} ${rawExif.Model}`
+        : rawExif.Model || rawExif.Make || null,
+      lens: rawExif.LensModel || rawExif.Lens || null,
+      iso: rawExif.ISO || rawExif.ISOSpeedRatings || null,
+      aperture: rawExif.FNumber
+        ? `f/${rawExif.FNumber}`
+        : rawExif.ApertureValue
+        ? `f/${rawExif.ApertureValue}`
+        : null,
+      shutter: rawExif.ExposureTime
+        ? rawExif.ExposureTime < 1
+          ? `1/${Math.round(1 / rawExif.ExposureTime)}s`
+          : `${rawExif.ExposureTime}s`
+        : null,
+      focal_length: rawExif.FocalLength ? `${rawExif.FocalLength}mm` : null,
+      date_taken: rawExif.DateTimeOriginal || rawExif.CreateDate || null,
+      gps:
+        rawExif.latitude && rawExif.longitude
+          ? {
+              latitude: rawExif.latitude,
+              longitude: rawExif.longitude,
+            }
+          : null,
+    };
+  } catch (err) {
+    console.warn("Client EXIF extraction failed:", err);
+    return null;
+  }
+}
+
+/**
  * Optimizes large images in the browser before sending them to Vercel.
  * Bypasses Vercel's 4.5MB serverless payload limit by shrinking 15MB+ RAW/JPG files to < 1.5MB WebP/JPEG.
  */
 async function compressImageForUpload(file: File): Promise<File> {
-  // If file is already under 3MB and standard format, no compression needed
   if (file.size <= 3 * 1024 * 1024 && !file.type.includes("tiff") && !file.type.includes("raw")) {
     return file;
   }
@@ -74,7 +120,7 @@ async function compressImageForUpload(file: File): Promise<File> {
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      resolve(file); // Fallback to original if format isn't directly renderable by Canvas
+      resolve(file);
     };
 
     img.src = url;
@@ -131,22 +177,23 @@ export function ImageUploader({
         return;
       }
 
-      setUploadProgress(`Starting parallel upload of ${totalFiles} images...`);
+      setUploadProgress(`Extracting EXIF & starting parallel processing of ${totalFiles} images...`);
 
-      // Concurrency limit: 3 parallel workers
       const CONCURRENCY = 3;
 
       const processSingleFile = async (rawFile: File, index: number) => {
-        // 1. Compress in browser if necessary
+        // Extract EXIF directly from original raw file before canvas compression
+        const clientExif = await extractRawExif(rawFile);
         const fileToUpload = await compressImageForUpload(rawFile);
 
-        // 2. Prepare FormData
         const formData = new FormData();
         formData.append("file", fileToUpload);
         formData.append("albumId", selectedAlbumId);
         formData.append("sortOrder", (photosCount + index).toString());
+        if (clientExif) {
+          formData.append("clientExif", JSON.stringify(clientExif));
+        }
 
-        // 3. Upload to server
         const res = await fetch("/api/upload", {
           method: "POST",
           headers: {
@@ -161,9 +208,8 @@ export function ImageUploader({
         }
 
         completedCount++;
-        setUploadProgress(`Uploading in parallel: ${completedCount}/${totalFiles} completed...`);
+        setUploadProgress(`Optimizing & uploading: ${completedCount}/${totalFiles} completed...`);
 
-        // Set cover image for album if it doesn't have one
         const currentAlbum = albums.find((a) => a.id === selectedAlbumId);
         if (currentAlbum && !currentAlbum.cover_image_url && result.photo?.url) {
           const coverUrl = result.photo.url;
@@ -176,7 +222,6 @@ export function ImageUploader({
         }
       };
 
-      // Create parallel worker pool
       const workerCount = Math.min(CONCURRENCY, totalFiles);
       const workers = Array.from({ length: workerCount }, async (_, workerId) => {
         for (let i = workerId; i < totalFiles; i += workerCount) {
@@ -186,8 +231,7 @@ export function ImageUploader({
 
       await Promise.all(workers);
 
-      // Trigger auto-fill to generate AI title, location, and set earliest photo date
-      setUploadProgress("Analyzing photos to auto-fill title, date & location...");
+      setUploadProgress("Running Workers AI CLIP model & color palette extraction...");
       try {
         const autoFillRes = await fetch("/api/albums/auto-fill", {
           method: "POST",
@@ -211,7 +255,7 @@ export function ImageUploader({
         console.error("Auto fill trigger failed:", autoErr);
       }
 
-      toast.success("All images uploaded successfully!");
+      toast.success("All images uploaded & EXIF metadata saved!");
       onUploadComplete();
     } catch (err: any) {
       toast.error(`Upload error: ${err.message}`);
@@ -228,12 +272,15 @@ export function ImageUploader({
       onDragLeave={handleDrag}
       onDrop={handleDrop}
       onClick={() => fileInputRef.current?.click()}
-      className={`border-2 border-dashed py-14 flex flex-col items-center justify-center transition-all duration-300 rounded-none ${
+      className={`relative cursor-pointer border-2 border-dashed py-12 px-6 flex flex-col items-center justify-center transition-all duration-300 rounded-none overflow-hidden ${
         dragActive
-          ? "border-[#e8e5f0] bg-white/5"
-          : "border-white/10 hover:border-white/20 hover:bg-white/5"
+          ? "border-film-amber bg-film-amber/10 shadow-[0_0_30px_rgba(230,126,58,0.15)]"
+          : "border-white/15 bg-[#121518]/60 hover:border-white/30 hover:bg-white/[0.04]"
       }`}
     >
+      {/* Background ambient glow */}
+      <div className="absolute inset-0 bg-radial from-film-amber/5 via-transparent to-transparent pointer-events-none" />
+
       <input
         type="file"
         ref={fileInputRef}
@@ -244,21 +291,28 @@ export function ImageUploader({
       />
 
       {uploading ? (
-        <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-[#e8e5f0]" />
-          <p className="font-mono text-sm tracking-wider">{uploadProgress}</p>
+        <div className="flex flex-col items-center gap-4 text-center z-10">
+          <ThinkingOrb state="uploading" size="lg" />
+          <div className="space-y-1">
+            <p className="font-mono text-sm tracking-wider text-white font-bold">{uploadProgress}</p>
+            <p className="font-mono text-[10px] text-white/50 uppercase tracking-widest flex items-center justify-center gap-1.5">
+              <Zap className="h-3 w-3 text-emerald-400" /> EXIF Header Extraction + WebP Compression + R2 Sync
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
-            <Upload className="h-6 w-6 text-white/60" />
+        <div className="flex flex-col items-center gap-3 text-center z-10">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:border-film-amber/50 transition-colors">
+            <Upload className="h-6 w-6 text-film-amber" />
           </div>
-          <p className="font-serif font-bold text-sm tracking-wider">
-            Drag & drop images here or click to browse
-          </p>
-          <p className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
-            Supports high-resolution JPEG, PNG, TIFF, and RAW files (fast parallel upload)
-          </p>
+          <div>
+            <p className="font-serif font-bold text-base text-white tracking-wide">
+              Drag & drop photos here or click to browse
+            </p>
+            <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mt-1">
+              Supports JPEG, PNG, TIFF, and RAW formats • Client EXIF extraction & parallel R2 sync
+            </p>
+          </div>
         </div>
       )}
     </div>

@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Loader2 } from "lucide-react";
+import { Lock, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { ThinkingOrb } from "./thinking-orb";
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -27,34 +28,43 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         password,
       });
       if (error) throw error;
-      toast.success("Successfully logged in");
+      toast.success("Successfully authenticated");
       onLoginSuccess();
     } catch (err: any) {
-      toast.error(err.message || "Failed to log in");
+      toast.error(err.message || "Authentication failed");
     } finally {
       setLoginLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-[#0E1012] px-6 text-[#e8e5f0]">
-      <Card className="w-full max-w-md bg-[#14171a] border-white/10 text-white rounded-none">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
-            <Lock className="h-6 w-6 text-[#e8e5f0]" />
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-[#0B0D0F] px-6 text-[#e8e5f0] overflow-hidden">
+      {/* Background ambient glowing orbs */}
+      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-film-amber/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      <Card className="relative z-10 w-full max-w-md bg-[#121519]/80 backdrop-blur-2xl border-white/10 text-white rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+        <CardHeader className="space-y-3 text-center pb-2">
+          <div className="mx-auto flex items-center justify-center py-2">
+            <ThinkingOrb
+              state={loginLoading ? "thinking" : "idle"}
+              size="lg"
+            />
           </div>
-          <CardTitle className="font-serif text-2xl font-bold tracking-wider uppercase">
-            Admin Login
+          <CardTitle className="font-serif text-2xl font-bold tracking-wider uppercase text-white">
+            Admin Control Center
           </CardTitle>
-          <CardDescription className="text-white/60 font-mono text-[10px] uppercase tracking-widest">
-            Stills Photography Portal
+          <CardDescription className="text-white/50 font-mono text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-film-amber" />
+            <span>Supabase RLS & R2 Secured Portal</span>
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
+
+        <CardContent className="pt-4">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-mono uppercase tracking-widest text-xs">
-                Email
+              <Label htmlFor="email" className="font-mono uppercase tracking-widest text-[10px] text-white/70">
+                Admin Email
               </Label>
               <Input
                 id="email"
@@ -62,12 +72,12 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 placeholder="admin@stills.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-black/20 border-white/10 rounded-none h-11 focus-visible:ring-white focus:border-white text-white"
+                className="bg-white/5 border-white/15 rounded-none h-11 focus-visible:ring-film-amber focus:border-film-amber text-white font-mono text-xs"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="font-mono uppercase tracking-widest text-xs">
+              <Label htmlFor="password" className="font-mono uppercase tracking-widest text-[10px] text-white/70">
                 Password
               </Label>
               <Input
@@ -76,17 +86,18 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-black/20 border-white/10 rounded-none h-11 focus-visible:ring-white focus:border-white text-white"
+                className="bg-white/5 border-white/15 rounded-none h-11 focus-visible:ring-film-amber focus:border-film-amber text-white font-mono text-xs"
                 required
               />
             </div>
+
             <Button
               type="submit"
               disabled={loginLoading}
-              className="w-full bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] transition-colors h-11 rounded-none font-bold uppercase tracking-widest text-xs"
+              className="w-full bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] transition-all h-11 rounded-none font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg"
             >
-              {loginLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Authenticate
+              <span>{loginLoading ? "Authenticating..." : "Enter Portal"}</span>
+              {!loginLoading && <ArrowRight className="h-4 w-4" />}
             </Button>
           </form>
         </CardContent>

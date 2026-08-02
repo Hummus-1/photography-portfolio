@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Album } from "@/lib/types";
 import { LocationSelector } from "./location-selector";
+import { ThinkingOrb } from "./thinking-orb";
 
 interface CreateAlbumDialogProps {
   isOpen: boolean;
@@ -99,56 +100,69 @@ export function CreateAlbumDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger render={
-        <Button className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+        <Button className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer shadow-md">
           <Plus className="h-4 w-4" />
           Create Album
         </Button>
       } />
-      <DialogContent className="bg-[#14171a] border-white/10 text-white rounded-none max-w-11/12 w-fit max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl font-bold uppercase tracking-wider">
-            New Photo Album
+      <DialogContent
+        data-lenis-prevent
+        className="bg-[#121519]/95 backdrop-blur-2xl border-white/15 text-white rounded-none max-w-2xl md:max-w-3xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
+      >
+        {/* Static Header */}
+        <DialogHeader className="shrink-0 p-6 sm:p-8 border-b border-white/10 space-y-1.5 relative pr-12">
+          <DialogTitle className="font-serif text-2xl font-bold uppercase tracking-wider flex items-center gap-2 text-white">
+            <FolderPlus className="h-5 w-5 text-film-amber" /> New Album Collection
           </DialogTitle>
-          <DialogDescription className="text-white/60 text-xs">
-            Create an album container. You can leave fields empty to auto-fill title, location, and date when photos are uploaded.
+          <DialogDescription className="text-white/60 text-xs font-mono">
+            Initialize a new photography album container. Leave title, date, or location empty for AI auto-fill.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-200/90 flex items-start gap-2.5 rounded-none mt-2 font-mono">
-          <span className="text-base leading-none">✨</span>
-          <span>
-            <strong>Auto-fill feature:</strong> Leave title or location blank. Once you upload photos, AI will generate title suggestions and fill the date based on the earliest photo creation time.
-          </span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="title" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-              Album Title <span className="text-white/40 font-normal">(Optional)</span>
-            </Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Visit Greenland (Leave empty to auto-generate)"
-              className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-            />
+        {/* Scrollable Inner Body */}
+        <div data-lenis-prevent className="flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-8 space-y-6">
+          <div className="bg-film-amber/10 border border-film-amber/20 p-3.5 text-xs text-film-amber flex items-start gap-3 font-mono">
+            <ThinkingOrb state="idle" size="sm" className="mt-0.5 shrink-0" />
+            <span>
+              <strong className="font-bold">AI Auto-Fill Enabled:</strong> Once photos are uploaded, AI Workers will parse camera EXIF dates, detect GPS coordinates, and suggest collection titles automatically.
+            </span>
           </div>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="date" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-                Date <span className="text-white/40 font-normal">(Optional - auto-detects earliest photo date)</span>
-              </Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-              />
+
+          <form id="create-album-form" onSubmit={handleSubmit} className="space-y-6">
+            {/* Title & Date Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="title" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                  Album Title <span className="text-white/40 font-normal">(Optional)</span>
+                </Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Iceland Glaciers (Leave blank to auto-generate)"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs h-10"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="date" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                  Date <span className="text-white/40 font-normal">(Optional - auto-detects earliest photo)</span>
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs h-10"
+                />
+              </div>
             </div>
-            
-            <div className="space-y-1.5">
+
+            {/* Location Hierarchy */}
+            <div className="space-y-1.5 border-t border-white/10 pt-4">
+              <Label className="font-mono text-[10px] uppercase tracking-widest text-white/70 block mb-1">
+                Location Hierarchy <span className="text-white/40 font-normal">(Optional)</span>
+              </Label>
               <LocationSelector
                 selectedLocationId={locationId}
                 onSelectLocation={(id, fullName) => {
@@ -157,31 +171,36 @@ export function CreateAlbumDialog({
                 }}
               />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="description" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-              Description <span className="text-white/40 font-normal">(Optional)</span>
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe this photo collection..."
-              rows={3}
-              className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white resize-none"
-            />
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <DialogClose render={
-              <Button type="button" variant="outline" className="border-white/10 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
-                Cancel
-              </Button>
-            } />
-            <Button type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs">
-              {loading ? "Creating..." : "Create Album"}
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                Description <span className="text-white/40 font-normal">(Optional)</span>
+              </Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe this photo collection..."
+                rows={3}
+                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber resize-none text-xs"
+              />
+            </div>
+          </form>
+        </div>
+
+        {/* Static Footer Actions */}
+        <div className="shrink-0 p-4 sm:p-6 border-t border-white/10 bg-[#0E1012] flex justify-end gap-3">
+          <DialogClose render={
+            <Button type="button" variant="outline" className="border-white/15 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs px-5 py-2">
+              Cancel
             </Button>
-          </div>
-        </form>
+          } />
+          <Button form="create-album-form" type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs px-6 py-2 flex items-center gap-2 cursor-pointer shadow-md">
+            {loading ? <ThinkingOrb state="thinking" size="sm" /> : null}
+            <span>{loading ? "Creating..." : "Create Album"}</span>
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

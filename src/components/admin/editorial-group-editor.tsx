@@ -22,9 +22,13 @@ import {
   Tag,
   GripVertical,
   Maximize2,
+  Grid,
+  CheckSquare,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { ThinkingOrb } from "./thinking-orb";
 
 interface EditorialGroupEditorProps {
   album: Album;
@@ -53,6 +57,8 @@ export function EditorialGroupEditor({
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [viewMode, setViewMode] = useState<"story" | "masonry">("story");
+
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [editScore, setEditScore] = useState<string>("");
   const [editTags, setEditTags] = useState<string>("");
@@ -132,6 +138,14 @@ export function EditorialGroupEditor({
     setSelectedPhotoIds((prev) =>
       prev.includes(id) ? prev.filter((pId) => pId !== id) : [...prev, id]
     );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPhotoIds.length === photos.length) {
+      setSelectedPhotoIds([]);
+    } else {
+      setSelectedPhotoIds(photos.map((p) => p.id));
+    }
   };
 
   const handleExpandPhoto = (index: number) => {
@@ -308,17 +322,20 @@ export function EditorialGroupEditor({
 
   if (photosLoading) {
     return (
-      <div className="flex py-20 justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-white/50" />
+      <div className="flex py-20 justify-center items-center flex-col gap-3">
+        <ThinkingOrb state="thinking" size="lg" label="Loading Photos" sublabel="Fetching collection stills" />
       </div>
     );
   }
 
   if (!photos || photos.length === 0) {
     return (
-      <p className="text-sm text-white/40 italic py-10 text-center">
-        No photos uploaded to this album yet. Upload photos to start grouping and ordering!
-      </p>
+      <div className="p-12 border border-dashed border-white/10 bg-white/[0.02] text-center space-y-2">
+        <p className="text-sm font-serif text-white/50">No photos uploaded to this album yet.</p>
+        <p className="text-xs font-mono text-white/30 uppercase tracking-widest">
+          Use the uploader dropzone above to add photos.
+        </p>
+      </div>
     );
   }
 
@@ -357,198 +374,303 @@ export function EditorialGroupEditor({
     <div className="space-y-6">
       {/* Top Controls Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
-        <div>
-          <h4 className="font-serif text-xl font-bold tracking-wide flex items-center gap-2">
-            <Rows className="h-5 w-5 opacity-70" />
-            <span>Album Photo Manager ({photos.length} Stills)</span>
-          </h4>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-white/40 mt-1">
-            Drag photo grip handles or whole row headers to reorder • Select photos to create side-by-side rows
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h4 className="font-serif text-xl font-bold tracking-wide text-white">
+              Editorial Layout & Story Manager
+            </h4>
+            <span className="font-mono text-[10px] bg-film-amber/10 border border-film-amber/30 px-2 py-0.5 text-film-amber uppercase tracking-widest font-semibold">
+              {photos.length} Stills
+            </span>
+          </div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+            Drag photo grip handles or whole row headers to reorder • Select photos to group side-by-side
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          {selectedPhotoIds.length > 0 && (
+          {/* View Mode Switcher */}
+          <div className="flex items-center p-0.5 bg-black/40 border border-white/10">
             <button
-              onClick={handleGroupSelected}
-              className="bg-amber-500 text-black hover:bg-amber-400 font-bold px-4 py-2 font-mono text-xs uppercase tracking-widest flex items-center gap-2 transition-all cursor-pointer shadow-md"
+              onClick={() => setViewMode("story")}
+              className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                viewMode === "story"
+                  ? "bg-film-amber/20 text-film-amber border border-film-amber/40 font-bold"
+                  : "text-white/40 hover:text-white"
+              }`}
             >
-              <Layers className="h-3.5 w-3.5" />
-              <span>Group Selected ({selectedPhotoIds.length})</span>
+              <Rows className="h-3.5 w-3.5" />
+              <span>Rows</span>
             </button>
-          )}
+            <button
+              onClick={() => setViewMode("masonry")}
+              className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                viewMode === "masonry"
+                  ? "bg-film-amber/20 text-film-amber border border-film-amber/40 font-bold"
+                  : "text-white/40 hover:text-white"
+              }`}
+            >
+              <Grid className="h-3.5 w-3.5" />
+              <span>Grid</span>
+            </button>
+          </div>
+
+          <button
+            onClick={toggleSelectAll}
+            className="px-3 py-1.5 font-mono text-xs uppercase tracking-wider border border-white/10 text-white/60 hover:text-white hover:bg-white/5 flex items-center gap-1.5 transition-all"
+          >
+            <CheckSquare className="h-3.5 w-3.5" />
+            <span>{selectedPhotoIds.length === photos.length ? "Deselect All" : "Select All"}</span>
+          </button>
 
           <button
             onClick={handleSaveAll}
             disabled={isSaving}
-            className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] disabled:opacity-50 px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+            className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] disabled:opacity-50 px-5 py-2 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
           >
             {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <ThinkingOrb state="thinking" size="sm" />
             ) : (
               <Save className="h-4 w-4" />
             )}
-            <span>Save Story Layout</span>
+            <span>Save Layout</span>
           </button>
         </div>
       </div>
 
-      {/* Editorial Feed Blocks List */}
-      <div className="space-y-6">
-        {visualBlocks.map((block, blockIndex) => {
-          if (block.type === "group" && block.groupId) {
-            const isGroupDragging = draggedBlockIndex === blockIndex;
-            const isGroupDragOver = dragOverBlockIndex === blockIndex;
+      {/* Floating Batch Action Command Dock */}
+      {selectedPhotoIds.length > 0 && (
+        <div className="sticky top-4 z-30 p-4 bg-[#121519]/90 backdrop-blur-xl border border-film-amber/40 shadow-2xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 text-xs font-mono text-white">
+            <ThinkingOrb state="idle" size="sm" />
+            <span className="font-bold text-film-amber">{selectedPhotoIds.length} Photos Selected</span>
+          </div>
 
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleGroupSelected}
+              className="bg-film-amber text-white hover:bg-film-amber/90 font-bold px-3.5 py-1.5 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span>Group Row</span>
+            </button>
+
+            <button
+              onClick={() => setSelectedPhotoIds([])}
+              className="bg-white/10 text-white hover:bg-white/20 px-3 py-1.5 font-mono text-xs uppercase tracking-widest cursor-pointer transition-all"
+            >
+              Clear Selection
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Editorial Feed Blocks List or Masonry View */}
+      {viewMode === "story" ? (
+        <div className="space-y-6">
+          {visualBlocks.map((block, blockIndex) => {
+            if (block.type === "group" && block.groupId) {
+              const isGroupDragging = draggedBlockIndex === blockIndex;
+              const isGroupDragOver = dragOverBlockIndex === blockIndex;
+
+              return (
+                <div
+                  key={`block-${block.groupId}-${blockIndex}`}
+                  draggable
+                  onDragStart={(e) => {
+                    e.stopPropagation();
+                    setDraggedBlockIndex(blockIndex);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setDragOverBlockIndex(blockIndex);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedBlockIndex(null);
+                    setDragOverBlockIndex(null);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (draggedBlockIndex !== null && draggedBlockIndex !== blockIndex) {
+                      handleDropBlock(draggedBlockIndex, blockIndex);
+                    }
+                  }}
+                  className={`bg-film-amber/5 border-2 border-dashed rounded-none p-4 space-y-4 relative transition-all ${
+                    isGroupDragging
+                      ? "opacity-30 border-film-amber scale-[0.99]"
+                      : isGroupDragOver
+                      ? "border-film-amber border-2 bg-film-amber/15 scale-[1.01]"
+                      : "border-film-amber/30"
+                  }`}
+                >
+                  {/* Group Header Bar with Move Handles */}
+                  <div className="flex items-center justify-between border-b border-film-amber/20 pb-2.5">
+                    <div className="flex items-center gap-2 text-film-amber font-mono text-xs font-bold uppercase tracking-wider">
+                      <div className="cursor-grab active:cursor-grabbing p-1 text-film-amber/80 hover:text-film-amber transition-colors" title="Drag to move entire group row">
+                        <GripVertical className="h-4 w-4" />
+                      </div>
+                      <Layers className="h-4 w-4" />
+                      <span>Side-by-Side Row Group ({block.items.length} Photos)</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled={blockIndex === 0}
+                        onClick={() => moveBlockInList(blockIndex, blockIndex - 1)}
+                        className="hover:bg-film-amber/20 disabled:opacity-20 p-1.5 rounded text-film-amber text-xs font-mono flex items-center gap-1 transition-colors"
+                        title="Move Row Group Up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Move Row Up</span>
+                      </button>
+                      <button
+                        disabled={blockIndex === visualBlocks.length - 1}
+                        onClick={() => moveBlockInList(blockIndex, blockIndex + 1)}
+                        className="hover:bg-film-amber/20 disabled:opacity-20 p-1.5 rounded text-film-amber text-xs font-mono flex items-center gap-1 transition-colors"
+                        title="Move Row Group Down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Move Row Down</span>
+                      </button>
+                      <button
+                        onClick={() => handleUngroupRow(block.groupId!)}
+                        className="text-film-amber hover:text-film-amber/80 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 bg-film-amber/10 hover:bg-film-amber/20 border border-film-amber/20 rounded-none transition-all cursor-pointer"
+                        title="Break row into individual photos"
+                      >
+                        <Unlink className="h-3.5 w-3.5" />
+                        <span>Ungroup Row</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Compact Split Cards for Grouped Row */}
+                  <div className="space-y-3">
+                    {block.items.map(({ photo, originalIndex }) => (
+                      <PhotoCardTile
+                        key={photo.id}
+                        photo={photo}
+                        originalIndex={originalIndex}
+                        totalPhotos={photos.length}
+                        isSelected={selectedPhotoIds.includes(photo.id)}
+                        isCover={coverImageUrl === photo.url}
+                        isEditing={editingPhotoId === photo.id}
+                        isDragging={draggedIndex === originalIndex}
+                        isDragOver={dragOverIndex === originalIndex}
+                        onDragStart={() => setDraggedIndex(originalIndex)}
+                        onDragOver={() => setDragOverIndex(originalIndex)}
+                        onDragEnd={() => {
+                          setDraggedIndex(null);
+                          setDragOverIndex(null);
+                        }}
+                        onDrop={() => {
+                          if (draggedIndex !== null) {
+                            handleDrop(draggedIndex, originalIndex);
+                          }
+                        }}
+                        onToggleSelect={() => toggleSelectPhoto(photo.id)}
+                        onExpandPhoto={() => handleExpandPhoto(originalIndex)}
+                        onMoveUp={() => movePhotoInList(originalIndex, originalIndex - 1)}
+                        onMoveDown={() => movePhotoInList(originalIndex, originalIndex + 1)}
+                        onSetCoverPhoto={() => onSetCoverPhoto(photo.url)}
+                        onStartEdit={() => startEditing(photo)}
+                        onDeletePhoto={() => onDeletePhoto(photo.id)}
+                        onRemoveFromGroup={() => handleRemoveFromGroup(photo.id)}
+                        isInGroup={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            // Single standalone photo block
+            const { photo, originalIndex } = block.items[0];
             return (
-              <div
-                key={`block-${block.groupId}-${blockIndex}`}
-                draggable
-                onDragStart={(e) => {
-                  e.stopPropagation();
-                  setDraggedBlockIndex(blockIndex);
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDragOverBlockIndex(blockIndex);
-                }}
+              <PhotoCardTile
+                key={`block-single-${photo.id}`}
+                photo={photo}
+                originalIndex={originalIndex}
+                totalPhotos={photos.length}
+                isSelected={selectedPhotoIds.includes(photo.id)}
+                isCover={coverImageUrl === photo.url}
+                isEditing={editingPhotoId === photo.id}
+                isDragging={draggedIndex === originalIndex}
+                isDragOver={dragOverIndex === originalIndex}
+                onDragStart={() => setDraggedIndex(originalIndex)}
+                onDragOver={() => setDragOverIndex(originalIndex)}
                 onDragEnd={() => {
-                  setDraggedBlockIndex(null);
-                  setDragOverBlockIndex(null);
+                  setDraggedIndex(null);
+                  setDragOverIndex(null);
                 }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (draggedBlockIndex !== null && draggedBlockIndex !== blockIndex) {
-                    handleDropBlock(draggedBlockIndex, blockIndex);
+                onDrop={() => {
+                  if (draggedIndex !== null) {
+                    handleDrop(draggedIndex, originalIndex);
                   }
                 }}
-                className={`bg-amber-500/5 border-2 border-dashed rounded-lg p-4 space-y-4 relative transition-all ${
-                  isGroupDragging
-                    ? "opacity-30 border-amber-400 scale-[0.99]"
-                    : isGroupDragOver
-                    ? "border-amber-400 border-2 bg-amber-500/15 scale-[1.01]"
-                    : "border-amber-500/30"
-                }`}
-              >
-                {/* Group Header Bar with Move Handles */}
-                <div className="flex items-center justify-between border-b border-amber-500/20 pb-2.5">
-                  <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold uppercase tracking-wider">
-                    <div className="cursor-grab active:cursor-grabbing p-1 text-amber-400/80 hover:text-amber-300 transition-colors" title="Drag to move entire group row">
-                      <GripVertical className="h-4 w-4" />
-                    </div>
-                    <Layers className="h-4 w-4" />
-                    <span>Side-by-Side Row Group ({block.items.length} Photos)</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      disabled={blockIndex === 0}
-                      onClick={() => moveBlockInList(blockIndex, blockIndex - 1)}
-                      className="hover:bg-amber-500/20 disabled:opacity-20 p-1.5 rounded text-amber-400 text-xs font-mono flex items-center gap-1 transition-colors"
-                      title="Move Row Group Up"
-                    >
-                      <ArrowUp className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Move Row Up</span>
-                    </button>
-                    <button
-                      disabled={blockIndex === visualBlocks.length - 1}
-                      onClick={() => moveBlockInList(blockIndex, blockIndex + 1)}
-                      className="hover:bg-amber-500/20 disabled:opacity-20 p-1.5 rounded text-amber-400 text-xs font-mono flex items-center gap-1 transition-colors"
-                      title="Move Row Group Down"
-                    >
-                      <ArrowDown className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Move Row Down</span>
-                    </button>
-                    <button
-                      onClick={() => handleUngroupRow(block.groupId!)}
-                      className="text-amber-400/80 hover:text-amber-300 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded transition-all cursor-pointer"
-                      title="Break row into individual photos"
-                    >
-                      <Unlink className="h-3.5 w-3.5" />
-                      <span>Ungroup Row</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Compact Split Cards for Grouped Row */}
-                <div className="space-y-3">
-                  {block.items.map(({ photo, originalIndex }) => (
-                    <PhotoCardTile
-                      key={photo.id}
-                      photo={photo}
-                      originalIndex={originalIndex}
-                      totalPhotos={photos.length}
-                      isSelected={selectedPhotoIds.includes(photo.id)}
-                      isCover={coverImageUrl === photo.url}
-                      isEditing={editingPhotoId === photo.id}
-                      isDragging={draggedIndex === originalIndex}
-                      isDragOver={dragOverIndex === originalIndex}
-                      onDragStart={() => setDraggedIndex(originalIndex)}
-                      onDragOver={() => setDragOverIndex(originalIndex)}
-                      onDragEnd={() => {
-                        setDraggedIndex(null);
-                        setDragOverIndex(null);
-                      }}
-                      onDrop={() => {
-                        if (draggedIndex !== null) {
-                          handleDrop(draggedIndex, originalIndex);
-                        }
-                      }}
-                      onToggleSelect={() => toggleSelectPhoto(photo.id)}
-                      onExpandPhoto={() => handleExpandPhoto(originalIndex)}
-                      onMoveUp={() => movePhotoInList(originalIndex, originalIndex - 1)}
-                      onMoveDown={() => movePhotoInList(originalIndex, originalIndex + 1)}
-                      onSetCoverPhoto={() => onSetCoverPhoto(photo.url)}
-                      onStartEdit={() => startEditing(photo)}
-                      onDeletePhoto={() => onDeletePhoto(photo.id)}
-                      onRemoveFromGroup={() => handleRemoveFromGroup(photo.id)}
-                      isInGroup={true}
-                    />
-                  ))}
+                onToggleSelect={() => toggleSelectPhoto(photo.id)}
+                onExpandPhoto={() => handleExpandPhoto(originalIndex)}
+                onMoveUp={() => movePhotoInList(originalIndex, originalIndex - 1)}
+                onMoveDown={() => movePhotoInList(originalIndex, originalIndex + 1)}
+                onSetCoverPhoto={() => onSetCoverPhoto(photo.url)}
+                onStartEdit={() => startEditing(photo)}
+                onDeletePhoto={() => onDeletePhoto(photo.id)}
+                onQuickGroupNext={() => handleQuickGroupWithNext(originalIndex)}
+                isInGroup={false}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        /* Masonry Grid View */
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {photos.map((photo, idx) => (
+            <div
+              key={photo.id}
+              onClick={() => toggleSelectPhoto(photo.id)}
+              className={`group relative bg-[#14171a] border overflow-hidden cursor-pointer transition-all ${
+                selectedPhotoIds.includes(photo.id)
+                  ? "border-film-amber ring-2 ring-film-amber/50"
+                  : "border-white/10 hover:border-white/30"
+              }`}
+            >
+              <div className="relative aspect-[4/3] w-full">
+                <Image
+                  src={photo.url}
+                  alt={photo.description || ""}
+                  fill
+                  sizes="300px"
+                  className="object-cover"
+                />
+                {coverImageUrl === photo.url && (
+                  <span className="absolute top-2 left-2 bg-film-amber text-white text-[9px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider">
+                    Cover
+                  </span>
+                )}
+                <div className="absolute top-2 right-2 bg-black/60 px-1.5 py-0.5 text-[9px] font-mono text-white/80">
+                  #{idx + 1}
                 </div>
               </div>
-            );
-          }
 
-          // Single standalone photo block
-          const { photo, originalIndex } = block.items[0];
-          return (
-            <PhotoCardTile
-              key={`block-single-${photo.id}`}
-              photo={photo}
-              originalIndex={originalIndex}
-              totalPhotos={photos.length}
-              isSelected={selectedPhotoIds.includes(photo.id)}
-              isCover={coverImageUrl === photo.url}
-              isEditing={editingPhotoId === photo.id}
-              isDragging={draggedIndex === originalIndex}
-              isDragOver={dragOverIndex === originalIndex}
-              onDragStart={() => setDraggedIndex(originalIndex)}
-              onDragOver={() => setDragOverIndex(originalIndex)}
-              onDragEnd={() => {
-                setDraggedIndex(null);
-                setDragOverIndex(null);
-              }}
-              onDrop={() => {
-                if (draggedIndex !== null) {
-                  handleDrop(draggedIndex, originalIndex);
-                }
-              }}
-              onToggleSelect={() => toggleSelectPhoto(photo.id)}
-              onExpandPhoto={() => handleExpandPhoto(originalIndex)}
-              onMoveUp={() => movePhotoInList(originalIndex, originalIndex - 1)}
-              onMoveDown={() => movePhotoInList(originalIndex, originalIndex + 1)}
-              onSetCoverPhoto={() => onSetCoverPhoto(photo.url)}
-              onStartEdit={() => startEditing(photo)}
-              onDeletePhoto={() => onDeletePhoto(photo.id)}
-              onQuickGroupNext={() => handleQuickGroupWithNext(originalIndex)}
-              isInGroup={false}
-            />
-          );
-        })}
-      </div>
+              <div className="p-2.5 flex items-center justify-between text-xs font-mono">
+                <span className="text-white/60 text-[10px] truncate max-w-[120px]">
+                  {photo.location || "No spot tag"}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleExpandPhoto(idx);
+                  }}
+                  className="text-white/40 hover:text-white p-1"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Fullscreen Lightbox Modal for Full Size Photo & EXIF View */}
       <Lightbox
@@ -562,11 +684,11 @@ export function EditorialGroupEditor({
 
       {/* Edit Metadata Modal */}
       {editingPhotoId && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-[#14171a] border border-white/20 p-6 max-w-md w-full rounded-lg space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#14171a] border border-white/20 p-6 max-w-md w-full rounded-none space-y-4 shadow-2xl">
             <div className="flex justify-between items-center pb-2 border-b border-white/10">
-              <span className="font-mono text-xs uppercase tracking-widest text-white/80 font-bold">
-                Edit Photo Metadata
+              <span className="font-mono text-xs uppercase tracking-widest text-white/80 font-bold flex items-center gap-2">
+                <Pencil className="h-3.5 w-3.5 text-film-amber" /> Edit Photo Metadata
               </span>
               <button onClick={() => setEditingPhotoId(null)} className="text-white/50 hover:text-white">
                 <X className="h-4 w-4" />
@@ -582,7 +704,7 @@ export function EditorialGroupEditor({
                 max="10"
                 value={editScore}
                 onChange={(e) => setEditScore(e.target.value)}
-                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white/40"
+                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-film-amber"
               />
             </div>
 
@@ -592,7 +714,7 @@ export function EditorialGroupEditor({
                 type="text"
                 value={editTags}
                 onChange={(e) => setEditTags(e.target.value)}
-                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-white/40"
+                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-film-amber"
               />
             </div>
 
@@ -602,7 +724,7 @@ export function EditorialGroupEditor({
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 rows={3}
-                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs text-white resize-none focus:outline-none focus:border-white/40"
+                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs text-white resize-none focus:outline-none focus:border-film-amber"
               />
             </div>
 
@@ -688,30 +810,28 @@ function PhotoCardTile({
         e.preventDefault();
         onDrop();
       }}
-      className={`relative bg-[#14171a] border rounded-lg overflow-hidden flex flex-col sm:flex-row gap-4 p-3.5 transition-all group shadow-sm ${
+      className={`relative bg-[#14171a] border rounded-none overflow-hidden flex flex-col sm:flex-row gap-4 p-3.5 transition-all group shadow-sm ${
         isDragging
-          ? "opacity-30 border-amber-400 scale-[0.98]"
+          ? "opacity-30 border-film-amber scale-[0.98]"
           : isDragOver
-          ? "border-amber-400 border-2 border-dashed bg-amber-500/10 scale-[1.01]"
+          ? "border-film-amber border-2 border-dashed bg-film-amber/10 scale-[1.01]"
           : isSelected
-          ? "border-amber-400 ring-1 ring-amber-400/50"
+          ? "border-film-amber ring-1 ring-film-amber/50"
           : "border-white/10 hover:border-white/25"
       }`}
     >
       {/* Left side: Drag Handle & Thumbnail Container */}
       <div className="flex items-center gap-3">
-        {/* Grip Handle */}
         <div
-          className="text-white/30 hover:text-amber-400 cursor-grab active:cursor-grabbing p-1 shrink-0 select-none transition-colors"
+          className="text-white/30 hover:text-film-amber cursor-grab active:cursor-grabbing p-1 shrink-0 select-none transition-colors"
           title="Click and drag to reorder"
         >
           <GripVertical className="h-5 w-5" />
         </div>
 
-        {/* Thumbnail (Click to expand in Lightbox) */}
         <div
           onClick={onExpandPhoto}
-          className="relative w-full sm:w-44 md:w-52 h-36 shrink-0 bg-black/60 rounded overflow-hidden flex items-center justify-center border border-white/10 select-none cursor-pointer group/thumb"
+          className="relative w-full sm:w-44 md:w-52 h-36 shrink-0 bg-black/60 rounded-none overflow-hidden flex items-center justify-center border border-white/10 select-none cursor-pointer group/thumb"
           title="Click to view full size and EXIF details"
         >
           <Image
@@ -722,15 +842,14 @@ function PhotoCardTile({
             className="object-contain transition-transform duration-500 group-hover/thumb:scale-105"
           />
           {isCover && (
-            <div className="absolute top-2 left-2 bg-amber-500 text-black text-[9px] font-bold font-mono px-2 py-0.5 uppercase tracking-wider flex items-center gap-1 shadow-md z-10">
-              <Star className="h-3 w-3 fill-black" />
+            <div className="absolute top-2 left-2 bg-film-amber text-white text-[9px] font-bold font-mono px-2 py-0.5 uppercase tracking-wider flex items-center gap-1 shadow-md z-10">
+              <Star className="h-3 w-3 fill-white" />
               Cover
             </div>
           )}
 
-          {/* Hover Expand Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white shadow-lg flex items-center gap-1.5 px-3 font-mono text-[10px] font-bold uppercase tracking-wider">
+            <div className="p-2 bg-white/20 backdrop-blur-md text-white shadow-lg flex items-center gap-1.5 px-3 font-mono text-[10px] font-bold uppercase tracking-wider">
               <Maximize2 className="h-3.5 w-3.5" />
               <span>Expand</span>
             </div>
@@ -740,14 +859,13 @@ function PhotoCardTile({
 
       {/* Right side: Photo Information & Toolbar */}
       <div className="flex-grow flex flex-col justify-between min-w-0 space-y-3">
-        {/* Top Header: Checkbox, Index, Location & EXIF */}
         <div className="flex items-center justify-between border-b border-white/10 pb-2">
           <div className="flex items-center gap-2.5">
             <input
               type="checkbox"
               checked={isSelected}
               onChange={onToggleSelect}
-              className="rounded border-white/30 text-amber-500 focus:ring-amber-500 cursor-pointer h-4 w-4"
+              className="rounded border-white/30 text-film-amber focus:ring-film-amber cursor-pointer h-4 w-4"
             />
             <span className="font-mono text-xs text-white/80 font-bold tracking-wider select-none">
               Still #{originalIndex + 1}
@@ -757,7 +875,7 @@ function PhotoCardTile({
           <div className="flex items-center gap-3 text-xs font-mono text-white/50 select-none">
             {photo.location && (
               <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
+                <MapPin className="h-3 w-3 text-film-amber" />
                 {photo.location}
               </span>
             )}
@@ -770,7 +888,6 @@ function PhotoCardTile({
           </div>
         </div>
 
-        {/* Middle Info: Story Description, Score & Hashtags */}
         <div className="space-y-1.5 min-w-0">
           {photo.description ? (
             <p className="font-serif italic text-xs text-white/90 line-clamp-2 leading-relaxed">
@@ -782,21 +899,20 @@ function PhotoCardTile({
 
           <div className="flex flex-wrap items-center gap-3 text-xs select-none">
             {photo.score !== undefined && photo.score !== null && (
-              <span className="bg-amber-500/10 text-amber-400 font-mono text-[10px] font-bold px-2 py-0.5 border border-amber-500/20 rounded">
+              <span className="bg-film-amber/10 text-film-amber font-mono text-[10px] font-bold px-2 py-0.5 border border-film-amber/20">
                 ★ {photo.score} / 10
               </span>
             )}
 
             {photo.tags && photo.tags.length > 0 && (
               <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
-                <Tag className="h-3 w-3 opacity-60" />
+                <Tag className="h-3 w-3 opacity-60 text-film-amber" />
                 <span>{photo.tags.map((t) => `#${t}`).join(" ")}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Bottom Actions Toolbar */}
         <div className="flex items-center justify-between pt-2 border-t border-white/10 select-none">
           <div className="flex items-center gap-1">
             <button
@@ -832,7 +948,7 @@ function PhotoCardTile({
             {!isCover && (
               <button
                 onClick={onSetCoverPhoto}
-                className="hover:bg-amber-500/20 p-1.5 rounded text-white/60 hover:text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
+                className="hover:bg-film-amber/20 p-1.5 rounded text-white/60 hover:text-film-amber transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
                 title="Set as Album Cover"
               >
                 <Star className="h-3.5 w-3.5" />
@@ -843,7 +959,7 @@ function PhotoCardTile({
             {isInGroup ? (
               <button
                 onClick={onRemoveFromGroup}
-                className="hover:bg-amber-500/20 p-1.5 rounded text-amber-400 transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
+                className="hover:bg-film-amber/20 p-1.5 rounded text-film-amber transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
                 title="Remove photo from row group"
               >
                 <Unlink className="h-3.5 w-3.5" />

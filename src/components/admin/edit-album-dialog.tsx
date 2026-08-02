@@ -20,6 +20,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Album } from "@/lib/types";
 import { LocationSelector } from "./location-selector";
+import { ThinkingOrb } from "./thinking-orb";
 
 interface EditAlbumDialogProps {
   album: Album;
@@ -108,7 +109,6 @@ export function EditAlbumDialog({
     }
 
     try {
-      // 1. Update albums table
       const { error: updateError } = await supabase
         .from("albums")
         .update({
@@ -127,7 +127,6 @@ export function EditAlbumDialog({
 
       if (updateError) throw updateError;
 
-      // 2. Fetch updated album with computed location_path from albums_with_locations view
       const { data: updatedViewData, error: viewError } = await supabase
         .from("albums_with_locations")
         .select("*")
@@ -153,181 +152,189 @@ export function EditAlbumDialog({
           <Button
             variant="outline"
             size="sm"
-            className="border-white/10 text-white hover:bg-white/5 rounded-none font-mono text-xs uppercase tracking-wider flex items-center gap-1.5"
+            className="border-white/15 text-white hover:bg-white/10 rounded-none font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
             <Edit className="h-3.5 w-3.5" />
-            Edit All Album Details
+            Edit Settings
           </Button>
         } />
       )}
-      <DialogContent className="bg-[#14171a] border-white/10 text-white rounded-none max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl font-bold uppercase tracking-wider flex items-center gap-2">
-            <Sliders className="h-5 w-5 text-amber-400" />
-            Edit Album Details & Settings
+      <DialogContent
+        data-lenis-prevent
+        className="bg-[#121519]/95 backdrop-blur-2xl border-white/15 text-white rounded-none max-w-3xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
+      >
+        {/* Static Header */}
+        <DialogHeader className="shrink-0 p-6 sm:p-8 border-b border-white/10 relative pr-12">
+          <DialogTitle className="font-serif text-xl font-bold uppercase tracking-wider flex items-center gap-2 text-white">
+            <Sliders className="h-5 w-5 text-film-amber" />
+            Edit Collection Metadata
           </DialogTitle>
-          <DialogDescription className="text-white/60 text-xs">
-            Edit title, URL slug, date, location hierarchy, description, tags, rating score, and visibility settings.
+          <DialogDescription className="text-white/60 text-xs font-mono">
+            Configure title, URL slug, date, location hierarchy, tags, rating score, and visibility settings.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-          {/* Title and Slug */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Scrollable Inner Body */}
+        <div data-lenis-prevent className="flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-8 space-y-6">
+          <form id="edit-album-form" onSubmit={handleSubmit} className="space-y-6">
+            {/* Title and Slug */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-title" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                  Album Title
+                </Label>
+                <Input
+                  id="edit-title"
+                  value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="Album Title"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-slug" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                  URL Slug
+                </Label>
+                <Input
+                  id="edit-slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="e.g. visit-greenland"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Date & Score */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-date" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
+                  <Calendar className="h-3 w-3" /> Date
+                </Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-score" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
+                  <Star className="h-3 w-3 text-film-amber" /> Album Rating Score (0 - 10)
+                </Label>
+                <Input
+                  id="edit-score"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+                  value={score}
+                  onChange={(e) => setScore(e.target.value)}
+                  placeholder="e.g. 9.2"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Hierarchical Location Selector */}
+            <div className="space-y-1.5 border-t border-white/10 pt-4">
+              <Label className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1 mb-1">
+                <MapPin className="h-3 w-3 text-film-amber" /> Location Hierarchy Selection
+              </Label>
+              <LocationSelector
+                selectedLocationId={locationId}
+                onSelectLocation={(id, fullName) => {
+                  setLocationId(id);
+                  setLocation(fullName);
+                }}
+              />
+            </div>
+
+            {/* Custom Tags */}
             <div className="space-y-1.5">
-              <Label htmlFor="edit-title" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-                Album Title
+              <Label htmlFor="edit-tags" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
+                <Tag className="h-3 w-3 text-film-amber" /> Album Hashtags (comma separated)
               </Label>
               <Input
-                id="edit-title"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Album Title"
-                className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-                required
+                id="edit-tags"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="e.g. nature, winter, glaciers, arctic"
+                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
               />
             </div>
 
+            {/* Description */}
             <div className="space-y-1.5">
-              <Label htmlFor="edit-slug" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-                URL Slug
+              <Label htmlFor="edit-description" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                Album Description
               </Label>
-              <Input
-                id="edit-slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="e.g. visit-greenland"
-                className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white font-mono text-xs"
-              />
-            </div>
-          </div>
-
-          {/* Date & Score */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-date" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
-                <Calendar className="h-3 w-3" /> Date
-              </Label>
-              <Input
-                id="edit-date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white"
-                required
+              <Textarea
+                id="edit-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe this photo collection..."
+                rows={3}
+                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber resize-none text-xs"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-score" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
-                <Star className="h-3 w-3 text-amber-400" /> Album Rating Score (0 - 10)
-              </Label>
-              <Input
-                id="edit-score"
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
-                value={score}
-                onChange={(e) => setScore(e.target.value)}
-                placeholder="e.g. 9.2"
-                className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white font-mono text-xs"
-              />
+            {/* Visibility Controls */}
+            <div className="p-4 bg-white/[0.03] border border-white/10 flex items-center justify-between gap-6">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="edit-published"
+                  checked={isPublished}
+                  onCheckedChange={setIsPublished}
+                />
+                <Label htmlFor="edit-published" className="font-mono text-xs uppercase tracking-wider text-white cursor-pointer">
+                  Publicly Published
+                </Label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="edit-featured"
+                  checked={isFeatured}
+                  onCheckedChange={setIsFeatured}
+                />
+                <Label htmlFor="edit-featured" className="font-mono text-xs uppercase tracking-wider text-film-amber cursor-pointer">
+                  ★ Featured on Homepage
+                </Label>
+              </div>
             </div>
-          </div>
+          </form>
+        </div>
 
-          {/* Hierarchical Location Selector */}
-          <div className="space-y-1.5 border-t border-white/10 pt-4">
-            <Label className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1 mb-1">
-              <MapPin className="h-3 w-3 text-amber-400" /> Location Hierarchy Selection
-            </Label>
-            <LocationSelector
-              selectedLocationId={locationId}
-              onSelectLocation={(id, fullName) => {
-                setLocationId(id);
-                setLocation(fullName);
-              }}
-            />
-          </div>
+        {/* Static Footer Actions */}
+        <div className="shrink-0 p-4 sm:p-6 border-t border-white/10 bg-[#0E1012] flex justify-between items-center">
+          <a
+            href={`/album/${album.slug}?preview=true`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-film-amber/10 hover:bg-film-amber/20 border border-film-amber/30 text-film-amber font-mono text-xs uppercase tracking-wider transition-all"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            Preview Album
+          </a>
 
-          {/* Custom Tags */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-tags" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
-              <Tag className="h-3 w-3" /> Album Hashtags (comma separated)
-            </Label>
-            <Input
-              id="edit-tags"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="e.g. nature, winter, glaciers, arctic"
-              className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white font-mono text-xs"
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-description" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-              Album Description
-            </Label>
-            <Textarea
-              id="edit-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe this photo collection..."
-              rows={3}
-              className="bg-black/20 border-white/10 rounded-none text-white focus-visible:ring-white resize-none"
-            />
-          </div>
-
-          {/* Visibility Controls */}
-          <div className="p-4 bg-white/5 border border-white/10 flex items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <Switch
-                id="edit-published"
-                checked={isPublished}
-                onCheckedChange={setIsPublished}
-              />
-              <Label htmlFor="edit-published" className="font-mono text-xs uppercase tracking-wider text-white">
-                Publicly Published
-              </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                id="edit-featured"
-                checked={isFeatured}
-                onCheckedChange={setIsFeatured}
-              />
-              <Label htmlFor="edit-featured" className="font-mono text-xs uppercase tracking-wider text-amber-300">
-                ★ Featured on Homepage
-              </Label>
-            </div>
-          </div>
-
-          {/* Submit buttons */}
-          <div className="flex justify-between items-center pt-4 border-t border-white/10">
-            <a
-              href={`/album/${album.slug}?preview=true`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs uppercase tracking-wider transition-all"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              Preview Album
-            </a>
-
-            <div className="flex gap-3">
-              <DialogClose render={
-                <Button type="button" variant="outline" className="border-white/10 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
-                  Cancel
-                </Button>
-              } />
-              <Button type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs">
-                {loading ? "Saving..." : "Save Album Changes"}
+          <div className="flex gap-3">
+            <DialogClose render={
+              <Button type="button" variant="outline" className="border-white/15 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
+                Cancel
               </Button>
-            </div>
+            } />
+            <Button form="edit-album-form" type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs flex items-center gap-2">
+              {loading ? <ThinkingOrb state="thinking" size="sm" /> : null}
+              <span>{loading ? "Saving..." : "Save Changes"}</span>
+            </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -15,17 +15,45 @@ import {
   Compass,
   ChevronDown,
   Layers,
+  Globe2,
+  Navigation,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { EditLocationDialog, LocationNode } from "./edit-location-dialog";
-import { geocodeLocation } from "@/lib/geocoding";
+import {
+  geocodeLocation,
+  searchLocationSuggestions,
+  GeocodeSuggestion,
+} from "@/lib/geocoding";
 
 interface LocationSelectorProps {
   selectedLocationId: string | null;
   onSelectLocation: (id: string | null, fullName: string) => void;
+}
+
+const ALLOWED_LOCATION_TYPES = [
+  "continent",
+  "country",
+  "sub-region",
+  "region",
+  "island",
+  "city",
+  "spot",
+  "custom",
+];
+
+function normalizeType(typeStr: string): string {
+  const lower = (typeStr || "").toLowerCase();
+  if (ALLOWED_LOCATION_TYPES.includes(lower)) return lower;
+  if (lower.includes("country")) return "country";
+  if (lower.includes("state") || lower.includes("province") || lower.includes("region")) return "region";
+  if (lower.includes("island")) return "island";
+  if (lower.includes("city") || lower.includes("town") || lower.includes("village")) return "city";
+  return "spot";
 }
 
 export function LocationSelector({
@@ -48,6 +76,10 @@ export function LocationSelector({
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [newSpotName, setNewSpotName] = useState("");
   const [creating, setCreating] = useState(false);
+
+  // Geocoding suggestions state
+  const [suggestions, setSuggestions] = useState<GeocodeSuggestion[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   // Editing state for location items
   const [editingNode, setEditingNode] = useState<LocationNode | null>(null);
@@ -85,7 +117,6 @@ export function LocationSelector({
     const node = locations.find((l) => l.id === selectedLocationId);
     if (!node) return;
 
-    // Traverse upwards to populate cascade selectors
     const pathNodes: LocationNode[] = [];
     let current: LocationNode | undefined = node;
     while (current) {
@@ -107,6 +138,28 @@ export function LocationSelector({
     if (regionNode) setSelectedRegionId(regionNode.id);
     if (spotNode) setSelectedSpotId(spotNode.id);
   }, [selectedLocationId, locations]);
+
+  // Debounced search for OpenStreetMap suggestions when typing
+  useEffect(() => {
+    if (!isCreatingNew || newSpotName.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const hits = await searchLocationSuggestions(newSpotName);
+        setSuggestions(hits);
+      } catch (err) {
+        console.error("Suggestion lookup error:", err);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [newSpotName, isCreatingNew]);
 
   // Helper to build full display path name (e.g. "Anaga, Tenerife, Spain")
   const buildFullName = (node: LocationNode): string => {
@@ -144,55 +197,41 @@ export function LocationSelector({
   // Regions & Islands for active country
   const regionsList = useMemo(() => {
     if (!selectedCountryId) return [];
-    // Get direct children OR descendants of selected country
-    const directChildren = locations.filter(
-      (l) => l.parent_id === selectedCountryId
-    );
-    return directChildren.sort((a, b) => a.name.localeCompare(b.name));
+    return locations
+      .filter((l) => l.parent_id === selectedCountryId)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [locations, selectedCountryId]);
 
-  // Spots & Cities for active region
+  // Specific Spots/Cities for active region
   const spotsList = useMemo(() => {
     if (!selectedRegionId) return [];
-    const directChildren = locations.filter(
-      (l) => l.parent_id === selectedRegionId
-    );
-    return directChildren.sort((a, b) => a.name.localeCompare(b.name));
+    return locations
+      .filter((l) => l.parent_id === selectedRegionId)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [locations, selectedRegionId]);
 
-  // Filtered search results
+  // Filtered search list across all nodes
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase().trim();
-    return locations
-      .filter(
-        (l) =>
-          l.name.toLowerCase().includes(query) ||
-          l.type.toLowerCase().includes(query) ||
-          buildFullName(l).toLowerCase().includes(query)
-      )
-      .slice(0, 12)
-      .map((node) => ({
-        node,
-        fullName: buildFullName(node),
-        hierarchy: buildHierarchyString(node),
-      }));
+    if (!searchQuery.trim()) return locations.slice(0, 25);
+    const q = searchQuery.toLowerCase().trim();
+    return locations.filter((loc) => {
+      const full = buildFullName(loc).toLowerCase();
+      const hier = buildHierarchyString(loc).toLowerCase();
+      return loc.name.toLowerCase().includes(q) || full.includes(q) || hier.includes(q);
+    });
   }, [locations, searchQuery]);
 
-  // Shortcut locations for quick selection
-  const shortcutLocations = useMemo(() => {
-    const names = ["Greenland", "Spain", "Iceland", "Mongolia", "Tenerife", "Anaga", "Disko Bay"];
-    return locations.filter((l) => names.includes(l.name)).slice(0, 5);
-  }, [locations]);
+  const activeNode = useMemo(() => {
+    return locations.find((l) => l.id === selectedLocationId) || null;
+  }, [locations, selectedLocationId]);
 
-  const activeNode = selectedLocationId
-    ? locations.find((l) => l.id === selectedLocationId)
-    : null;
-
-  const handleSelectNode = (node: LocationNode) => {
-    onSelectLocation(node.id, buildFullName(node));
-    setSearchQuery("");
-    toast.success(`Selected location: "${node.name}"`);
+  const handleSelectNode = (node: LocationNode | null) => {
+    if (!node) {
+      onSelectLocation(null, "");
+      return;
+    }
+    const fullName = buildFullName(node);
+    onSelectLocation(node.id, fullName);
   };
 
   const handleClearSelection = () => {
@@ -212,54 +251,250 @@ export function LocationSelector({
     await fetchLocations();
   };
 
-  // Quick inline creation of new location with auto-geocoding
-  const handleCreateNewSpot = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Resolves the proper continent parent ID for any country node to satisfy DB check_parent constraint
+  const getContinentIdForCountry = (countryName: string, allLocs: LocationNode[]): string => {
+    const continents = allLocs.filter((l) => l.type === "continent");
+    if (continents.length === 0) {
+      throw new Error("No continent nodes found in database.");
+    }
+
+    const lower = countryName.toLowerCase();
+    if (
+      ["argentina", "chile", "brazil", "brasil", "peru", "colombia", "venezuela", "ecuador", "bolivia", "paraguay", "uruguay"].some(
+        (c) => lower.includes(c)
+      )
+    ) {
+      return (
+        continents.find((c) => c.name.toLowerCase().includes("south america"))?.id ||
+        continents[0].id
+      );
+    }
+    if (
+      ["united states", "usa", "canada", "mexico", "greenland", "costa rica", "cuba", "jamaica", "panama"].some(
+        (c) => lower.includes(c)
+      )
+    ) {
+      return (
+        continents.find((c) => c.name.toLowerCase().includes("north america"))?.id ||
+        continents[0].id
+      );
+    }
+    if (
+      ["japan", "china", "india", "thailand", "indonesia", "vietnam", "korea", "philippines", "malaysia"].some(
+        (c) => lower.includes(c)
+      )
+    ) {
+      return continents.find((c) => c.name.toLowerCase().includes("asia"))?.id || continents[0].id;
+    }
+    if (
+      ["morocco", "egypt", "south africa", "kenya", "tanzania", "nigeria", "ghana", "ethiopia", "madagascar"].some(
+        (c) => lower.includes(c)
+      )
+    ) {
+      return continents.find((c) => c.name.toLowerCase().includes("africa"))?.id || continents[0].id;
+    }
+    if (["australia", "new zealand", "fiji"].some((c) => lower.includes(c))) {
+      return continents.find((c) => c.name.toLowerCase().includes("oceania"))?.id || continents[0].id;
+    }
+
+    // Default to Europe (Spain, France, UK, Iceland, Norway, Italy, Germany, etc.)
+    return continents.find((c) => c.name.toLowerCase().includes("europe"))?.id || continents[0].id;
+  };
+
+  // Helper to ensure a location node exists in Supabase
+  const getOrCreateLocationNode = async (
+    name: string,
+    rawType: string,
+    parentId: string | null,
+    lat?: number,
+    lng?: number,
+    currentLocs: LocationNode[] = locations
+  ): Promise<LocationNode> => {
+    const type = normalizeType(rawType);
+    let finalParentId = parentId;
+
+    // To satisfy Postgres CHECK constraint `check_parent_for_custom_locations`:
+    // Country & Sub-region types MUST have a non-null parent_id (pointing to a continent)
+    if ((type === "country" || type === "sub-region") && !finalParentId) {
+      finalParentId = getContinentIdForCountry(name, currentLocs);
+    }
+
+    // Check if node already exists under this parent
+    const existing = currentLocs.find(
+      (l) => l.name.toLowerCase() === name.toLowerCase() && l.parent_id === finalParentId
+    );
+    if (existing) return existing;
+
+    // Insert new node into Supabase
+    const { data, error } = await supabase
+      .from("locations")
+      .insert({
+        name: name.trim(),
+        type,
+        parent_id: finalParentId,
+        lat: lat || null,
+        lng: lng || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      // Handle Unique Constraint (name, parent_id) collision gracefully
+      if (error.code === "23505") {
+        const { data: refetched } = await supabase
+          .from("locations")
+          .select("id, name, type, parent_id, lat, lng")
+          .eq("name", name.trim())
+          .eq("parent_id", finalParentId)
+          .single();
+
+        if (refetched) return refetched as LocationNode;
+      }
+      throw error;
+    }
+
+    const newNode = data as LocationNode;
+    currentLocs.push(newNode);
+    return newNode;
+  };
+
+  // When a user selects a specific OpenStreetMap suggestion (e.g. "Seville, Andalusia, Spain" or "Córdoba, Argentina")
+  const handleSelectSuggestion = async (sugg: GeocodeSuggestion) => {
+    setCreating(true);
+    try {
+      // Fetch fresh locations from DB to prevent stale state issues
+      const { data: latestLocs, error: fetchErr } = await supabase
+        .from("locations")
+        .select("id, name, type, parent_id, lat, lng");
+      if (fetchErr) throw fetchErr;
+
+      const currentLocList = latestLocs as LocationNode[];
+      let parentNodeId: string | null = selectedRegionId || selectedCountryId || null;
+
+      // Automatically construct parent Country & Region hierarchy if missing
+      if (!parentNodeId && sugg.country) {
+        const countryNode = await getOrCreateLocationNode(
+          sugg.country,
+          "country",
+          null,
+          undefined,
+          undefined,
+          currentLocList
+        );
+        parentNodeId = countryNode.id;
+
+        if (sugg.state && sugg.state.toLowerCase() !== sugg.country.toLowerCase()) {
+          const regionNode = await getOrCreateLocationNode(
+            sugg.state,
+            "region",
+            countryNode.id,
+            undefined,
+            undefined,
+            currentLocList
+          );
+          parentNodeId = regionNode.id;
+        }
+      }
+
+      const spotNode = await getOrCreateLocationNode(
+        sugg.name,
+        sugg.type || "spot",
+        parentNodeId,
+        sugg.lat,
+        sugg.lng,
+        currentLocList
+      );
+
+      await fetchLocations();
+      handleSelectNode(spotNode);
+
+      toast.success(
+        `Created & selected "${sugg.name}" (${sugg.country || "GPS: " + sugg.lat + "°"})`
+      );
+
+      setNewSpotName("");
+      setSuggestions([]);
+      setIsCreatingNew(false);
+    } catch (err: any) {
+      console.error("Error creating location suggestion:", err);
+      toast.error(err.message || "Failed to process location suggestion");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // Manual fallback location creation
+  const handleCreateNewSpotManual = async () => {
     const cleanName = newSpotName.trim();
     if (!cleanName) {
       toast.error("Please enter a location spot name");
       return;
     }
 
-    const parentId = selectedRegionId || selectedCountryId || null;
-    let parentName = "";
-    if (parentId) {
-      const parentNode = locations.find((l) => l.id === parentId);
-      if (parentNode) parentName = parentNode.name;
-    }
-
     setCreating(true);
     try {
-      // Auto-detect GPS coordinates via OpenStreetMap Nominatim API
-      const geocodeRes = await geocodeLocation(cleanName, parentName);
-
-      const type = selectedRegionId ? "spot" : selectedCountryId ? "region" : "country";
-
-      const { data, error } = await supabase
+      const { data: latestLocs, error: fetchErr } = await supabase
         .from("locations")
-        .insert({
-          name: cleanName,
-          type,
-          parent_id: parentId,
-          lat: geocodeRes?.lat || null,
-          lng: geocodeRes?.lng || null,
-        })
-        .select()
-        .single();
+        .select("id, name, type, parent_id, lat, lng");
+      if (fetchErr) throw fetchErr;
 
-      if (error) {
-        if (error.code === "23505") {
-          toast.error(`"${cleanName}" already exists under this parent location.`);
-        } else {
-          throw error;
-        }
-        return;
+      const currentLocList = latestLocs as LocationNode[];
+      let parentId = selectedRegionId || selectedCountryId || null;
+      let parentName = "";
+      if (parentId) {
+        const parentNode = currentLocList.find((l) => l.id === parentId);
+        if (parentNode) parentName = parentNode.name;
       }
 
-      const newNode = data as LocationNode;
+      const geocodeRes = await geocodeLocation(cleanName, parentName);
+
+      // Auto-extract country/region from geocoded display name if available and no parent selected
+      if (!parentId && geocodeRes?.displayName) {
+        const parts = geocodeRes.displayName.split(",").map((p) => p.trim());
+        if (parts.length >= 2) {
+          const rawCountry = parts[parts.length - 1];
+          const rawRegion = parts.length >= 3 ? parts[parts.length - 2] : undefined;
+
+          const countryNode = await getOrCreateLocationNode(
+            rawCountry,
+            "country",
+            null,
+            undefined,
+            undefined,
+            currentLocList
+          );
+          parentId = countryNode.id;
+
+          if (rawRegion && rawRegion.toLowerCase() !== rawCountry.toLowerCase() && rawRegion.toLowerCase() !== cleanName.toLowerCase()) {
+            const regionNode = await getOrCreateLocationNode(
+              rawRegion,
+              "region",
+              countryNode.id,
+              undefined,
+              undefined,
+              currentLocList
+            );
+            parentId = regionNode.id;
+          }
+        }
+      }
+
+      const type = selectedRegionId ? "spot" : selectedCountryId ? "region" : "city";
+
+      const newNode = await getOrCreateLocationNode(
+        cleanName,
+        type,
+        parentId,
+        geocodeRes?.lat,
+        geocodeRes?.lng,
+        currentLocList
+      );
+
       await fetchLocations();
       handleSelectNode(newNode);
+
       setNewSpotName("");
+      setSuggestions([]);
       setIsCreatingNew(false);
 
       if (geocodeRes) {
@@ -268,6 +503,7 @@ export function LocationSelector({
         toast.success(`Created location "${cleanName}"`);
       }
     } catch (err: any) {
+      console.error("Error creating location manually:", err);
       toast.error(err.message || "Failed to create location");
     } finally {
       setCreating(false);
@@ -285,7 +521,6 @@ export function LocationSelector({
 
   return (
     <div className="flex flex-col space-y-4 w-full bg-[#16181c] border border-white/10 p-4 text-white">
-      
       {/* Top Bar: Title & Active Selection Card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
@@ -348,7 +583,7 @@ export function LocationSelector({
               variant="outline"
               size="sm"
               onClick={() => handleOpenEdit(activeNode)}
-              className="h-7 border-amber-400/30 text-amber-300 hover:bg-amber-400/20 text-[10px] font-mono uppercase tracking-widest cursor-pointer px-2.5"
+              className="h-7 px-2.5 border-film-amber/40 text-film-amber hover:bg-film-amber/20 text-[10px] font-mono uppercase tracking-wider cursor-pointer"
             >
               <Pencil className="h-3 w-3 mr-1" /> Edit
             </Button>
@@ -357,137 +592,109 @@ export function LocationSelector({
               variant="ghost"
               size="sm"
               onClick={handleClearSelection}
-              className="h-7 text-white/50 hover:text-white text-[10px] font-mono uppercase cursor-pointer px-2"
-              title="Clear selection"
+              className="h-7 px-2 text-white/50 hover:text-white hover:bg-white/10 text-[10px] font-mono uppercase tracking-wider cursor-pointer"
             >
-              <X className="h-3.5 w-3.5" />
+              Clear
             </Button>
           </div>
         </div>
       ) : (
-        <div className="p-2.5 bg-black/20 border border-white/5 text-xs text-white/40 font-mono uppercase tracking-widest flex items-center gap-2">
-          <Compass className="h-3.5 w-3.5 text-white/30" />
-          <span>No location selected. Search or browse below.</span>
+        <div className="p-3 bg-white/[0.02] border border-dashed border-white/10 text-xs text-white/40 font-mono flex items-center justify-between">
+          <span>No location selected for this album container.</span>
+          <span className="text-[10px] uppercase text-film-amber">Optional</span>
         </div>
       )}
 
-      {/* Mode 1: Search & Quick Pick */}
+      {/* Mode 1: Instant Search Filter */}
       {activeTab === "search" && (
         <div className="space-y-3">
-          {/* Quick Shortcuts Ribbon */}
-          {shortcutLocations.length > 0 && !searchQuery && (
-            <div className="space-y-1.5">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-white/40">
-                Popular Portfolio Destinations
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {shortcutLocations.map((loc) => (
-                  <button
-                    key={loc.id}
-                    type="button"
-                    onClick={() => handleSelectNode(loc)}
-                    className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-white/80 hover:text-white font-sans transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <MapPin className="h-3 w-3 text-film-amber" />
-                    <span>{loc.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Search Input Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/40" />
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-white/40" />
             <Input
-              placeholder="Search any country, island, city, or spot (e.g. Tenerife, Skógafoss, Nuuk)..."
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-black/40 border-white/15 rounded-none text-white text-xs pl-9 pr-10 h-9 focus-visible:ring-amber-400/50"
+              placeholder="Search spots, regions, or countries (e.g. Seville, Teide, Spain)..."
+              className="w-full bg-black/40 border-white/10 text-xs font-mono text-white placeholder-white/40 pl-9 pr-3 py-2 rounded-none focus-visible:ring-film-amber"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-2.5 text-xs text-white/40 hover:text-white cursor-pointer"
+                className="absolute right-2.5 top-2.5 text-[10px] font-mono text-white/40 hover:text-white"
               >
-                <X className="h-4 w-4" />
+                CLEAR
               </button>
             )}
           </div>
 
-          {/* Search Results List */}
-          {searchQuery && (
-            <ScrollArea className="border border-white/10 bg-black/40 max-h-60 w-full">
-              <div className="divide-y divide-white/5">
-                {searchResults.length === 0 ? (
-                  <div className="p-6 text-center space-y-3">
-                    <p className="text-xs font-mono text-white/40 uppercase tracking-widest">
-                      No location found for &quot;{searchQuery}&quot;
-                    </p>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setNewSpotName(searchQuery);
-                        setIsCreatingNew(true);
-                      }}
-                      className="bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold uppercase tracking-wider h-8"
-                    >
-                      <Plus className="h-3.5 w-3.5 mr-1" /> Add &quot;{searchQuery}&quot; as new location
-                    </Button>
-                  </div>
-                ) : (
-                  searchResults.map(({ node, fullName, hierarchy }) => (
+          <ScrollArea className="h-48 border border-white/10 bg-black/20 p-2">
+            <div className="space-y-1">
+              {searchResults.length === 0 ? (
+                <div className="p-4 text-center text-xs font-mono text-white/40 space-y-1">
+                  <p>No existing locations match &quot;{searchQuery}&quot;</p>
+                  <p className="text-[10px] text-film-amber uppercase">
+                    Use &quot;Quick Add Location&quot; below to resolve &amp; save it!
+                  </p>
+                </div>
+              ) : (
+                searchResults.map((loc) => {
+                  const isSelected = loc.id === selectedLocationId;
+                  const fullName = buildFullName(loc);
+                  const hierarchyStr = buildHierarchyString(loc);
+
+                  return (
                     <div
-                      key={node.id}
-                      onClick={() => handleSelectNode(node)}
-                      className="p-3 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer group"
+                      key={loc.id}
+                      onClick={() => handleSelectNode(loc)}
+                      className={`group p-2 flex items-center justify-between text-xs cursor-pointer transition-all border ${
+                        isSelected
+                          ? "bg-film-amber/20 border-film-amber/40 text-film-amber font-semibold"
+                          : "bg-white/[0.02] border-transparent hover:bg-white/[0.06] hover:border-white/10 text-white/80"
+                      }`}
                     >
-                      <div className="flex flex-col gap-0.5 truncate">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-white text-xs">{node.name}</span>
-                          <span className="px-1.5 py-0.5 bg-white/10 text-[9px] font-mono uppercase text-white/60">
-                            {node.type}
+                      <div className="flex flex-col truncate pr-2">
+                        <div className="flex items-center gap-2 truncate">
+                          <MapPin className="h-3 w-3 text-film-amber shrink-0" />
+                          <span className="truncate">{fullName}</span>
+                          <span className="text-[9px] font-mono opacity-50 uppercase px-1 bg-white/10 shrink-0">
+                            {loc.type}
                           </span>
-                          {node.lat != null && node.lng != null && (
-                            <span className="text-[9px] font-mono text-film-amber flex items-center gap-0.5">
-                              <MapPin className="h-2.5 w-2.5" /> {node.lat}°, {node.lng}°
-                            </span>
-                          )}
                         </div>
-                        {hierarchy && (
-                          <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest truncate">
-                            {hierarchy}
-                          </div>
+                        {hierarchyStr && (
+                          <span className="text-[10px] font-mono text-white/40 truncate pl-5">
+                            {hierarchyStr}
+                          </span>
                         )}
                       </div>
 
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={(e) => handleOpenEdit(node, e)}
-                        className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-amber-300 hover:bg-white/10"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenEdit(loc, e)}
+                          className="p-1 text-white/40 hover:text-film-amber transition-colors"
+                          title="Edit Location Node"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-          )}
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
         </div>
       )}
 
-      {/* Mode 2: Cascading Dropdowns */}
+      {/* Mode 2: Cascading Selectors */}
       {activeTab === "cascade" && (
-        <div className="space-y-4 pt-1">
+        <div className="space-y-3">
           {/* Step 1: Select Country */}
           <div className="space-y-1">
             <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
-              <Layers className="h-3 w-3 text-amber-400" />
-              1. Select Country or Territory
+              <Globe className="h-3 w-3 text-film-amber" />
+              1. Select Country or Sub-Region
             </label>
             <select
               value={selectedCountryId}
@@ -497,14 +704,14 @@ export function LocationSelector({
                 setSelectedRegionId("");
                 setSelectedSpotId("");
                 const node = locations.find((l) => l.id === id);
-                if (node) handleSelectNode(node);
+                handleSelectNode(node || null);
               }}
-              className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-amber-400"
+              className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
             >
               <option value="">-- Choose Country --</option>
-              {countriesList.map((country) => (
-                <option key={country.id} value={country.id} className="bg-[#16181c] text-white">
-                  {country.name}
+              {countriesList.map((c) => (
+                <option key={c.id} value={c.id} className="bg-[#16181c] text-white">
+                  {c.name}
                 </option>
               ))}
             </select>
@@ -514,8 +721,8 @@ export function LocationSelector({
           {selectedCountryId && (
             <div className="space-y-1">
               <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
-                <ChevronDown className="h-3 w-3 text-amber-400" />
-                2. Select Region or Island (Optional)
+                <Compass className="h-3 w-3 text-film-amber" />
+                2. Select Island or Region (Optional)
               </label>
               <select
                 value={selectedRegionId}
@@ -524,14 +731,16 @@ export function LocationSelector({
                   setSelectedRegionId(id);
                   setSelectedSpotId("");
                   const node = locations.find((l) => l.id === id);
-                  if (node) handleSelectNode(node);
+                  handleSelectNode(
+                    node || locations.find((l) => l.id === selectedCountryId) || null
+                  );
                 }}
-                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-amber-400"
+                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
               >
-                <option value="">-- All Regions / Islands --</option>
-                {regionsList.map((region) => (
-                  <option key={region.id} value={region.id} className="bg-[#16181c] text-white">
-                    {region.name} ({region.type})
+                <option value="">-- All Regions / Whole Country --</option>
+                {regionsList.map((r) => (
+                  <option key={r.id} value={r.id} className="bg-[#16181c] text-white">
+                    {r.name} ({r.type})
                   </option>
                 ))}
               </select>
@@ -553,7 +762,7 @@ export function LocationSelector({
                   const node = locations.find((l) => l.id === id);
                   if (node) handleSelectNode(node);
                 }}
-                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-amber-400"
+                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
               >
                 <option value="">-- All Spots --</option>
                 {spotsList.map((spot) => (
@@ -567,7 +776,7 @@ export function LocationSelector({
         </div>
       )}
 
-      {/* Inline Create New Location Spot Trigger */}
+      {/* Inline Create New Location Trigger & Suggestions Palette */}
       {!isCreatingNew ? (
         <div className="pt-2 border-t border-white/10 flex items-center justify-between">
           <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
@@ -580,41 +789,91 @@ export function LocationSelector({
             onClick={() => setIsCreatingNew(true)}
             className="h-7 border-white/15 text-white hover:bg-white/10 text-[10px] font-mono uppercase tracking-wider cursor-pointer"
           >
-            <Plus className="h-3.5 w-3.5 mr-1 text-amber-400" /> Quick Add Location
+            <Plus className="h-3.5 w-3.5 mr-1 text-film-amber" /> Quick Add Location
           </Button>
         </div>
       ) : (
-        <form onSubmit={handleCreateNewSpot} className="p-3 bg-black/50 border border-amber-400/30 space-y-3">
+        <div className="p-3.5 bg-black/60 border border-film-amber/40 space-y-3 relative">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> Quick Add New Location (Auto GPS)
+            <span className="text-[10px] font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-film-amber" /> Quick Add Location (With OSM Smart Suggestions)
             </span>
             <button
               type="button"
-              onClick={() => setIsCreatingNew(false)}
+              onClick={() => {
+                setIsCreatingNew(false);
+                setNewSpotName("");
+                setSuggestions([]);
+              }}
               className="text-white/40 hover:text-white cursor-pointer"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              placeholder="e.g. El Teide National Park"
-              value={newSpotName}
-              onChange={(e) => setNewSpotName(e.target.value)}
-              className="bg-black/40 border-white/15 text-xs text-white h-8"
-              required
-            />
-            <Button
-              type="submit"
-              disabled={creating || !newSpotName.trim()}
-              className="bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold uppercase tracking-wider h-8 shrink-0 px-3 cursor-pointer"
-            >
-              {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save & Select"}
-            </Button>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Type name (e.g. Seville, Teide National Park, Cordoba)..."
+                value={newSpotName}
+                onChange={(e) => setNewSpotName(e.target.value)}
+                className="bg-black/40 border-white/15 text-xs text-white h-9 focus-visible:ring-film-amber"
+              />
+              <Button
+                type="button"
+                onClick={handleCreateNewSpotManual}
+                disabled={creating || !newSpotName.trim()}
+                className="bg-film-amber text-white hover:bg-film-amber/90 text-xs font-bold uppercase tracking-wider h-9 shrink-0 px-4 cursor-pointer"
+              >
+                {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save Location"}
+              </Button>
+            </div>
+
+            {/* Smart Suggestions Box (e.g. Seville Spain, Teide National Park, etc.) */}
+            {loadingSuggestions ? (
+              <div className="p-2 text-[10px] font-mono text-film-amber/70 flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Fetching geographic suggestions...
+              </div>
+            ) : suggestions.length > 0 ? (
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 block">
+                  Select Geographic Match to Auto-Build Hierarchy &amp; GPS:
+                </span>
+                <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                  {suggestions.map((sugg, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleSelectSuggestion(sugg)}
+                      className="p-2.5 bg-white/5 hover:bg-film-amber/20 border border-white/10 hover:border-film-amber/40 transition-all cursor-pointer flex items-center justify-between text-xs group"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 pr-2">
+                        <Navigation className="h-3.5 w-3.5 text-film-amber shrink-0 group-hover:scale-110 transition-transform" />
+                        <div className="flex flex-col truncate">
+                          <span className="font-bold text-white truncate">
+                            {sugg.name}
+                            {sugg.country && (
+                              <span className="font-normal text-film-amber ml-1.5 text-[11px]">
+                                ({sugg.state ? `${sugg.state}, ` : ""}{sugg.country})
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-[9px] font-mono text-white/40 truncate">
+                            {sugg.displayName}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className="text-[9px] font-mono text-film-amber/90 shrink-0 bg-black/40 px-2 py-0.5 border border-film-amber/30">
+                        {sugg.lat}°, {sugg.lng}°
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
-        </form>
+        </div>
       )}
 
       {/* Edit Location Dialog Modal */}
@@ -627,7 +886,6 @@ export function LocationSelector({
           onLocationUpdated={handleLocationUpdated}
         />
       )}
-
     </div>
   );
 }

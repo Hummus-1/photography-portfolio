@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, MapPin, Loader2, FolderOpen, Eye } from "lucide-react";
+import { LogOut, MapPin, Loader2, FolderOpen, Eye, Sparkles, Layers, ShieldCheck, Database, ExternalLink } from "lucide-react";
+import { Navigation } from "@/components/navigation";
 import { AdminLogin } from "@/components/admin/admin-login";
 import { CreateAlbumDialog } from "@/components/admin/create-album-dialog";
 import { AlbumSidebar } from "@/components/admin/album-sidebar";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { EditorialGroupEditor } from "@/components/admin/editorial-group-editor";
 import { AlbumAutoFillToolbar } from "@/components/admin/album-auto-fill-toolbar";
+import { ThinkingOrb } from "@/components/admin/thinking-orb";
 import { Album, Photo } from "@/lib/types";
 
 export default function AdminPage() {
@@ -222,11 +224,19 @@ export default function AdminPage() {
     );
   };
 
+  const stats = useMemo(() => {
+    return {
+      totalAlbums: albums.length,
+      published: albums.filter((a) => a.is_published).length,
+      featured: albums.filter((a) => a.is_featured).length,
+    };
+  }, [albums]);
+
   // Loading Screen
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#0E1012] text-[#e8e5f0]">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex h-screen w-full items-center justify-center bg-[#090A0C] text-[#e8e5f0]">
+        <ThinkingOrb state="thinking" size="lg" label="Initializing Studio Engine" sublabel="Authenticating & syncing state" />
       </div>
     );
   }
@@ -239,37 +249,79 @@ export default function AdminPage() {
   const activeAlbum = albums.find((a) => a.id === selectedAlbumId);
 
   return (
-    <div className="min-h-screen bg-[#0E1012] text-[#e8e5f0] p-6 md:p-12 transition-colors duration-400">
-      {/* Dashboard Top bar */}
-      <div className="mx-auto max-w-[1600px] flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-8 mb-12 gap-6">
-        <div>
-          <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight">
-            Dashboard
-          </h1>
-          <p className="font-mono text-[10px] tracking-widest text-white/50 uppercase mt-1">
-            Logged in as {session.user.email}
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#090A0C] text-[#e8e5f0] pb-12 transition-colors duration-400">
+      {/* Site Navigation Bar */}
+      <Navigation />
 
-        <div className="flex items-center gap-4">
-          <CreateAlbumDialog
-            isOpen={isAlbumModalOpen}
-            onOpenChange={setIsAlbumModalOpen}
-            onAlbumCreated={handleAlbumCreated}
-          />
+      {/* Ambient background glow */}
+      <div className="fixed top-0 left-1/4 w-[600px] h-[300px] bg-film-amber/5 blur-[120px] pointer-events-none" />
 
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="border-white/10 text-white hover:bg-white/5 rounded-none flex items-center gap-2 font-mono text-xs uppercase tracking-widest"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+      {/* Elevated Admin Control Header */}
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 md:px-12 pt-6 mb-8 relative z-10">
+        <div className="p-6 sm:p-8 bg-[#121519]/80 backdrop-blur-2xl border border-white/10 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
+          {/* Ambient radial glow backdrop */}
+          <div className="absolute -top-12 -right-12 w-80 h-80 bg-film-amber/10 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Left title & session info */}
+          <div className="space-y-3 z-10">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                Admin Dashboard
+              </h1>
+              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-300 font-mono text-[10px] uppercase tracking-widest">
+                <span>System Live • R2 & Supabase</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-white/50">
+              <span className="text-white/80 font-medium">Logged in as {session.user.email}</span>
+              <span className="text-white/20">•</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-white/5 border border-white/10 text-white/70 text-[10px] uppercase tracking-wider">
+                  {stats.totalAlbums} Collections
+                </span>
+                <span className="px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] uppercase tracking-wider">
+                  {stats.published} Published
+                </span>
+                <span className="px-2.5 py-0.5 bg-film-amber/10 border border-film-amber/20 text-film-amber text-[10px] uppercase tracking-wider font-semibold">
+                  ★ {stats.featured} Featured
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Action buttons */}
+          <div className="flex items-center gap-3 flex-wrap z-10">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white font-mono text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-film-amber" />
+              <span>View Public Gallery</span>
+            </a>
+
+            <CreateAlbumDialog
+              isOpen={isAlbumModalOpen}
+              onOpenChange={setIsAlbumModalOpen}
+              onAlbumCreated={handleAlbumCreated}
+            />
+
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-none px-4 py-2 font-mono text-xs uppercase tracking-widest cursor-pointer flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4 text-red-400/80" />
+              <span>Logout</span>
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1600px] grid grid-cols-1 lg:grid-cols-4 gap-12">
+      {/* Main Grid Workspace */}
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 md:px-12 grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
         <AlbumSidebar
           albums={albums}
           selectedAlbumId={selectedAlbumId}
@@ -284,33 +336,36 @@ export default function AdminPage() {
         <div className="lg:col-span-3 space-y-8">
           {activeAlbum ? (
             <>
-              {/* Album metadata info */}
-              <div className="p-6 bg-white/5 border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              {/* Album Metadata Banner Header */}
+              <div className="p-6 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-white/[0.04] border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                  <h3 className="font-serif text-xl font-bold tracking-wide">
-                    {activeAlbum.title}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <ThinkingOrb state={activeAlbum.is_published ? "success" : "idle"} size="sm" />
+                    <h3 className="font-serif text-2xl font-bold tracking-wide text-white">
+                      {activeAlbum.title}
+                    </h3>
+                  </div>
                   <p className="text-xs text-white/60 mt-1 max-w-xl">
                     {activeAlbum.description || "No description provided."}
                   </p>
                 </div>
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                   <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-white/40">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-film-amber" />
                       {activeAlbum.location_path && activeAlbum.location_path.length > 0 
                         ? activeAlbum.location_path.map(n => n.name).join(" / ") 
                         : activeAlbum.location || "Unspecified Location"}
                     </span>
                     <span>•</span>
-                    <span>{activeAlbum.date}</span>
+                    <span>{activeAlbum.date || "Date pending"}</span>
                   </div>
 
                   <a
                     href={`/album/${activeAlbum.slug}?preview=true`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono text-xs uppercase tracking-wider transition-all"
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-film-amber/10 hover:bg-film-amber/20 border border-film-amber/30 text-film-amber font-mono text-xs uppercase tracking-wider transition-all"
                   >
                     <Eye className="h-4 w-4" />
                     Preview Album
@@ -325,7 +380,7 @@ export default function AdminPage() {
                 onAlbumUpdated={handleAlbumUpdated}
               />
 
-              {/* Upload Drag & Drop Uploader */}
+              {/* Drag & Drop Image Uploader */}
               <ImageUploader
                 selectedAlbumId={selectedAlbumId}
                 photosCount={photos.length}
@@ -350,13 +405,13 @@ export default function AdminPage() {
               />
             </>
           ) : (
-            <div className="text-center py-24 bg-white/5 border border-white/10 flex flex-col items-center justify-center">
-              <FolderOpen className="h-10 w-10 text-white/30 mb-4" />
-              <p className="font-serif font-bold text-sm tracking-widest uppercase">
-                Select an Album
+            <div className="text-center py-28 bg-white/[0.02] border border-white/10 flex flex-col items-center justify-center space-y-3">
+              <ThinkingOrb state="idle" size="lg" />
+              <p className="font-serif font-bold text-base tracking-widest uppercase text-white">
+                Select an Album Collection
               </p>
-              <p className="text-xs text-white/40 mt-1 max-w-xs">
-                Choose an existing album from the sidebar or click "Create Album" to initialize a new collection.
+              <p className="text-xs text-white/40 max-w-xs font-mono">
+                Choose an existing collection from the left sidebar or click "Create Album" to start a new project.
               </p>
             </div>
           )}

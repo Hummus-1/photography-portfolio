@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Calendar, MapPin, Loader2, Check, RefreshCw } from "lucide-react";
+import { Sparkles, Calendar, MapPin, Loader2, Check, RefreshCw, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Album } from "@/lib/types";
 
 import { EditAlbumDialog } from "./edit-album-dialog";
+import { ThinkingOrb } from "./thinking-orb";
 
 interface AlbumAutoFillToolbarProps {
   album: Album;
@@ -111,32 +112,36 @@ export function AlbumAutoFillToolbar({
 
   return (
     <div className="space-y-3">
-      {/* Action bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white/5 border border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-amber-500/10 border border-amber-500/20 text-amber-300">
-            <Sparkles className="h-4 w-4" />
-          </div>
+      {/* Action Bar */}
+      <div className="relative overflow-hidden p-5 bg-gradient-to-r from-[#14171a] via-[#111417] to-[#14171a] border border-white/10 flex flex-wrap items-center justify-between gap-4">
+        {/* Glow backdrop */}
+        <div className="absolute top-0 right-0 w-64 h-full bg-film-amber/5 blur-2xl pointer-events-none" />
+
+        <div className="flex items-center gap-3.5 z-10">
+          <ThinkingOrb
+            state={loading ? "ai-analyzing" : isUntitled ? "idle" : "success"}
+            size="md"
+          />
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-serif font-bold text-sm text-white">
+              <span className="font-serif font-bold text-base text-white">
                 {album.title}
               </span>
               {isUntitled && (
-                <span className="text-[9px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 uppercase tracking-widest">
-                  Needs Title & Details
+                <span className="text-[9px] font-mono bg-film-amber/20 text-film-amber border border-film-amber/30 px-2 py-0.5 uppercase tracking-widest flex items-center gap-1">
+                  <Wand2 className="h-3 w-3" /> Auto-Fill Ready
                 </span>
               )}
             </div>
             <p className="text-[11px] text-white/50 font-mono mt-0.5">
               {photosCount === 0
                 ? "Upload photos below to auto-detect earliest creation date, location, and AI title."
-                : `Album has ${photosCount} photo${photosCount > 1 ? "s" : ""}. Click to run AI auto-fill.`}
+                : `Collection contains ${photosCount} photo${photosCount > 1 ? "s" : ""}. Run AI engine for auto-tagging and suggestions.`}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 z-10">
           <EditAlbumDialog
             album={album}
             onAlbumUpdated={onAlbumUpdated}
@@ -146,29 +151,29 @@ export function AlbumAutoFillToolbar({
             size="sm"
             onClick={() => handleAutoFill(true)}
             disabled={loading || photosCount === 0}
-            className="bg-amber-500/20 text-amber-200 border border-amber-500/30 hover:bg-amber-500/30 rounded-none font-mono text-xs uppercase tracking-wider flex items-center gap-1.5"
+            className="bg-film-amber/20 text-film-amber border border-film-amber/40 hover:bg-film-amber/30 rounded-none font-mono text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all"
           >
             {loading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <RefreshCw className="h-3.5 w-3.5" />
             )}
-            {isUntitled ? "Auto-Fill from Photos" : "Generate Title Suggestions"}
+            {isUntitled ? "Auto-Fill from Photos" : "Generate AI Titles"}
           </Button>
         </div>
       </div>
 
       {/* Suggested Titles Palette (if generated) */}
       {suggestions && (
-        <div className="p-4 bg-[#14171a] border border-amber-500/20 space-y-3 font-sans">
-          <div className="flex items-center justify-between text-xs text-amber-300 font-mono uppercase tracking-wider">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-              AI Suggested Album Titles
+        <div className="p-4 bg-[#0A0C0E] border border-film-amber/30 space-y-3 font-sans transition-all">
+          <div className="flex items-center justify-between text-xs text-film-amber font-mono uppercase tracking-wider">
+            <span className="flex items-center gap-2">
+              <ThinkingOrb state="ai-analyzing" size="sm" />
+              <span>AI Suggested Album Titles</span>
             </span>
             {suggestions.earliestDate && (
-              <span className="flex items-center gap-1 text-[#e8e5f0]/60 text-[10px]">
-                <Calendar className="h-3 w-3" /> Earliest photo: {suggestions.earliestDate}
+              <span className="flex items-center gap-1.5 text-white/60 text-[10px]">
+                <Calendar className="h-3 w-3 text-film-amber" /> Earliest Photo: {suggestions.earliestDate}
               </span>
             )}
           </div>
@@ -178,10 +183,10 @@ export function AlbumAutoFillToolbar({
               <button
                 type="button"
                 onClick={() => handleApplyTitle(suggestions.aiTitle!)}
-                className={`px-3 py-1.5 text-xs border font-medium flex items-center gap-1.5 transition-all ${
+                className={`px-3 py-1.5 text-xs border font-medium flex items-center gap-2 transition-all ${
                   album.title === suggestions.aiTitle
-                    ? "bg-amber-500 text-black border-amber-400 font-bold"
-                    : "bg-white/5 border-white/20 text-white hover:bg-amber-500/20 hover:border-amber-400"
+                    ? "bg-film-amber text-white border-film-amber font-bold"
+                    : "bg-white/5 border-white/20 text-white hover:bg-film-amber/20 hover:border-film-amber"
                 }`}
               >
                 {album.title === suggestions.aiTitle && <Check className="h-3 w-3" />}
@@ -195,9 +200,9 @@ export function AlbumAutoFillToolbar({
                 key={idx}
                 type="button"
                 onClick={() => handleApplyTitle(alt)}
-                className={`px-3 py-1.5 text-xs border font-medium flex items-center gap-1.5 transition-all ${
+                className={`px-3 py-1.5 text-xs border font-medium flex items-center gap-2 transition-all ${
                   album.title === alt
-                    ? "bg-amber-500 text-black border-amber-400 font-bold"
+                    ? "bg-film-amber text-white border-film-amber font-bold"
                     : "bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/40"
                 }`}
               >
@@ -208,9 +213,9 @@ export function AlbumAutoFillToolbar({
           </div>
 
           {suggestions.autoResolvedLocation && !album.location && (
-            <div className="text-[11px] font-mono text-white/50 flex items-center gap-1 pt-1 border-t border-white/5">
-              <MapPin className="h-3 w-3 text-amber-400" />
-              Detected Location: {suggestions.autoResolvedLocation}
+            <div className="text-[11px] font-mono text-white/50 flex items-center gap-1.5 pt-2 border-t border-white/5">
+              <MapPin className="h-3 w-3 text-film-amber" />
+              Auto Detected Location: {suggestions.autoResolvedLocation}
             </div>
           )}
         </div>

@@ -51,42 +51,52 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 4. Extract EXIF data
+    // 4. Extract EXIF data (prefer clientExif extracted from raw file before canvas compression)
+    const clientExifStr = formData.get("clientExif") as string | null;
     let exif: any = {};
     let parsedLocation: string | null = locationOverride || null;
 
-    try {
-      const rawExif = await exifr.parse(buffer, {
-        tiff: true,
-        xmp: true,
-        gps: true,
-      });
-
-      if (rawExif) {
-        exif = {
-          camera: rawExif.Make && rawExif.Model ? `${rawExif.Make} ${rawExif.Model}` : rawExif.Model || null,
-          lens: rawExif.LensModel || rawExif.Lens || null,
-          iso: rawExif.ISO || rawExif.ISOSpeedRatings || null,
-          aperture: rawExif.FNumber ? `f/${rawExif.FNumber}` : rawExif.ApertureValue ? `f/${rawExif.ApertureValue}` : null,
-          shutter: rawExif.ExposureTime
-            ? rawExif.ExposureTime < 1
-              ? `1/${Math.round(1 / rawExif.ExposureTime)}s`
-              : `${rawExif.ExposureTime}s`
-            : null,
-          focal_length: rawExif.FocalLength ? `${rawExif.FocalLength}mm` : null,
-          date_taken: rawExif.DateTimeOriginal || null,
-        };
-
-        // If GPS coordinates are present, store them
-        if (rawExif.latitude && rawExif.longitude) {
-          exif.gps = {
-            latitude: rawExif.latitude,
-            longitude: rawExif.longitude,
-          };
-        }
+    if (clientExifStr) {
+      try {
+        exif = JSON.parse(clientExifStr) || {};
+      } catch (e) {
+        console.error("Failed to parse clientExif:", e);
       }
-    } catch (exifErr) {
-      console.error("EXIF parsing failed:", exifErr);
+    }
+
+    if (!exif.camera && !exif.iso && !exif.aperture) {
+      try {
+        const rawExif = await exifr.parse(buffer, {
+          tiff: true,
+          xmp: true,
+          gps: true,
+        });
+
+        if (rawExif) {
+          exif = {
+            camera: rawExif.Make && rawExif.Model ? `${rawExif.Make} ${rawExif.Model}` : rawExif.Model || rawExif.Make || null,
+            lens: rawExif.LensModel || rawExif.Lens || null,
+            iso: rawExif.ISO || rawExif.ISOSpeedRatings || null,
+            aperture: rawExif.FNumber ? `f/${rawExif.FNumber}` : rawExif.ApertureValue ? `f/${rawExif.ApertureValue}` : null,
+            shutter: rawExif.ExposureTime
+              ? rawExif.ExposureTime < 1
+                ? `1/${Math.round(1 / rawExif.ExposureTime)}s`
+                : `${rawExif.ExposureTime}s`
+              : null,
+            focal_length: rawExif.FocalLength ? `${rawExif.FocalLength}mm` : null,
+            date_taken: rawExif.DateTimeOriginal || rawExif.CreateDate || null,
+          };
+
+          if (rawExif.latitude && rawExif.longitude) {
+            exif.gps = {
+              latitude: rawExif.latitude,
+              longitude: rawExif.longitude,
+            };
+          }
+        }
+      } catch (exifErr) {
+        console.error("Server EXIF parsing failed:", exifErr);
+      }
     }
 
     // 5. Image dimensions and aspect ratio via Sharp
