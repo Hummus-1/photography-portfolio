@@ -62,7 +62,7 @@ export function HeroShowcase({ featuredAlbums = [], hoverEffect = "focus" }: Her
                 <span className="opacity-40 font-normal italic">Visual Journal.</span>
               </h1>
 
-              <p className="text-base sm:text-lg md:text-xl font-sans text-foreground/75 leading-relaxed max-w-2xl pt-1">
+              <p className="text-base md:text-lg font-sans text-foreground/75 leading-relaxed max-w-2xl pt-1">
                 A personal archive documenting remote landscapes, architectural geometries, and expedition series across volcanic islands and sub-arctic terrain.
               </p>
             </div>
