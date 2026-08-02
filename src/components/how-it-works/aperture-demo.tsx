@@ -2,33 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Aperture, Sun, Moon, Sparkles, Sliders } from "lucide-react";
+import { Aperture, Sun, Moon } from "lucide-react";
 
 export function ApertureDemo() {
-  const [fStop, setFStop] = useState<"f1.4" | "f8" | "f22">("f1.4");
+  const [fStop, setFStop] = useState<"f1.4" | "f22">("f1.4");
 
-  // Blade positions for aperture morphing simulation
-  const getBladeRotation = () => {
-    switch (fStop) {
-      case "f1.4":
-        return 0; // Wide open
-      case "f8":
-        return 22; // Medium stop
-      case "f22":
-        return 45; // Small aperture
-    }
-  };
-
-  const getBladeScale = () => {
-    switch (fStop) {
-      case "f1.4":
-        return 1.0;
-      case "f8":
-        return 0.75;
-      case "f22":
-        return 0.45;
-    }
-  };
+  const isLight = fStop === "f1.4";
 
   return (
     <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-8">
@@ -43,12 +22,12 @@ export function ApertureDemo() {
           </h3>
         </div>
 
-        {/* F-Stop Control Toggle Buttons */}
+        {/* F-Stop Control Toggle Buttons (Matching UI 2-state toggle) */}
         <div className="flex items-center gap-1.5 p-1 rounded-2xl border border-foreground/15 bg-background font-mono text-xs">
           <button
             onClick={() => setFStop("f1.4")}
-            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-              fStop === "f1.4"
+            className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+              isLight
                 ? "bg-film-amber text-white font-bold shadow"
                 : "text-foreground/70 hover:text-foreground"
             }`}
@@ -58,20 +37,9 @@ export function ApertureDemo() {
           </button>
 
           <button
-            onClick={() => setFStop("f8")}
-            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-              fStop === "f8"
-                ? "bg-film-amber text-white font-bold shadow"
-                : "text-foreground/70 hover:text-foreground"
-            }`}
-          >
-            <span>F/8.0 (Mid-Range)</span>
-          </button>
-
-          <button
             onClick={() => setFStop("f22")}
-            className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-              fStop === "f22"
+            className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+              !isLight
                 ? "bg-film-amber text-white font-bold shadow"
                 : "text-foreground/70 hover:text-foreground"
             }`}
@@ -92,14 +60,14 @@ export function ApertureDemo() {
 
             {/* Morphing Blades Container */}
             <motion.div
-              animate={{ rotate: getBladeRotation() }}
+              animate={{ rotate: isLight ? 0 : 45 }}
               transition={{ type: "spring", stiffness: 120, damping: 15 }}
               className="relative size-36 sm:size-40 flex items-center justify-center"
             >
               {[0, 60, 120, 180, 240, 300].map((angle, idx) => (
                 <motion.div
                   key={idx}
-                  animate={{ scale: getBladeScale() }}
+                  animate={{ scale: isLight ? 1.0 : 0.45 }}
                   transition={{ type: "spring", stiffness: 140, damping: 18 }}
                   style={{ transformOrigin: "center center" }}
                   className="absolute"
@@ -133,32 +101,30 @@ export function ApertureDemo() {
               Photographic Metaphor in Code
             </div>
             <h4 className="font-serif text-xl sm:text-2xl font-bold text-foreground">
-              {fStop === "f1.4" && "F/1.4 Wide Aperture — Maximum Light Intake"}
-              {fStop === "f8" && "F/8.0 Mid-Aperture Stop — Balanced Tonal Depth"}
-              {fStop === "f22" && "F/22 Pin-Hole Aperture — High Contrast Shadow Density"}
+              {isLight ? "F/1.4 Wide Aperture — Maximum Light Intake" : "F/22 Pin-Hole Aperture — High Contrast Shadow Density"}
             </h4>
           </div>
 
           <p className="text-xs sm:text-sm text-foreground/80 font-sans leading-relaxed">
-            Rather than using a generic theme toggle button, the application implements an interactive 6-blade camera aperture ring. Toggling themes triggers an SVG polygon blade matrix rotation and scale interpolation, mirroring physical camera optics.
+            Rather than using a generic theme toggle button, the site&apos;s header implements an interactive camera aperture lens ring. Toggling between Light and Dark modes triggers a smooth 45-degree rotation and scale interpolation of SVG iris blades, mirroring physical camera optics.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs pt-2">
-            <div className="p-3.5 rounded-xl border border-foreground/10 bg-foreground/[0.02] space-y-1">
-              <div className="text-[10px] text-foreground/50 uppercase tracking-widest">
+            <div className={`p-3.5 rounded-xl border transition-all ${isLight ? "border-film-amber bg-film-amber/10" : "border-foreground/10 bg-foreground/[0.02]"}`}>
+              <div className="text-[10px] text-film-amber font-semibold uppercase tracking-widest">
                 F/1.4 Light Mode
               </div>
-              <div className="text-foreground/80">
-                Wide open iris, maximum luminance, subtle shadow depth.
+              <div className="text-foreground/80 mt-1">
+                Wide open iris aperture, maximum luminance, subtle shadow depth.
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-foreground/10 bg-foreground/[0.02] space-y-1">
-              <div className="text-[10px] text-foreground/50 uppercase tracking-widest">
+            <div className={`p-3.5 rounded-xl border transition-all ${!isLight ? "border-film-amber bg-film-amber/10" : "border-foreground/10 bg-foreground/[0.02]"}`}>
+              <div className="text-[10px] text-film-amber font-semibold uppercase tracking-widest">
                 F/22 Dark Mode
               </div>
-              <div className="text-foreground/80">
-                Pin-point aperture stop, deep chiaroscuro black values.
+              <div className="text-foreground/80 mt-1">
+                Small pin-point aperture stop, deep chiaroscuro black values.
               </div>
             </div>
           </div>

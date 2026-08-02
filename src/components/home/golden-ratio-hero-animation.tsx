@@ -28,6 +28,24 @@ function hexToRgb(hex: string): RGB {
   };
 }
 
+interface LineConfig {
+  dirAngle: number;
+  startTime: number;
+  legDuration: number;
+}
+
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  alpha: number;
+  maxLife: number;
+  life: number;
+  colorRgb: { r: number; g: number; b: number };
+}
+
 export function GoldenRatioHeroAnimation() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -36,6 +54,30 @@ export function GoldenRatioHeroAnimation() {
   const animFrameId = useRef<number | null>(null);
   const rotationRef = useRef<number>(0);
   const startTimeRef = useRef<number | null>(null);
+  const lineConfigsRef = useRef<LineConfig[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
+
+  // Generate randomized line speeds and start delays once on component initialization
+  if (lineConfigsRef.current.length === 0) {
+    // 16 2D directions spaced 22.5 degrees (PI / 8) apart
+    const directions = Array.from({ length: 16 }, (_, i) => (i * Math.PI) / 8);
+    let accumulatedDelay = 0;
+
+    lineConfigsRef.current = directions.map((dirAngle) => {
+      // Random start delay between 0.25s and 0.65s relative to previous line
+      const delay = 0.25 + Math.random() * 0.4;
+      accumulatedDelay += delay;
+
+      // Random speed/duration for each line (between 5.0s and 8.5s per leg)
+      const legDuration = 5.0 + Math.random() * 3.5;
+
+      return {
+        dirAngle,
+        startTime: accumulatedDelay,
+        legDuration,
+      };
+    });
+  }
 
   // Canvas render loop
   useEffect(() => {
@@ -72,7 +114,7 @@ export function GoldenRatioHeroAnimation() {
       lastTime = now;
 
       // Slow background rotation for visual grace
-      rotationRef.current += dt * 0.03;
+      rotationRef.current += dt * 0.025;
 
       // Total elapsed time in seconds
       const elapsedTime = (now - startTimeRef.current) / 1000;
@@ -93,15 +135,18 @@ export function GoldenRatioHeroAnimation() {
       const scaleBase = Math.max(width * 0.7, height);
       const maxRadius = Math.min(scaleBase * 0.42, 340);
 
-      // Draw 4 Staggered Golden Ratio Lines (0.5s delay each, in 4 2D directions)
-      drawFourDirectionalSpirals(
+      // Draw 16 Golden Ratio Lines with randomized speeds, particles & shimmer
+      drawDirectionalSpirals(
         ctx,
         cx,
         cy,
         maxRadius,
         rotationRef.current,
         elapsedTime,
-        accentRgb
+        dt,
+        accentRgb,
+        lineConfigsRef.current,
+        particlesRef.current
       );
 
       animFrameId.current = requestAnimationFrame(render);
@@ -115,78 +160,125 @@ export function GoldenRatioHeroAnimation() {
     };
   }, []);
 
-  // Renderer for 4 Golden Ratio Lines offset by 90-degree 2D directions and 0.5s delayed starts
-  const drawFourDirectionalSpirals = (
+  // Renderer for 16 Golden Ratio Lines offset by 22.5-degree 2D directions with particles & multi-tone shimmer
+  const drawDirectionalSpirals = (
     ctx: CanvasRenderingContext2D,
     cx: number,
     cy: number,
     maxRadius: number,
     rotation: number,
     elapsedTime: number,
-    accent: RGB
+    dt: number,
+    accent: RGB,
+    lineConfigs: LineConfig[],
+    particles: Particle[]
   ) => {
     ctx.save();
     ctx.translate(cx, cy);
 
     // Deep ambient radial background glow
-    const ambientPulse = ctx.createRadialGradient(0, 0, 0, 0, 0, maxRadius * 1.05);
-    ambientPulse.addColorStop(0, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.24)`);
-    ambientPulse.addColorStop(0.4, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.07)`);
+    const ambientPulse = ctx.createRadialGradient(0, 0, 0, 0, 0, maxRadius * 1.08);
+    ambientPulse.addColorStop(0, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.22)`);
+    ambientPulse.addColorStop(0.45, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.06)`);
     ambientPulse.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = ambientPulse;
     ctx.beginPath();
-    ctx.arc(0, 0, maxRadius * 1.05, 0, Math.PI * 2);
+    ctx.arc(0, 0, maxRadius * 1.08, 0, Math.PI * 2);
     ctx.fill();
 
     // Logarithmic Spiral parameters
     const b = Math.log(PHI) / (Math.PI / 2); // ~0.3063489
     const a = maxRadius * 0.0055;
-    const totalTurns = 4.8;
-    const maxTotalTheta = totalTurns * Math.PI * 2;
+    
+    // Match maxTotalTheta precisely to maxRadius * 0.95 boundary (~16.816 rad)
+    const maxTotalTheta = Math.log(0.95 / 0.0055) / b;
 
-    // Time timing config
-    const legDuration = 8.33; // seconds to draw from root to end (or end to root)
-    const cycleDuration = legDuration * 2; // full forming + retracting cycle
-
-    // 4 cardinal 2D directions (0deg, 90deg, 180deg, 270deg)
-    const directions = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
-    const delayPerLine = 0.5; // 0.5s delay between consecutive lines
+    // Pause durations: 2.0s hold at max length as requested
+    const peakPauseDuration = 2.0;
+    const rootPauseDuration = 0.1;
 
     ctx.save();
     ctx.rotate(rotation);
 
-    directions.forEach((dirAngle, lineIdx) => {
-      const lineStartTime = lineIdx * delayPerLine;
-      if (elapsedTime < lineStartTime) return; // Wait for staggered 0.5s delay start
+    lineConfigs.forEach((config, lineIdx) => {
+      if (elapsedTime < config.startTime) return; // Wait for line's randomized start delay
 
-      const activeTime = elapsedTime - lineStartTime;
+      const activeTime = elapsedTime - config.startTime;
+      const cycleDuration = config.legDuration * 2 + peakPauseDuration + rootPauseDuration;
       const cycleTime = activeTime % cycleDuration;
 
-      // Calculate progress [0, 1]: 0 -> 1 during forming, 1 -> 0 during retracting
+      // Calculate progress [0, 1]: forming outward -> 2s hold at max length -> retracting -> root turnaround
       let rawProgress = 0;
-      if (cycleTime <= legDuration) {
-        rawProgress = cycleTime / legDuration; // Forming outward from root
+      let isForming = false;
+      if (cycleTime <= config.legDuration) {
+        rawProgress = cycleTime / config.legDuration; // Forming outward
+        isForming = true;
+      } else if (cycleTime <= config.legDuration + peakPauseDuration) {
+        rawProgress = 1.0; // Hold at max length for 2 seconds
+      } else if (cycleTime <= config.legDuration * 2 + peakPauseDuration) {
+        const retractTime = cycleTime - (config.legDuration + peakPauseDuration);
+        rawProgress = 1.0 - retractTime / config.legDuration; // Retracting back to root
       } else {
-        rawProgress = 1 - (cycleTime - legDuration) / legDuration; // Retracting back to root
+        rawProgress = 0.0; // Root turnaround
       }
 
-      // Ease-In acceleration curve: line starts slow near root and accelerates at latter stages
-      const easedProgress = Math.pow(rawProgress, 2.2);
+      // Ease-Out curve: fast burst at the beginning, graceful deceleration at the end of line formation
+      const easedProgress = 1 - Math.pow(1 - rawProgress, 2.2);
 
       const currentMaxTheta = maxTotalTheta * easedProgress;
       if (currentMaxTheta <= 0.02) return;
 
       ctx.save();
-      ctx.rotate(dirAngle);
+      ctx.rotate(config.dirAngle);
 
-      // Alpha modifier for staggered line depth
-      const lineAlpha = 1.0 - lineIdx * 0.08;
+      // Alpha modifier across 16 lines for clean depth layering
+      const lineAlpha = 1.0 - (lineIdx % 4) * 0.05 - Math.floor(lineIdx / 4) * 0.03;
+
+      // Calculate head coordinates of the growing spiral head tip
+      const headTheta = currentMaxTheta;
+      const headRadius = a * Math.exp(b * headTheta);
+
+      if (isForming && headRadius <= maxRadius * 0.95 && Math.random() < 0.35) {
+        // Compute world coordinates relative to center translation (cx, cy)
+        const localHeadX = headRadius * Math.cos(headTheta);
+        const localHeadY = headRadius * Math.sin(headTheta);
+
+        // Rotate by config.dirAngle + rotation
+        const totalAngle = config.dirAngle + rotation;
+        const worldX = localHeadX * Math.cos(totalAngle) - localHeadY * Math.sin(totalAngle);
+        const worldY = localHeadX * Math.sin(totalAngle) + localHeadY * Math.cos(totalAngle);
+
+        // Spawn ember particle
+        const pAngle = totalAngle + (Math.random() - 0.5) * 0.8;
+        const pSpeed = 12 + Math.random() * 28;
+
+        // Alternate color palette: Champagne Gold, Warm Amber, Copper
+        const randColor = Math.random();
+        let colorRgb = { r: 250, g: 235, b: 195 }; // Champagne Gold
+        if (randColor > 0.6) {
+          colorRgb = accent; // Warm Film Amber
+        } else if (randColor > 0.3) {
+          colorRgb = { r: 210, g: 105, b: 40 }; // Copper / Burnt Sienna
+        }
+
+        particles.push({
+          x: worldX,
+          y: worldY,
+          vx: Math.cos(pAngle) * pSpeed,
+          vy: Math.sin(pAngle) * pSpeed,
+          size: 0.35 + Math.random() * 0.5,
+          alpha: 0.85 * lineAlpha,
+          maxLife: 0.7 + Math.random() * 0.9,
+          life: 0,
+          colorRgb,
+        });
+      }
 
       // 1. Outer Bloom Stroke Pass
-      ctx.shadowColor = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.85 * lineAlpha})`;
-      ctx.shadowBlur = 18;
-      ctx.strokeStyle = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.35 * lineAlpha})`;
-      ctx.lineWidth = 5;
+      ctx.shadowColor = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.8 * lineAlpha})`;
+      ctx.shadowBlur = 16;
+      ctx.strokeStyle = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.3 * lineAlpha})`;
+      ctx.lineWidth = 4.5;
 
       ctx.beginPath();
       let started = false;
@@ -205,17 +297,32 @@ export function GoldenRatioHeroAnimation() {
       }
       ctx.stroke();
 
-      // 2. Core Luminous Golden Spiral Stroke
+      // 2. Core Shimmering Multi-tone Golden Spiral Stroke
+      // Subtle dynamic shimmer animation offset
+      const shimmerOffset = (Math.sin(elapsedTime * 1.8 + lineIdx * 0.4) + 1) * 0.06;
+
       const strokeGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, maxRadius * 0.95);
+      // 0%: Pure luminous champagne core
       strokeGrad.addColorStop(0, `rgba(255, 253, 245, ${0.98 * lineAlpha})`);
-      strokeGrad.addColorStop(0.3, `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.95 * lineAlpha})`);
-      strokeGrad.addColorStop(0.8, `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.7 * lineAlpha})`);
+      // 25%: Warm Champagne Gold
+      strokeGrad.addColorStop(
+        Math.min(0.38, 0.22 + shimmerOffset),
+        `rgba(247, 226, 185, ${0.95 * lineAlpha})`
+      );
+      // 55%: Dynamic Film Amber accent
+      strokeGrad.addColorStop(
+        Math.min(0.72, 0.52 + shimmerOffset),
+        `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.85 * lineAlpha})`
+      );
+      // 82%: Deep cinematic copper highlight
+      strokeGrad.addColorStop(0.82, `rgba(195, 88, 32, ${0.7 * lineAlpha})`);
+      // 100%: Fade edge
       strokeGrad.addColorStop(1, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0)`);
 
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.9 * lineAlpha})`;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.85 * lineAlpha})`;
       ctx.strokeStyle = strokeGrad;
-      ctx.lineWidth = 3.2;
+      ctx.lineWidth = 2.8;
 
       ctx.beginPath();
       started = false;
@@ -237,9 +344,35 @@ export function GoldenRatioHeroAnimation() {
       ctx.restore();
     });
 
+    ctx.restore(); // Restore line rotation transform
+
+    // Render Dynamic Ember Particles in central coordinate space
+    ctx.save();
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life += dt;
+      if (p.life >= p.maxLife) {
+        particles.splice(i, 1);
+        continue;
+      }
+
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      const currentAlpha = p.alpha * (1 - p.life / p.maxLife);
+
+      ctx.fillStyle = `rgba(${p.colorRgb.r}, ${p.colorRgb.g}, ${p.colorRgb.b}, ${currentAlpha})`;
+      ctx.shadowColor = `rgba(${p.colorRgb.r}, ${p.colorRgb.g}, ${p.colorRgb.b}, ${currentAlpha})`;
+      ctx.shadowBlur = 2;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
     // Hairline Golden Angle Rays for geometric backdrop
     ctx.save();
-    ctx.strokeStyle = `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.07)`;
+    ctx.strokeStyle = `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.06)`;
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 8]);
 
@@ -252,8 +385,7 @@ export function GoldenRatioHeroAnimation() {
     }
     ctx.restore();
 
-    ctx.restore();
-    ctx.restore();
+    ctx.restore(); // Restore center translation
   };
 
   return (
