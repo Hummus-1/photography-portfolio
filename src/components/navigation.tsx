@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ApertureToggle } from "./aperture-toggle";
+import { Logo } from "@/components/logo";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -41,13 +42,32 @@ export function Navigation() {
     <header className="sticky top-0 z-50 w-full border-b border-foreground/10 bg-background/80 backdrop-blur-lg transition-colors duration-300">
       <div className="w-full px-4 sm:px-6 md:px-12 h-16 sm:h-20 flex items-center justify-between">
         
-        {/* Brand Logo */}
+        {/* Brand Logo Header */}
         <Link
           href="/"
-          className="group flex items-center gap-2 font-serif text-lg sm:text-xl md:text-2xl font-bold tracking-wider hover:opacity-85 transition-opacity"
+          className="group flex items-center gap-3 py-1 transition-all"
         >
-          <span>DANIEL GARCÍA</span>
-          <span className="text-[10px] tracking-widest font-sans font-normal opacity-40 relative -top-1 sm:-top-2">©</span>
+          {/* Viewfinder Icon Glass Container */}
+          <div className="relative p-1.5 sm:p-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] group-hover:border-film-amber/40 group-hover:bg-film-amber/10 group-hover:shadow-[0_0_15px_rgba(217,107,39,0.15)] transition-all duration-300 flex items-center justify-center">
+            <Logo className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
+            
+            {/* Corner Tech Accents */}
+            <span className="absolute -top-0.5 -left-0.5 w-1 h-1 border-t border-l border-foreground/40 group-hover:border-film-amber transition-colors duration-300" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-1 h-1 border-b border-r border-foreground/40 group-hover:border-film-amber transition-colors duration-300" />
+          </div>
+
+          {/* Brand Name & Subtitle */}
+          <div className="flex flex-col">
+            <div className="flex items-center font-serif text-base sm:text-lg md:text-xl font-bold tracking-wider text-foreground group-hover:text-foreground/90 transition-colors leading-tight">
+              <span>DANI'S STILLS</span>
+            </div>
+            
+            <div className="flex items-center gap-2 text-[9px] font-mono tracking-[0.2em] text-foreground/50 uppercase group-hover:text-film-amber/80 transition-colors leading-none mt-0.5">
+              <span>VISUAL ARCHIVE</span>
+              <span className="hidden lg:inline-block text-[8px] text-foreground/30">•</span>
+              <span className="hidden lg:inline-block text-[8px] text-foreground/40">35MM / RAW</span>
+            </div>
+          </div>
         </Link>
 
         {/* Desktop Links & Aperture Switcher */}
