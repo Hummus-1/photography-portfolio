@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { FolderOpen, Loader2, MapPin, Trash2, Eye, Search, Sparkles, SlidersHorizontal } from "lucide-react";
+import { isoToDDMMYYYY } from "@/components/ui/date-selector";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Album } from "@/lib/types";
@@ -180,7 +181,7 @@ export function AlbumSidebar({
                   {album.date && (
                     <>
                       <span>•</span>
-                      <span>{album.date}</span>
+                      <span>{isoToDDMMYYYY(album.date)}</span>
                     </>
                   )}
                 </div>

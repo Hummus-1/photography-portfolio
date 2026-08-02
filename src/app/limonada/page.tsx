@@ -14,6 +14,7 @@ import { EditorialGroupEditor } from "@/components/admin/editorial-group-editor"
 import { AlbumAutoFillToolbar } from "@/components/admin/album-auto-fill-toolbar";
 import { ThinkingOrb } from "@/components/admin/thinking-orb";
 import { Album, Photo } from "@/lib/types";
+import { isoToDDMMYYYY } from "@/components/ui/date-selector";
 
 export default function AdminPage() {
   const [session, setSession] = useState<any>(null);
@@ -358,7 +359,7 @@ export default function AdminPage() {
                         : activeAlbum.location || "Unspecified Location"}
                     </span>
                     <span>•</span>
-                    <span>{activeAlbum.date || "Date pending"}</span>
+                    <span>{activeAlbum.date ? isoToDDMMYYYY(activeAlbum.date) : "Date pending"}</span>
                   </div>
 
                   <a

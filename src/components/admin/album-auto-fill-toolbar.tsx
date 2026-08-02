@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Sparkles, Calendar, MapPin, Loader2, Check, RefreshCw, Wand2 } from "lucide-react";
+import { isoToDDMMYYYY } from "@/components/ui/date-selector";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -173,7 +174,7 @@ export function AlbumAutoFillToolbar({
             </span>
             {suggestions.earliestDate && (
               <span className="flex items-center gap-1.5 text-white/60 text-[10px]">
-                <Calendar className="h-3 w-3 text-film-amber" /> Earliest Photo: {suggestions.earliestDate}
+                <Calendar className="h-3 w-3 text-film-amber" /> Earliest Photo: {isoToDDMMYYYY(suggestions.earliestDate)}
               </span>
             )}
           </div>

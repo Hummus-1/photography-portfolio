@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Edit, MapPin, Tag, Star, Calendar, Globe, Sliders, Eye } from "lucide-react";
+import { Edit, MapPin, Tag, Calendar, Globe, Sliders, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Album } from "@/lib/types";
 import { LocationSelector } from "./location-selector";
 import { ThinkingOrb } from "./thinking-orb";
+import { DateSelector } from "@/components/ui/date-selector";
 
 interface EditAlbumDialogProps {
   album: Album;
@@ -54,7 +55,6 @@ export function EditAlbumDialog({
   const [locationId, setLocationId] = useState<string | null>(album.location_id || null);
   const [date, setDate] = useState(album.date || "");
   const [tags, setTags] = useState<string>(album.tags ? album.tags.join(", ") : "");
-  const [score, setScore] = useState<string>(album.score !== undefined && album.score !== null ? String(album.score) : "");
   const [isPublished, setIsPublished] = useState<boolean>(album.is_published || false);
   const [isFeatured, setIsFeatured] = useState<boolean>(album.is_featured || false);
   const [loading, setLoading] = useState(false);
@@ -68,7 +68,6 @@ export function EditAlbumDialog({
     setLocationId(album.location_id || null);
     setDate(album.date || "");
     setTags(album.tags ? album.tags.join(", ") : "");
-    setScore(album.score !== undefined && album.score !== null ? String(album.score) : "");
     setIsPublished(album.is_published || false);
     setIsFeatured(album.is_featured || false);
   }, [album]);
@@ -91,13 +90,6 @@ export function EditAlbumDialog({
     e.preventDefault();
     setLoading(true);
 
-    const parsedScore = score.trim() === "" ? null : parseFloat(score);
-    if (parsedScore !== null && (isNaN(parsedScore) || parsedScore < 0 || parsedScore > 10)) {
-      toast.error("Score must be a number between 0 and 10");
-      setLoading(false);
-      return;
-    }
-
     const tagsArray = tags
       .split(",")
       .map((t) => t.trim().toLowerCase())
@@ -119,7 +111,6 @@ export function EditAlbumDialog({
           location_id: locationId || null,
           date,
           tags: tagsArray,
-          score: parsedScore,
           is_published: isPublished,
           is_featured: isFeatured,
         })
@@ -170,7 +161,7 @@ export function EditAlbumDialog({
             Edit Collection Metadata
           </DialogTitle>
           <DialogDescription className="text-white/60 text-xs font-mono">
-            Configure title, URL slug, date, location hierarchy, tags, rating score, and visibility settings.
+            Configure title, URL slug, date, location hierarchy, tags, and visibility settings.
           </DialogDescription>
         </DialogHeader>
 
@@ -207,38 +198,18 @@ export function EditAlbumDialog({
               </div>
             </div>
 
-            {/* Date & Score */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-date" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
-                  <Calendar className="h-3 w-3" /> Date
-                </Label>
-                <Input
-                  id="edit-date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-score" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
-                  <Star className="h-3 w-3 text-film-amber" /> Album Rating Score (0 - 10)
-                </Label>
-                <Input
-                  id="edit-score"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="10"
-                  value={score}
-                  onChange={(e) => setScore(e.target.value)}
-                  placeholder="e.g. 9.2"
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
-                />
-              </div>
+            {/* Date */}
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-date" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
+                <Calendar className="h-3 w-3" /> Date
+              </Label>
+              <DateSelector
+                id="edit-date"
+                value={date}
+                onChange={(isoVal) => setDate(isoVal)}
+                className="rounded-none"
+                required
+              />
             </div>
 
             {/* Hierarchical Location Selector */}

@@ -36,8 +36,6 @@ interface LocationSelectorProps {
 }
 
 const ALLOWED_LOCATION_TYPES = [
-  "continent",
-  "country",
   "sub-region",
   "region",
   "island",
@@ -49,7 +47,6 @@ const ALLOWED_LOCATION_TYPES = [
 function normalizeType(typeStr: string): string {
   const lower = (typeStr || "").toLowerCase();
   if (ALLOWED_LOCATION_TYPES.includes(lower)) return lower;
-  if (lower.includes("country")) return "country";
   if (lower.includes("state") || lower.includes("province") || lower.includes("region")) return "region";
   if (lower.includes("island")) return "island";
   if (lower.includes("city") || lower.includes("town") || lower.includes("village")) return "city";
@@ -310,20 +307,22 @@ export function LocationSelector({
     lng?: number,
     currentLocs: LocationNode[] = locations
   ): Promise<LocationNode> => {
-    const type = normalizeType(rawType);
+    const lowerRawType = (rawType || "").toLowerCase().trim();
+    const isContinentOrCountry = lowerRawType === "continent" || lowerRawType === "country";
+
+    const type = isContinentOrCountry ? lowerRawType : normalizeType(rawType);
     let finalParentId = parentId;
 
-    // To satisfy Postgres CHECK constraint `check_parent_for_custom_locations`:
-    // Country & Sub-region types MUST have a non-null parent_id (pointing to a continent)
-    if ((type === "country" || type === "sub-region") && !finalParentId) {
-      finalParentId = getContinentIdForCountry(name, currentLocs);
-    }
-
-    // Check if node already exists under this parent
+    // Check if node already exists anywhere in currentLocs
     const existing = currentLocs.find(
-      (l) => l.name.toLowerCase() === name.toLowerCase() && l.parent_id === finalParentId
+      (l) => l.name.toLowerCase() === name.toLowerCase() && (isContinentOrCountry || l.parent_id === finalParentId)
     );
     if (existing) return existing;
+
+    // Disallow creation of new Continents and Countries
+    if (isContinentOrCountry) {
+      throw new Error(`Continents and countries cannot be added. "${name}" is not a recognized pre-existing continent or country.`);
+    }
 
     // Insert new node into Supabase
     const { data, error } = await supabase
@@ -371,28 +370,26 @@ export function LocationSelector({
       const currentLocList = latestLocs as LocationNode[];
       let parentNodeId: string | null = selectedRegionId || selectedCountryId || null;
 
-      // Automatically construct parent Country & Region hierarchy if missing
+      // Automatically connect to existing Country & Region hierarchy if available
       if (!parentNodeId && sugg.country) {
-        const countryNode = await getOrCreateLocationNode(
-          sugg.country,
-          "country",
-          null,
-          undefined,
-          undefined,
-          currentLocList
+        const countryName = sugg.country.toLowerCase();
+        const existingCountry = currentLocList.find(
+          (l) => l.name.toLowerCase() === countryName && (l.type === "country" || l.type === "continent")
         );
-        parentNodeId = countryNode.id;
+        if (existingCountry) {
+          parentNodeId = existingCountry.id;
 
-        if (sugg.state && sugg.state.toLowerCase() !== sugg.country.toLowerCase()) {
-          const regionNode = await getOrCreateLocationNode(
-            sugg.state,
-            "region",
-            countryNode.id,
-            undefined,
-            undefined,
-            currentLocList
-          );
-          parentNodeId = regionNode.id;
+          if (sugg.state && sugg.state.toLowerCase() !== countryName) {
+            const regionNode = await getOrCreateLocationNode(
+              sugg.state,
+              "region",
+              existingCountry.id,
+              undefined,
+              undefined,
+              currentLocList
+            );
+            parentNodeId = regionNode.id;
+          }
         }
       }
 
@@ -455,26 +452,22 @@ export function LocationSelector({
           const rawCountry = parts[parts.length - 1];
           const rawRegion = parts.length >= 3 ? parts[parts.length - 2] : undefined;
 
-          const countryNode = await getOrCreateLocationNode(
-            rawCountry,
-            "country",
-            null,
-            undefined,
-            undefined,
-            currentLocList
+          const existingCountry = currentLocList.find(
+            (l) => l.name.toLowerCase() === rawCountry.toLowerCase() && (l.type === "country" || l.type === "continent")
           );
-          parentId = countryNode.id;
-
-          if (rawRegion && rawRegion.toLowerCase() !== rawCountry.toLowerCase() && rawRegion.toLowerCase() !== cleanName.toLowerCase()) {
-            const regionNode = await getOrCreateLocationNode(
-              rawRegion,
-              "region",
-              countryNode.id,
-              undefined,
-              undefined,
-              currentLocList
-            );
-            parentId = regionNode.id;
+          if (existingCountry) {
+            parentId = existingCountry.id;
+            if (rawRegion && rawRegion.toLowerCase() !== rawCountry.toLowerCase()) {
+              const regionNode = await getOrCreateLocationNode(
+                rawRegion,
+                "region",
+                existingCountry.id,
+                undefined,
+                undefined,
+                currentLocList
+              );
+              parentId = regionNode.id;
+            }
           }
         }
       }

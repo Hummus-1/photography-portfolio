@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Album } from "@/lib/types";
 import { LocationSelector } from "./location-selector";
 import { ThinkingOrb } from "./thinking-orb";
+import { DateSelector } from "@/components/ui/date-selector";
 
 interface CreateAlbumDialogProps {
   isOpen: boolean;
@@ -148,12 +149,11 @@ export function CreateAlbumDialog({
                 <Label htmlFor="date" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
                   Date <span className="text-white/40 font-normal">(Optional - auto-detects earliest photo)</span>
                 </Label>
-                <Input
+                <DateSelector
                   id="date"
-                  type="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs h-10"
+                  onChange={(isoVal) => setDate(isoVal)}
+                  className="rounded-none"
                 />
               </div>
             </div>

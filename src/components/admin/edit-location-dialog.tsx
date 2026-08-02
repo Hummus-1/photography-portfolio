@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Check,
   Search,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,13 +48,16 @@ interface EditLocationDialogProps {
   onLocationUpdated: (updatedId: string, action: "update" | "delete") => void;
 }
 
+export function isProtectedLocationType(typeStr?: string | null): boolean {
+  const lower = (typeStr || "").toLowerCase().trim();
+  return lower === "continent" || lower === "country";
+}
+
 const LOCATION_TYPES = [
-  "continent",
-  "country",
   "region",
-  "island",
   "subregion",
-  "fjord",
+  "island",
+  "city",
   "spot",
   "custom",
 ];
@@ -189,6 +193,11 @@ export function EditLocationDialog({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isProtectedLocationType(node.type) || isProtectedLocationType(type)) {
+      toast.error("Continents and countries are protected system locations and cannot be edited.");
+      return;
+    }
+
     if (!name.trim()) {
       toast.error("Location name cannot be empty");
       return;
@@ -233,6 +242,11 @@ export function EditLocationDialog({
   };
 
   const handleDelete = async () => {
+    if (isProtectedLocationType(node.type)) {
+      toast.error("Continents and countries are protected system locations and cannot be removed.");
+      return;
+    }
+
     // Check if this location has children
     const childCount = allLocations.filter((l) => l.parent_id === node.id).length;
 
@@ -263,6 +277,8 @@ export function EditLocationDialog({
     }
   };
 
+  const isProtected = isProtectedLocationType(node.type);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
@@ -282,6 +298,13 @@ export function EditLocationDialog({
 
         {/* Scrollable Inner Body */}
         <div data-lenis-prevent className="flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-7 space-y-5">
+          {isProtected && (
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-center gap-2">
+              <Lock className="h-4 w-4 shrink-0 text-amber-400" />
+              <span>Continents and countries are protected system locations and cannot be edited, re-parented, or removed.</span>
+            </div>
+          )}
+
           <form id="edit-location-form" onSubmit={handleSave} className="space-y-5">
             {/* Current Path Info */}
             <div className="p-3 bg-white/5 border border-white/10 text-xs font-mono">
@@ -303,7 +326,8 @@ export function EditLocationDialog({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Location Name"
-                  className="bg-black/30 border-white/10 rounded-none text-white focus-visible:ring-film-amber text-xs"
+                  disabled={isProtected}
+                  className="bg-black/30 border-white/10 rounded-none text-white focus-visible:ring-film-amber text-xs disabled:opacity-50"
                   required
                 />
               </div>
@@ -315,13 +339,20 @@ export function EditLocationDialog({
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
-                  className="w-full h-9 bg-black/30 border border-white/10 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
+                  disabled={isProtected}
+                  className="w-full h-9 bg-black/30 border border-white/10 text-white text-xs px-3 focus:outline-none focus:border-film-amber disabled:opacity-50"
                 >
-                  {LOCATION_TYPES.map((t) => (
-                    <option key={t} value={t} className="bg-[#14171a] text-white">
-                      {t.toUpperCase()}
+                  {isProtected ? (
+                    <option value={node.type} className="bg-[#14171a] text-white">
+                      {node.type.toUpperCase()} (PROTECTED)
                     </option>
-                  ))}
+                  ) : (
+                    LOCATION_TYPES.map((t) => (
+                      <option key={t} value={t} className="bg-[#14171a] text-white">
+                        {t.toUpperCase()}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
@@ -461,8 +492,8 @@ export function EditLocationDialog({
             type="button"
             variant="outline"
             onClick={handleDelete}
-            disabled={deleting || saving}
-            className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-none font-mono text-xs uppercase tracking-wider h-9"
+            disabled={isProtected || deleting || saving}
+            className="border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-none font-mono text-xs uppercase tracking-wider h-9 disabled:opacity-30"
           >
             {deleting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -486,8 +517,8 @@ export function EditLocationDialog({
             <Button
               form="edit-location-form"
               type="submit"
-              disabled={saving || deleting}
-              className="bg-film-amber hover:bg-film-amber/90 text-white font-bold rounded-none uppercase text-xs tracking-wider h-9 px-4 cursor-pointer"
+              disabled={isProtected || saving || deleting}
+              className="bg-film-amber hover:bg-film-amber/90 text-white font-bold rounded-none uppercase text-xs tracking-wider h-9 px-4 cursor-pointer disabled:opacity-30"
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
