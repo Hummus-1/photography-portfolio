@@ -2,9 +2,13 @@
 
 import React, { useRef, useEffect } from "react";
 
-// Golden Ratio Constant Phi
+// Golden Ratio Constants
 const PHI = (1 + Math.sqrt(5)) / 2; // ~1.618033988749895
 const GOLDEN_ANGLE = 137.50776405003785; // degrees
+const B_PARAM = Math.log(PHI) / (Math.PI / 2); // ~0.3063489
+const MAX_TOTAL_THETA = Math.log(0.95 / 0.0055) / B_PARAM; // ~16.8166 rad
+const PEAK_PAUSE_DURATION = 2.0; // 2s hold at max length
+const ROOT_PAUSE_DURATION = 0.1;
 
 interface RGB {
   r: number;
@@ -34,18 +38,6 @@ interface LineConfig {
   legDuration: number;
 }
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  alpha: number;
-  maxLife: number;
-  life: number;
-  colorRgb: { r: number; g: number; b: number };
-}
-
 export function GoldenRatioHeroAnimation() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -55,7 +47,10 @@ export function GoldenRatioHeroAnimation() {
   const rotationRef = useRef<number>(0);
   const startTimeRef = useRef<number | null>(null);
   const lineConfigsRef = useRef<LineConfig[]>([]);
-  const particlesRef = useRef<Particle[]>([]);
+  
+  // Performance optimization refs
+  const accentRgbRef = useRef<RGB>({ r: 217, g: 107, b: 39 });
+  const frameCountRef = useRef<number>(0);
 
   // Generate randomized line speeds and start delays once on component initialization
   if (lineConfigsRef.current.length === 0) {
@@ -98,6 +93,14 @@ export function GoldenRatioHeroAnimation() {
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.scale(dpr, dpr);
+
+      // Immediately fetch accent color on resize
+      const rootStyles = getComputedStyle(document.documentElement);
+      const accentHex =
+        rootStyles.getPropertyValue("--film-amber").trim() ||
+        rootStyles.getPropertyValue("--accent").trim() ||
+        "#d96b27";
+      accentRgbRef.current = hexToRgb(accentHex);
     };
 
     resizeCanvas();
@@ -113,6 +116,17 @@ export function GoldenRatioHeroAnimation() {
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
+      // Periodically refresh accent color every 60 frames (~1 sec) instead of every frame
+      if (frameCountRef.current % 60 === 0) {
+        const rootStyles = getComputedStyle(document.documentElement);
+        const accentHex =
+          rootStyles.getPropertyValue("--film-amber").trim() ||
+          rootStyles.getPropertyValue("--accent").trim() ||
+          "#d96b27";
+        accentRgbRef.current = hexToRgb(accentHex);
+      }
+      frameCountRef.current++;
+
       // Slow background rotation for visual grace
       rotationRef.current += dt * 0.025;
 
@@ -121,21 +135,13 @@ export function GoldenRatioHeroAnimation() {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Fetch dynamic website accent color (--film-amber / --accent)
-      const rootStyles = getComputedStyle(document.documentElement);
-      const accentHex =
-        rootStyles.getPropertyValue("--film-amber").trim() ||
-        rootStyles.getPropertyValue("--accent").trim() ||
-        "#d96b27";
-      const accentRgb = hexToRgb(accentHex);
-
       const cx = width / 2;
       const cy = height / 2;
       // Preserve full animation scale regardless of reduced component height
       const scaleBase = Math.max(width * 0.7, height);
       const maxRadius = Math.min(scaleBase * 0.42, 340);
 
-      // Draw 16 Golden Ratio Lines with randomized speeds, particles & shimmer
+      // Draw 16 Golden Ratio Lines with optimized single-pass Path2D rendering
       drawDirectionalSpirals(
         ctx,
         cx,
@@ -143,10 +149,8 @@ export function GoldenRatioHeroAnimation() {
         maxRadius,
         rotationRef.current,
         elapsedTime,
-        dt,
-        accentRgb,
-        lineConfigsRef.current,
-        particlesRef.current
+        accentRgbRef.current,
+        lineConfigsRef.current
       );
 
       animFrameId.current = requestAnimationFrame(render);
@@ -160,7 +164,7 @@ export function GoldenRatioHeroAnimation() {
     };
   }, []);
 
-  // Renderer for 16 Golden Ratio Lines offset by 22.5-degree 2D directions with particles & multi-tone shimmer
+  // Renderer for 16 Golden Ratio Lines offset by 22.5-degree 2D directions with multi-tone shimmer
   const drawDirectionalSpirals = (
     ctx: CanvasRenderingContext2D,
     cx: number,
@@ -168,10 +172,8 @@ export function GoldenRatioHeroAnimation() {
     maxRadius: number,
     rotation: number,
     elapsedTime: number,
-    dt: number,
     accent: RGB,
-    lineConfigs: LineConfig[],
-    particles: Particle[]
+    lineConfigs: LineConfig[]
   ) => {
     ctx.save();
     ctx.translate(cx, cy);
@@ -186,16 +188,7 @@ export function GoldenRatioHeroAnimation() {
     ctx.arc(0, 0, maxRadius * 1.08, 0, Math.PI * 2);
     ctx.fill();
 
-    // Logarithmic Spiral parameters
-    const b = Math.log(PHI) / (Math.PI / 2); // ~0.3063489
     const a = maxRadius * 0.0055;
-    
-    // Match maxTotalTheta precisely to maxRadius * 0.95 boundary (~16.816 rad)
-    const maxTotalTheta = Math.log(0.95 / 0.0055) / b;
-
-    // Pause durations: 2.0s hold at max length as requested
-    const peakPauseDuration = 2.0;
-    const rootPauseDuration = 0.1;
 
     ctx.save();
     ctx.rotate(rotation);
@@ -204,19 +197,17 @@ export function GoldenRatioHeroAnimation() {
       if (elapsedTime < config.startTime) return; // Wait for line's randomized start delay
 
       const activeTime = elapsedTime - config.startTime;
-      const cycleDuration = config.legDuration * 2 + peakPauseDuration + rootPauseDuration;
+      const cycleDuration = config.legDuration * 2 + PEAK_PAUSE_DURATION + ROOT_PAUSE_DURATION;
       const cycleTime = activeTime % cycleDuration;
 
       // Calculate progress [0, 1]: forming outward -> 2s hold at max length -> retracting -> root turnaround
       let rawProgress = 0;
-      let isForming = false;
       if (cycleTime <= config.legDuration) {
         rawProgress = cycleTime / config.legDuration; // Forming outward
-        isForming = true;
-      } else if (cycleTime <= config.legDuration + peakPauseDuration) {
+      } else if (cycleTime <= config.legDuration + PEAK_PAUSE_DURATION) {
         rawProgress = 1.0; // Hold at max length for 2 seconds
-      } else if (cycleTime <= config.legDuration * 2 + peakPauseDuration) {
-        const retractTime = cycleTime - (config.legDuration + peakPauseDuration);
+      } else if (cycleTime <= config.legDuration * 2 + PEAK_PAUSE_DURATION) {
+        const retractTime = cycleTime - (config.legDuration + PEAK_PAUSE_DURATION);
         rawProgress = 1.0 - retractTime / config.legDuration; // Retracting back to root
       } else {
         rawProgress = 0.0; // Root turnaround
@@ -225,7 +216,7 @@ export function GoldenRatioHeroAnimation() {
       // Ease-Out curve: fast burst at the beginning, graceful deceleration at the end of line formation
       const easedProgress = 1 - Math.pow(1 - rawProgress, 2.2);
 
-      const currentMaxTheta = maxTotalTheta * easedProgress;
+      const currentMaxTheta = MAX_TOTAL_THETA * easedProgress;
       if (currentMaxTheta <= 0.02) return;
 
       ctx.save();
@@ -234,44 +225,21 @@ export function GoldenRatioHeroAnimation() {
       // Alpha modifier across 16 lines for clean depth layering
       const lineAlpha = 1.0 - (lineIdx % 4) * 0.05 - Math.floor(lineIdx / 4) * 0.03;
 
-      // Calculate head coordinates of the growing spiral head tip
-      const headTheta = currentMaxTheta;
-      const headRadius = a * Math.exp(b * headTheta);
+      // Single-pass Path2D generation: halves trigonometric calculations per frame
+      const linePath = new Path2D();
+      let started = false;
+      for (let theta = 0; theta <= currentMaxTheta; theta += 0.016) {
+        const radius = a * Math.exp(B_PARAM * theta);
+        if (radius > maxRadius * 0.95) break;
+        const x = radius * Math.cos(theta);
+        const y = radius * Math.sin(theta);
 
-      if (isForming && headRadius <= maxRadius * 0.95 && Math.random() < 0.35) {
-        // Compute world coordinates relative to center translation (cx, cy)
-        const localHeadX = headRadius * Math.cos(headTheta);
-        const localHeadY = headRadius * Math.sin(headTheta);
-
-        // Rotate by config.dirAngle + rotation
-        const totalAngle = config.dirAngle + rotation;
-        const worldX = localHeadX * Math.cos(totalAngle) - localHeadY * Math.sin(totalAngle);
-        const worldY = localHeadX * Math.sin(totalAngle) + localHeadY * Math.cos(totalAngle);
-
-        // Spawn ember particle
-        const pAngle = totalAngle + (Math.random() - 0.5) * 0.8;
-        const pSpeed = 12 + Math.random() * 28;
-
-        // Alternate color palette: Champagne Gold, Warm Amber, Copper
-        const randColor = Math.random();
-        let colorRgb = { r: 250, g: 235, b: 195 }; // Champagne Gold
-        if (randColor > 0.6) {
-          colorRgb = accent; // Warm Film Amber
-        } else if (randColor > 0.3) {
-          colorRgb = { r: 210, g: 105, b: 40 }; // Copper / Burnt Sienna
+        if (!started) {
+          linePath.moveTo(x, y);
+          started = true;
+        } else {
+          linePath.lineTo(x, y);
         }
-
-        particles.push({
-          x: worldX,
-          y: worldY,
-          vx: Math.cos(pAngle) * pSpeed,
-          vy: Math.sin(pAngle) * pSpeed,
-          size: 0.35 + Math.random() * 0.5,
-          alpha: 0.85 * lineAlpha,
-          maxLife: 0.7 + Math.random() * 0.9,
-          life: 0,
-          colorRgb,
-        });
       }
 
       // 1. Outer Bloom Stroke Pass
@@ -279,96 +247,34 @@ export function GoldenRatioHeroAnimation() {
       ctx.shadowBlur = 16;
       ctx.strokeStyle = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.3 * lineAlpha})`;
       ctx.lineWidth = 4.5;
-
-      ctx.beginPath();
-      let started = false;
-      for (let theta = 0; theta <= currentMaxTheta; theta += 0.012) {
-        const radius = a * Math.exp(b * theta);
-        if (radius > maxRadius * 0.95) break;
-        const x = radius * Math.cos(theta);
-        const y = radius * Math.sin(theta);
-
-        if (!started) {
-          ctx.moveTo(x, y);
-          started = true;
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.stroke();
+      ctx.stroke(linePath);
 
       // 2. Core Shimmering Multi-tone Golden Spiral Stroke
-      // Subtle dynamic shimmer animation offset
       const shimmerOffset = (Math.sin(elapsedTime * 1.8 + lineIdx * 0.4) + 1) * 0.06;
 
       const strokeGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, maxRadius * 0.95);
-      // 0%: Pure luminous champagne core
       strokeGrad.addColorStop(0, `rgba(255, 253, 245, ${0.98 * lineAlpha})`);
-      // 25%: Warm Champagne Gold
       strokeGrad.addColorStop(
         Math.min(0.38, 0.22 + shimmerOffset),
         `rgba(247, 226, 185, ${0.95 * lineAlpha})`
       );
-      // 55%: Dynamic Film Amber accent
       strokeGrad.addColorStop(
         Math.min(0.72, 0.52 + shimmerOffset),
         `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.85 * lineAlpha})`
       );
-      // 82%: Deep cinematic copper highlight
       strokeGrad.addColorStop(0.82, `rgba(195, 88, 32, ${0.7 * lineAlpha})`);
-      // 100%: Fade edge
       strokeGrad.addColorStop(1, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0)`);
 
       ctx.shadowBlur = 10;
       ctx.shadowColor = `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.85 * lineAlpha})`;
       ctx.strokeStyle = strokeGrad;
       ctx.lineWidth = 2.8;
-
-      ctx.beginPath();
-      started = false;
-      for (let theta = 0; theta <= currentMaxTheta; theta += 0.012) {
-        const radius = a * Math.exp(b * theta);
-        if (radius > maxRadius * 0.95) break;
-        const x = radius * Math.cos(theta);
-        const y = radius * Math.sin(theta);
-
-        if (!started) {
-          ctx.moveTo(x, y);
-          started = true;
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.stroke();
+      ctx.stroke(linePath);
 
       ctx.restore();
     });
 
     ctx.restore(); // Restore line rotation transform
-
-    // Render Dynamic Ember Particles in central coordinate space
-    ctx.save();
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      p.life += dt;
-      if (p.life >= p.maxLife) {
-        particles.splice(i, 1);
-        continue;
-      }
-
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      const currentAlpha = p.alpha * (1 - p.life / p.maxLife);
-
-      ctx.fillStyle = `rgba(${p.colorRgb.r}, ${p.colorRgb.g}, ${p.colorRgb.b}, ${currentAlpha})`;
-      ctx.shadowColor = `rgba(${p.colorRgb.r}, ${p.colorRgb.g}, ${p.colorRgb.b}, ${currentAlpha})`;
-      ctx.shadowBlur = 2;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.restore();
 
     // Hairline Golden Angle Rays for geometric backdrop
     ctx.save();
