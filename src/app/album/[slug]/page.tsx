@@ -100,7 +100,7 @@ export default async function AlbumPage({ params, searchParams }: AlbumPageProps
         <div className="bg-amber-500/20 border-b border-amber-500/30 text-amber-300 px-4 py-2.5 text-xs font-mono text-center flex items-center justify-center gap-2">
           <Eye className="h-4 w-4 text-amber-400 shrink-0" />
           <span>UNPUBLISHED DRAFT PREVIEW — Only visible in admin preview mode</span>
-          <a href="/admin" className="underline text-white hover:text-amber-200 ml-3">
+          <a href="/limonada" className="underline text-white hover:text-amber-200 ml-3">
             ← Return to Dashboard
           </a>
         </div>

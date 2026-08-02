@@ -47,7 +47,7 @@ export function CuratorialManifesto() {
               Volcanic & Sub-Arctic Expeditions
             </h3>
             <p className="text-sm font-sans text-foreground/70 leading-relaxed">
-              Seeking out isolated landscapes—from basalt sea stacks in Tenerife to glacial fjords in Greenland—where geological time is tangible and weather shapes the horizon.
+              Seeking out isolated landscapes—from basalt sea stacks in Tenerife to glacial fjords in Norway—where geological time is tangible and weather shapes the horizon.
             </p>
           </motion.div>
 

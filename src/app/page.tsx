@@ -132,6 +132,11 @@ export default async function HomePage() {
                     </Link>
                   </li>
                   <li>
+                    <Link href="/how-it-works" className="hover:text-film-amber transition-colors">
+                      How It Works
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/about" className="hover:text-film-amber transition-colors">
                       About & Contact
                     </Link>

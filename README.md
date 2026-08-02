@@ -17,7 +17,7 @@ Built with **Next.js 15**, **TypeScript**, and **Tailwind CSS v4**, the applicat
    - Extracted EXIF camera metadata (Camera, Lens, ISO, Aperture, Shutter Speed, Focal Length).
    - 5 dominant color palette circles extracted from the image.
    - User-defined and AI-generated hashtags.
-7. **Admin Panel (`/admin`)**: A secure drag-and-drop dashboard to create albums, manage publication status, and upload photos.
+7. **Admin Panel (`/limonada`)**: A secure drag-and-drop dashboard to create albums, manage publication status, and upload photos.
 8. **Automatic AI Tagging Pipeline**: Photo uploads are sent to **Cloudflare Workers AI (CLIP model)** to automatically generate tags describing objects, setting, and mood.
 
 ---
@@ -71,6 +71,6 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the homepage.
-Open [http://localhost:3000/admin](http://localhost:3000/admin) to log in and upload your collections.
+Open [http://localhost:3000/limonada](http://localhost:3000/limonada) to log in and upload your collections.
 
-*Note: If your database is empty, the homepage will automatically fall back to loading 3 mock collections (Greenland, Iceland, Mongolia) with sample photos, EXIF data, and palettes, allowing you to preview the design immediately.*
+*Note: If your database is empty, the homepage will automatically fall back to loading 3 mock collections (Norway, Iceland, Mongolia) with sample photos, EXIF data, and palettes, allowing you to preview the design immediately.*

@@ -6,7 +6,7 @@ import { Logo } from "@/components/logo";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Menu, X, Compass, Images, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, Compass, Images, User, LayoutDashboard, Cpu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Navigation() {
@@ -65,7 +65,7 @@ export function Navigation() {
             <div className="flex items-center gap-2 text-[9px] font-mono tracking-[0.2em] text-foreground/50 uppercase group-hover:text-film-amber/80 transition-colors leading-none mt-0.5">
               <span>VISUAL ARCHIVE</span>
               <span className="hidden lg:inline-block text-[8px] text-foreground/30">•</span>
-              <span className="hidden lg:inline-block text-[8px] text-foreground/40">35MM / RAW</span>
+              <span className="hidden lg:inline-block text-[8px] text-foreground/40">DIGITAL / RAW</span>
             </div>
           </div>
         </Link>
@@ -99,17 +99,29 @@ export function Navigation() {
 
             {isAdmin && (
               <Link
-                href="/admin"
+                href="/limonada"
                 className={`relative py-1 transition-colors duration-300 ${
-                  pathname?.startsWith("/admin") ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+                  pathname?.startsWith("/limonada") ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
                 }`}
               >
                 <span>Dashboard</span>
-                {pathname?.startsWith("/admin") && (
+                {pathname?.startsWith("/limonada") && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
                 )}
               </Link>
             )}
+
+            <Link
+              href="/how-it-works"
+              className={`relative py-1 transition-colors duration-300 ${
+                pathname === "/how-it-works" ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+              }`}
+            >
+              <span>How It Works</span>
+              {pathname === "/how-it-works" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+              )}
+            </Link>
 
             <Link
               href="/about"
@@ -176,9 +188,9 @@ export function Navigation() {
 
             {isAdmin && (
               <Link
-                href="/admin"
+                href="/limonada"
                 className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
-                  pathname?.startsWith("/admin")
+                  pathname?.startsWith("/limonada")
                     ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
                     : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
                 }`}
@@ -187,6 +199,18 @@ export function Navigation() {
                 <span>Dashboard</span>
               </Link>
             )}
+
+            <Link
+              href="/how-it-works"
+              className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
+                pathname === "/how-it-works"
+                  ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
+                  : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
+              }`}
+            >
+              <Cpu className="h-4 w-4" />
+              <span>How It Works</span>
+            </Link>
 
             <Link
               href="/about"

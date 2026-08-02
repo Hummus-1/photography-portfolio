@@ -188,7 +188,7 @@ export default function AboutPage() {
                 </p>
 
                 <p>
-                  This visual archive documents my photographic expeditions across volcanic landscapes, ocean headlands, and sub-arctic wilderness—from basalt columns in Tenerife to iceberg-filled fjords in Greenland.
+                  This visual archive documents my photographic expeditions across volcanic landscapes, ocean headlands, and sub-arctic wilderness—from basalt columns in Tenerife to iceberg-filled fjords in Norway.
                 </p>
               </div>
 
