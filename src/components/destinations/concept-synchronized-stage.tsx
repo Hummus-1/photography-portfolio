@@ -261,7 +261,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                                 {album.title}
                               </h4>
                               <span className="text-[11px] font-mono text-foreground/40 shrink-0">
-                                {new Date(album.date).getFullYear()}
+                                {album.date ? new Date(album.date).getFullYear() : "Pending"}
                               </span>
                             </div>
 

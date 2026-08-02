@@ -71,7 +71,8 @@ export function Lightbox({
     return () => clearInterval(interval);
   }, [isAutoplay, isOpen, selectedIndex]);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return "Date pending";
     try {
       const dateObj = new Date(dateStr);
       if (isNaN(dateObj.getTime())) return dateStr;
