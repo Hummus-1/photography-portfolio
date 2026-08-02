@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Album } from "@/lib/types";
 import { ThinkingOrb } from "./thinking-orb";
+import { isoToDDMMYYYY } from "@/components/ui/date-selector";
 import exifr from "exifr";
 
 interface ImageUploaderProps {
@@ -248,7 +249,7 @@ export function ImageUploader({
             toast.success(`AI Title Generated: "${autoFillData.appliedUpdates.title}"`);
           }
           if (autoFillData.earliestDate) {
-            toast.info(`Album date set to earliest photo date: ${autoFillData.earliestDate}`);
+            toast.info(`Album date set to earliest photo date: ${isoToDDMMYYYY(autoFillData.earliestDate)}`);
           }
         }
       } catch (autoErr) {

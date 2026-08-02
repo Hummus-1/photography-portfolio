@@ -273,9 +273,9 @@ Photo Collection Summary:
     // 7. Determine database updates
     const updates: Record<string, any> = {};
 
-    // Update date to earlier EXIF creation date if album date is not defined or is empty
+    // Update date to earliest photo EXIF creation date if album date is empty or if photos reveal an earlier date
     const isDateNotDefined = !album.date || album.date.trim() === "";
-    if (earliestDateStr && (isDateNotDefined || album.date !== earliestDateStr)) {
+    if (earliestDateStr && (isDateNotDefined || earliestDateStr < album.date)) {
       updates.date = earliestDateStr;
     }
 

@@ -98,17 +98,6 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
 
   return (
     <div className="w-full flex flex-col items-center relative">
-      {/* Floating Return to Spatial Index Bar */}
-      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 md:left-12 z-30">
-        <Link
-          href="/destinations"
-          style={{ borderColor: `${accentColor}30` }}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-background/85 backdrop-blur-md border text-[11px] sm:text-xs font-mono uppercase tracking-widest text-foreground/75 hover:border-film-amber/60 transition-all shadow-md group"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-1 transition-transform" style={{ color: accentColor }} />
-          <span>Spatial Index</span>
-        </Link>
-      </div>
 
       {/* Hero Section */}
       <Hero

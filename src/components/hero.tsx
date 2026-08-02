@@ -118,12 +118,12 @@ export function Hero({
         {/* Left Editorial Metadata */}
         <div className="lg:col-span-6 space-y-6">
           {/* Single Sleek Editorial Metadata Line */}
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono uppercase tracking-widest text-foreground/75">
-            <span className="font-bold flex items-center gap-1.5" style={{ color: accentColor }}>
+           <div className="flex flex-col gap-2 text-xs font-mono uppercase tracking-widest text-foreground/75">
+          <span className="font-bold flex items-center gap-1.5" style={{ color: accentColor }}>
               <Aperture className="h-3.5 w-3.5" />
               Series Exhibition
             </span>
-            <span className="text-foreground/30">•</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono uppercase tracking-widest text-foreground/75">
             <span className="font-medium text-foreground/80">{photos.length} Stills</span>
             <span className="text-foreground/30">•</span>
             <span>{formatDate(album.date)}</span>
@@ -132,7 +132,8 @@ export function Hero({
               <MapPin className="h-3.5 w-3.5" style={{ color: accentColor }} />
               {album.location || "Earth"}
             </span>
-          </div>
+            </div>
+            </div>
 
           <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.04]">
             {album.title}

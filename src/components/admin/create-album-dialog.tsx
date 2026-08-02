@@ -147,12 +147,13 @@ export function CreateAlbumDialog({
 
               <div className="space-y-1.5">
                 <Label htmlFor="date" className="font-mono text-[10px] uppercase tracking-widest text-white/70">
-                  Date <span className="text-white/40 font-normal">(Optional - auto-detects earliest photo)</span>
+                  Date <span className="text-white/40 font-normal">(Optional - auto-detects from earliest photo)</span>
                 </Label>
                 <DateSelector
                   id="date"
                   value={date}
                   onChange={(isoVal) => setDate(isoVal)}
+                  placeholder="DD/MM/YYYY (Leave empty to auto-detect)"
                   className="rounded-none"
                 />
               </div>
