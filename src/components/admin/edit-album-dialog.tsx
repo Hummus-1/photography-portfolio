@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Edit, MapPin, Tag, Calendar, Globe, Sliders, Eye } from "lucide-react";
+import { Edit, MapPin, Tag, Calendar, Globe, Sliders, Eye, Palette, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +55,7 @@ export function EditAlbumDialog({
   const [locationId, setLocationId] = useState<string | null>(album.location_id || null);
   const [date, setDate] = useState(album.date || "");
   const [tags, setTags] = useState<string>(album.tags ? album.tags.join(", ") : "");
+  const [customHeroColor, setCustomHeroColor] = useState<string>(album.custom_hero_color || "");
   const [isPublished, setIsPublished] = useState<boolean>(album.is_published || false);
   const [isFeatured, setIsFeatured] = useState<boolean>(album.is_featured || false);
   const [loading, setLoading] = useState(false);
@@ -68,6 +69,7 @@ export function EditAlbumDialog({
     setLocationId(album.location_id || null);
     setDate(album.date || "");
     setTags(album.tags ? album.tags.join(", ") : "");
+    setCustomHeroColor(album.custom_hero_color || "");
     setIsPublished(album.is_published || false);
     setIsFeatured(album.is_featured || false);
   }, [album]);
@@ -111,6 +113,7 @@ export function EditAlbumDialog({
           location_id: locationId || null,
           date,
           tags: tagsArray,
+          custom_hero_color: customHeroColor.trim() || null,
           is_published: isPublished,
           is_featured: isFeatured,
         })
@@ -253,6 +256,62 @@ export function EditAlbumDialog({
                 rows={3}
                 className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber resize-none text-xs"
               />
+            </div>
+
+            {/* Custom Hero Color Override */}
+            <div className="space-y-2 border-t border-white/10 pt-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="edit-hero-color" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1.5">
+                  <Palette className="h-3.5 w-3.5 text-film-amber" /> Hero Accent Color (Custom Override)
+                </Label>
+                {customHeroColor && (
+                  <button
+                    type="button"
+                    onClick={() => setCustomHeroColor("")}
+                    className="text-[10px] font-mono text-film-amber hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="h-2.5 w-2.5" /> Reset to Auto
+                  </button>
+                )}
+              </div>
+
+              {/* Swatch Pickers if cover_color_palette available */}
+              {album.cover_color_palette && album.cover_color_palette.length > 0 && (
+                <div className="flex items-center gap-2 pb-1">
+                  <span className="text-[10px] font-mono text-white/50">Palette Swatches:</span>
+                  <div className="flex items-center gap-1.5">
+                    {album.cover_color_palette.map((colorHex, idx) => (
+                      <button
+                        key={`swatch-${idx}-${colorHex}`}
+                        type="button"
+                        onClick={() => setCustomHeroColor(colorHex)}
+                        style={{ backgroundColor: colorHex }}
+                        className={`w-5 h-5 rounded-full border cursor-pointer transition-transform hover:scale-110 ${
+                          customHeroColor.toLowerCase() === colorHex.toLowerCase() ? "border-white ring-2 ring-film-amber scale-110" : "border-white/20 opacity-80 hover:opacity-100"
+                        }`}
+                        title={`Select swatch ${colorHex}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  id="edit-hero-color-picker"
+                  value={customHeroColor || "#D96B27"}
+                  onChange={(e) => setCustomHeroColor(e.target.value)}
+                  className="w-9 h-9 p-0.5 rounded bg-white/5 border border-white/20 cursor-pointer"
+                />
+                <Input
+                  id="edit-hero-color"
+                  value={customHeroColor}
+                  onChange={(e) => setCustomHeroColor(e.target.value)}
+                  placeholder="Auto-extracted from cover photo"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs max-w-xs"
+                />
+              </div>
             </div>
 
             {/* Visibility Controls */}

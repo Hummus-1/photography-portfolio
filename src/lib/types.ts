@@ -52,6 +52,7 @@ export interface Album {
   is_published: boolean;
   tags: string[];
   cover_color_palette?: string[];
+  custom_hero_color?: string | null;
   score?: number | null;
   lat?: number;
   lng?: number;

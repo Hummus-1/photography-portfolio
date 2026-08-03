@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import exifr from "exifr";
 import { v4 as uuidv4 } from "uuid";
+import { extractQuantizedPalette } from "@/lib/color-utils";
 
 // Define candidates for CLIP classification
 const CANDIDATE_PROMPTS = [
@@ -106,25 +107,13 @@ export async function POST(request: NextRequest) {
     const height = metadata.height || 2000;
     const aspect_ratio = parseFloat((width / height).toFixed(2));
 
-    // 6. Extract dominant color palette (5 representative colors)
-    // We resize down to 5x5 using sharp to aggregate regional average colors quickly and safely.
-    const tinyBuffer = await sharpImg
-      .resize(5, 5, { fit: "fill" })
+    // 6. Extract dominant color palette (5 representative colors) using Sharp quantization
+    const sampleBuffer = await sharpImg
+      .resize(64, 64, { fit: "cover" })
       .raw()
       .toBuffer();
 
-    const sampleIndices = [0, 6, 12, 18, 24]; // diagonal and center samples in the 25-pixel grid
-    const color_palette: string[] = [];
-    for (const idx of sampleIndices) {
-      const offset = idx * 3; // 3 bytes per pixel (RGB)
-      if (offset + 2 < tinyBuffer.length) {
-        const r = tinyBuffer[offset];
-        const g = tinyBuffer[offset + 1];
-        const b = tinyBuffer[offset + 2];
-        const hex = "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0")).join("");
-        color_palette.push(hex.toUpperCase());
-      }
-    }
+    const color_palette: string[] = extractQuantizedPalette(new Uint8Array(sampleBuffer), 3, 5);
 
     // 7. Compress images for web delivery
     // Main optimized image (max 2048px)

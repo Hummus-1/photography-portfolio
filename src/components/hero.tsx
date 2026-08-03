@@ -6,7 +6,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Calendar, MapPin, ChevronDown, Aperture, Images } from "lucide-react";
 import { Album, Photo } from "@/lib/types";
 import { ColorPalettePill } from "@/components/color-palette-pill";
-import { selectBestAccentColor } from "@/lib/color-utils";
+import { selectBestAccentColor, selectBestSecondaryColor, getHeroGlowOpacity } from "@/lib/color-utils";
 
 interface HeroProps {
   album: Album;
@@ -68,9 +68,10 @@ export function Hero({
     ? albumPalette
     : [albumPalette?.[0] || "#d96b27", "#1f2937", "#4b5563", "#9ca3af", "#e5e7eb"];
 
-  // Dynamic punchy accent color selection
-  const accentColor = selectBestAccentColor(palette, "#d96b27");
-  const secondaryColor = palette[1] || palette[0] || accentColor;
+  // Dynamic punchy accent color selection with optional manual hero override & contrast check
+  const accentColor = selectBestAccentColor(palette, "#d96b27", album.custom_hero_color);
+  const secondaryColor = selectBestSecondaryColor(palette, accentColor);
+  const glowOpacity = getHeroGlowOpacity(accentColor, true);
 
   const displayUrl = coverPhoto?.url || album.cover_image_url || "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=1600";
 
@@ -86,7 +87,12 @@ export function Hero({
     <section
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative w-full min-h-[88vh] lg:min-h-[92vh] bg-background overflow-hidden flex flex-col items-center justify-center border-b border-foreground/10 select-none pt-20 pb-12"
+      style={{
+        "--hero-accent": accentColor,
+        "--hero-secondary": secondaryColor,
+        "--hero-glow-opacity": glowOpacity,
+      } as React.CSSProperties}
+      className="relative w-full min-h-[88vh] lg:min-h-[92vh] bg-background overflow-hidden flex flex-col items-center justify-center border-b border-foreground/10 select-none pt-20 pb-12 transition-colors duration-700"
     >
       {/* Multi-Layer Animated Palette Wave Canvas */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -97,8 +103,8 @@ export function Hero({
             y: ["-15%", "10%", "15%", "-10%", "-15%"],
           }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          style={{ backgroundColor: accentColor }}
-          className="absolute -top-36 -left-36 w-[650px] h-[650px] rounded-full blur-[140px] opacity-25 dark:opacity-35"
+          style={{ backgroundColor: accentColor, opacity: glowOpacity }}
+          className="absolute -top-36 -left-36 w-[650px] h-[650px] rounded-full blur-[140px] transition-all duration-700"
         />
 
         <motion.div
@@ -108,8 +114,8 @@ export function Hero({
             y: ["15%", "-10%", "-15%", "15%", "15%"],
           }}
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-          style={{ backgroundColor: secondaryColor }}
-          className="absolute -bottom-36 -right-36 w-[700px] h-[700px] rounded-full blur-[160px] opacity-20 dark:opacity-30"
+          style={{ backgroundColor: secondaryColor, opacity: glowOpacity * 0.85 }}
+          className="absolute -bottom-36 -right-36 w-[700px] h-[700px] rounded-full blur-[160px] transition-all duration-700"
         />
       </div>
 

@@ -93,7 +93,7 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
     : (coverPhoto?.color_palette && coverPhoto.color_palette.length > 0)
     ? coverPhoto.color_palette
     : null;
-  const accentColor = selectBestAccentColor(albumPalette, "#d96b27");
+  const accentColor = selectBestAccentColor(albumPalette, "#d96b27", album.custom_hero_color);
   const chunks = getPhotoChunks(photos);
 
   return (
