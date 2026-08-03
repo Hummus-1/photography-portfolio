@@ -4,7 +4,19 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Album } from "@/lib/types";
-import { MapPin, ArrowRight, Sparkles, ChevronRight, ExternalLink, Images, Camera } from "lucide-react";
+import {
+  MapPin,
+  ArrowRight,
+  Sparkles,
+  ChevronRight,
+  ExternalLink,
+  Images,
+  Camera,
+  ChevronUp,
+  ChevronDown,
+  X,
+  Compass,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ColorPalettePill } from "../color-palette-pill";
 
@@ -21,14 +33,30 @@ interface ConceptSynchronizedStageProps {
   countryGroups: LocationGroup[];
   allAlbums: Album[];
   density: "expanded" | "compact";
+  selectedCountry?: string;
+  onSelectCountry?: (country: string) => void;
 }
 
-export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: ConceptSynchronizedStageProps) {
+export function ConceptSynchronizedStage({
+  countryGroups,
+  allAlbums,
+  density,
+  selectedCountry = "all",
+  onSelectCountry,
+}: ConceptSynchronizedStageProps) {
   const [activeAlbum, setActiveAlbum] = useState<Album>(allAlbums[0] || null);
   const [expandedCountries, setExpandedCountries] = useState<Record<string, boolean>>({});
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // Scroll-driven Intersection Observer: Auto update stage as user scrolls past items
+  // Keep active album in sync if allAlbums updates
+  useEffect(() => {
+    if (allAlbums.length && (!activeAlbum || !allAlbums.find((a) => a.id === activeAlbum.id))) {
+      setActiveAlbum(allAlbums[0]);
+    }
+  }, [allAlbums, activeAlbum]);
+
+  // Scroll-driven Intersection Observer for desktop & large viewports
   useEffect(() => {
     if (typeof window === "undefined" || !allAlbums.length) return;
 
@@ -48,8 +76,8 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
       },
       {
         root: null,
-        rootMargin: "-30% 0px -50% 0px",
-        threshold: 0.1,
+        rootMargin: "-25% 0px -45% 0px",
+        threshold: 0.15,
       }
     );
 
@@ -71,13 +99,29 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
     }));
   };
 
+  const handleSelectAlbum = (album: Album) => {
+    setActiveAlbum(album);
+
+    // If on mobile, open mobile preview drawer when clicked
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setIsMobileSheetOpen(true);
+    }
+
+    // Scroll card smoothly into view if triggered via map or chip
+    const cardEl = cardRefs.current.get(album.id);
+    if (cardEl) {
+      cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   return (
-    <div className="w-full relative">
+    <div className="w-full relative space-y-8 pb-20">
+      
       {/* 2-Column Synchronized Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Sticky Hero Stage */}
-        <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6">
+        {/* Left Sticky Hero Stage (Desktop View - Hidden on Small Mobile, Docked on Desktop) */}
+        <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-28 space-y-6">
           <div className="bg-foreground/[0.02] border border-foreground/15 rounded-3xl p-6 sm:p-8 space-y-6 backdrop-blur-md shadow-xl overflow-hidden relative">
             
             {/* Ambient Background Glow based on cover color palette */}
@@ -131,7 +175,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
 
                   {/* Location Path Breadcrumb */}
                   {activeAlbum.location_path && activeAlbum.location_path.length > 0 && (
-                    <div className="flex items-center flex-wrap gap-1 text-[11px] font-mono text-foreground/70 uppercase tracking-wider py-2 rounded-xl">
+                    <div className="flex items-center flex-wrap gap-1 text-[11px] font-mono text-foreground/70 uppercase tracking-wider py-1.5 rounded-xl">
                       {activeAlbum.location_path.map((node, index) => (
                         <span key={node.id || index} className="flex items-center gap-1">
                           {index > 0 && <ChevronRight className="h-3 w-3 opacity-40" />}
@@ -144,14 +188,13 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                   )}
 
                   <div className="flex items-center justify-between text-xs font-mono text-foreground/60">
-
                     {/* Google Maps Coordinates Link */}
                     {activeAlbum.lat != null && activeAlbum.lng != null && (
                       <a
                         href={`https://maps.google.com/?q=${activeAlbum.lat},${activeAlbum.lng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] text-film-amber font-mono bg-film-amber/10 px-2 py-0.5 rounded border border-film-amber/20 hover:bg-film-amber/20 transition-colors flex items-center gap-1"
+                        className="text-[10px] text-film-amber font-mono bg-film-amber/10 px-2 py-1 rounded border border-film-amber/20 hover:bg-film-amber/20 transition-colors flex items-center gap-1"
                         title="View GPS Pin on Google Maps"
                       >
                         {activeAlbum.lat >= 0 ? `${activeAlbum.lat.toFixed(2)}° N` : `${Math.abs(activeAlbum.lat).toFixed(2)}° S`},{" "}
@@ -173,7 +216,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                 <div className="pt-2">
                   <Link
                     href={`/album/${activeAlbum.slug}`}
-                    className="w-full inline-flex items-center justify-center gap-2 group bg-foreground text-background py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold hover:opacity-90 transition-all shadow-md cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 group bg-foreground text-background py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold hover:opacity-90 active:scale-[0.99] transition-all shadow-md cursor-pointer"
                   >
                     <span>Explore Photo Series</span>
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -184,8 +227,8 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
           </div>
         </div>
 
-        {/* Right Scrollable Stream */}
-        <div className="lg:col-span-7 space-y-10">
+        {/* Right Scrollable Stream / Album Cards Column */}
+        <div className="col-span-1 lg:col-span-7 space-y-8">
           {countryGroups.map((group) => {
             const isExpanded = expandedCountries[group.country];
             const displayLimit = isExpanded ? group.albums.length : 6;
@@ -197,7 +240,7 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                 
                 {/* Country Chapter Header */}
                 <div className="flex items-center justify-between border-b border-foreground/15 pb-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     {group.countryCode && (
                       <span className="text-xs font-mono bg-foreground/10 px-2.5 py-1 rounded-md text-foreground font-bold uppercase tracking-wider">
                         {group.countryCode}
@@ -216,7 +259,6 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                 <div className="space-y-3">
                   {visibleAlbums.map((album) => {
                     const isActive = activeAlbum?.id === album.id;
-                    const photosPreview = (album as any).photos ? (album as any).photos.slice(0, 3) : [];
 
                     return (
                       <div
@@ -226,21 +268,25 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                           if (el) cardRefs.current.set(album.id, el);
                           else cardRefs.current.delete(album.id);
                         }}
-                        onClick={() => setActiveAlbum(album)}
-                        onMouseEnter={() => setActiveAlbum(album)}
-                        className={`group cursor-pointer rounded-3xl border transition-all duration-300 ${
-                          density === "compact" ? "p-3.5 space-y-2" : "p-5 space-y-3"
+                        onClick={() => handleSelectAlbum(album)}
+                        className={`group cursor-pointer rounded-3xl border transition-all duration-300 active:scale-[0.99] ${
+                          density === "compact" ? "p-3 sm:p-4 space-y-2" : "p-4 sm:p-5 space-y-3"
                         } ${
                           isActive
-                            ? "bg-foreground/[0.05] border-foreground/40 shadow-lg ring-1 ring-foreground/20"
+                            ? "bg-foreground/[0.05] border-film-amber/60 shadow-lg ring-1 ring-film-amber/30"
                             : "bg-foreground/[0.01] border-foreground/10 hover:border-foreground/25 hover:bg-foreground/[0.03]"
                         }`}
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          
                           {/* Cover Thumbnail */}
-                          <div className={`relative rounded-2xl overflow-hidden shrink-0 border border-foreground/15 shadow-sm ${
-                            density === "compact" ? "aspect-[4/3] w-20" : "aspect-[4/3] w-28 sm:w-32"
-                          }`}>
+                          <div
+                            className={`relative rounded-2xl overflow-hidden shrink-0 border border-foreground/15 shadow-sm ${
+                              density === "compact"
+                                ? "aspect-[4/3] w-20 sm:w-24"
+                                : "aspect-[4/3] w-24 sm:w-32"
+                            }`}
+                          >
                             <Image
                               src={
                                 album.cover_image_url ||
@@ -252,16 +298,18 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                             />
                           </div>
 
-                          {/* Details */}
+                          {/* Album Card Details */}
                           <div className="flex-1 min-w-0 space-y-1">
                             <div className="flex items-center justify-between gap-2">
-                              <h4 className={`font-serif font-bold text-foreground truncate group-hover:text-foreground/90 ${
-                                density === "compact" ? "text-base" : "text-xl"
-                              }`}>
+                              <h4
+                                className={`font-serif font-bold text-foreground truncate group-hover:text-film-amber transition-colors ${
+                                  density === "compact" ? "text-sm sm:text-base" : "text-base sm:text-xl"
+                                }`}
+                              >
                                 {album.title}
                               </h4>
-                              <span className="text-[11px] font-mono text-foreground/40 shrink-0">
-                                {album.date ? new Date(album.date).getFullYear() : "Pending"}
+                              <span className="text-[10px] sm:text-[11px] font-mono text-foreground/40 shrink-0">
+                                {album.date ? new Date(album.date).getFullYear() : ""}
                               </span>
                             </div>
 
@@ -270,10 +318,10 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                               <span className="truncate">{album.location}</span>
                             </div>
 
-                            {/* Tags & Shot count */}
-                            {density === "expanded" && (
-                              <div className="flex items-center gap-2 pt-1 flex-wrap">
-                                {album.tags?.slice(0, 3).map((t, idx) => (
+                            {/* Tags & Shot count (Shown in Expanded mode) */}
+                            {density === "expanded" && album.tags && album.tags.length > 0 && (
+                              <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                                {album.tags.slice(0, 3).map((t, idx) => (
                                   <span
                                     key={idx}
                                     className="text-[9px] font-mono uppercase tracking-wider text-foreground/60 bg-foreground/5 px-2 py-0.5 rounded-full border border-foreground/10"
@@ -285,15 +333,15 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                             )}
                           </div>
 
-                          {/* Arrow CTA */}
-                          <div className="shrink-0 pl-2">
+                          {/* Direct Arrow Link CTA */}
+                          <div className="shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center">
                             <Link
                               href={`/album/${album.slug}`}
                               onClick={(e) => e.stopPropagation()}
                               title={`Open ${album.title} album`}
-                              className={`p-3 rounded-full transition-all flex items-center justify-center ${
+                              className={`w-10 h-10 rounded-full transition-all flex items-center justify-center ${
                                 isActive
-                                  ? "bg-foreground text-background hover:scale-110 shadow-sm"
+                                  ? "bg-film-amber text-white hover:scale-110 shadow-md"
                                   : "bg-foreground/10 text-foreground/70 hover:bg-foreground hover:text-background hover:scale-110"
                               }`}
                             >
@@ -301,18 +349,17 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                             </Link>
                           </div>
                         </div>
-
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Show More Button */}
+                {/* Show More / Collapse Button */}
                 {hasMore && (
                   <div className="pt-2 text-center">
                     <button
                       onClick={() => toggleExpand(group.country)}
-                      className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-foreground/15 text-xs font-mono uppercase tracking-widest text-foreground/70 hover:border-foreground hover:text-foreground transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-foreground/15 text-xs font-mono uppercase tracking-widest text-foreground/70 hover:border-foreground hover:text-foreground transition-colors cursor-pointer min-h-[44px]"
                     >
                       <span>
                         {isExpanded
@@ -322,13 +369,150 @@ export function ConceptSynchronizedStage({ countryGroups, allAlbums, density }: 
                     </button>
                   </div>
                 )}
-
               </div>
             );
           })}
         </div>
 
       </div>
+
+      {/* MOBILE STICKY FLOATING PREVIEW BAR & BOTTOM SHEET */}
+      {activeAlbum && (
+        <div className="block lg:hidden">
+          
+          {/* Floating Pill Bar at Bottom of Mobile Viewport */}
+          <div className="fixed bottom-4 left-4 right-4 z-40">
+            <div className="p-3 rounded-2xl bg-background/95 border border-film-amber/40 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 text-foreground">
+              
+              {/* Thumbnail & Title */}
+              <div
+                onClick={() => setIsMobileSheetOpen(!isMobileSheetOpen)}
+                className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+              >
+                <div className="relative aspect-square w-11 rounded-xl overflow-hidden border border-foreground/20 shrink-0">
+                  <Image
+                    src={
+                      activeAlbum.cover_image_url ||
+                      "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=200"
+                    }
+                    alt={activeAlbum.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="min-w-0 space-y-0.5">
+                  <div className="text-[10px] font-mono text-film-amber uppercase tracking-wider flex items-center gap-1 truncate">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{activeAlbum.location}</span>
+                  </div>
+                  <h4 className="font-serif text-sm font-bold text-foreground truncate">
+                    {activeAlbum.title}
+                  </h4>
+                </div>
+              </div>
+
+              {/* Expand Sheet Toggle & Direct Album Link */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setIsMobileSheetOpen(!isMobileSheetOpen)}
+                  className="p-2 rounded-xl bg-foreground/5 border border-foreground/10 text-foreground/80 hover:text-foreground cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
+                  aria-label="Toggle details sheet"
+                >
+                  {isMobileSheetOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                </button>
+
+                <Link
+                  href={`/album/${activeAlbum.slug}`}
+                  className="px-3.5 py-2 rounded-xl bg-film-amber text-white text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px]"
+                >
+                  <span>View</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Full Expanded Mobile Sheet Modal */}
+          <AnimatePresence>
+            {isMobileSheetOpen && (
+              <>
+                {/* Backdrop overlay */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileSheetOpen(false)}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                />
+
+                {/* Slide-Up Sheet */}
+                <motion.div
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-foreground/15 rounded-t-3xl p-6 space-y-5 max-h-[85vh] overflow-y-auto shadow-2xl"
+                >
+                  <div className="flex items-center justify-between border-b border-foreground/10 pb-3">
+                    <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+                      <Compass className="h-4 w-4" />
+                      <span>Active Destination Preview</span>
+                    </div>
+                    <button
+                      onClick={() => setIsMobileSheetOpen(false)}
+                      className="p-2 rounded-full border border-foreground/10 text-foreground/60 hover:text-foreground cursor-pointer"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-foreground/15 shadow-md">
+                    <Image
+                      src={
+                        activeAlbum.cover_image_url ||
+                        "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=800"
+                      }
+                      alt={activeAlbum.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="font-serif text-2xl font-bold text-foreground">
+                      {activeAlbum.title}
+                    </h3>
+
+                    <div className="text-xs font-mono text-foreground/70 flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-film-amber" />
+                      <span>{activeAlbum.location}</span>
+                    </div>
+
+                    <p className="text-xs text-foreground/80 leading-relaxed font-sans">
+                      {activeAlbum.description}
+                    </p>
+
+                    {activeAlbum.cover_color_palette && (
+                      <ColorPalettePill colors={activeAlbum.cover_color_palette} />
+                    )}
+
+                    <div className="pt-3">
+                      <Link
+                        href={`/album/${activeAlbum.slug}`}
+                        className="w-full inline-flex items-center justify-center gap-2 bg-foreground text-background py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold cursor-pointer shadow-md"
+                      >
+                        <span>Explore Photo Series</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
