@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import GridLayout, { useContainerWidth, LayoutItem } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import { Photo } from "@/lib/types";
-import { Save, Star, Trash2, Pencil, X, Camera, Loader2, LayoutGrid, RotateCcw } from "lucide-react";
+import { Save, Star, Trash2, Pencil, X, Camera, Loader2, LayoutGrid, RotateCcw, Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
@@ -82,13 +82,51 @@ export function InteractiveCollageEditor({
   onSaveLayoutSuccess,
 }: InteractiveCollageEditorProps) {
   const [layout, setLayout] = useState<LayoutItem[]>([]);
-  const [isSavingLayout, setIsSavingLayout] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const saveDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoad = useRef(true);
+
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
   const [editScore, setEditScore] = useState<string>("");
   const [editTags, setEditTags] = useState<string>("");
   const [editDescription, setEditDescription] = useState<string>("");
 
   const { containerRef, width } = useContainerWidth({ measureBeforeMount: true });
+
+  const saveLayoutToDb = async (items: readonly LayoutItem[]) => {
+    setSaveStatus("saving");
+    try {
+      const updates = items.map((item) => {
+        const gridObj = {
+          x: item.x,
+          y: item.y,
+          w: item.w,
+          h: item.h,
+        };
+        return supabase
+          .from("photos")
+          .update({ grid_layout: gridObj })
+          .eq("id", item.i);
+      });
+
+      await Promise.all(updates);
+      setSaveStatus("saved");
+      setTimeout(() => {
+        setSaveStatus("idle");
+      }, 2000);
+      onSaveLayoutSuccess();
+    } catch (err: any) {
+      setSaveStatus("error");
+      toast.error(`Auto-save failed: ${err.message}`);
+    }
+  };
+
+  const debouncedAutoSave = (newItems: readonly LayoutItem[]) => {
+    if (saveDebounceTimer.current) clearTimeout(saveDebounceTimer.current);
+    saveDebounceTimer.current = setTimeout(() => {
+      saveLayoutToDb(newItems);
+    }, 600);
+  };
 
   // Reset layout to native aspect ratio proportions
   const resetToAspectRatios = () => {
@@ -123,7 +161,8 @@ export function InteractiveCollageEditor({
     });
 
     setLayout(freshLayout);
-    toast.info("Layout reset to native photo aspect ratios");
+    saveLayoutToDb(freshLayout);
+    toast.info("Layout reset to native photo aspect ratios and saved");
   };
 
   useEffect(() => {
@@ -134,36 +173,16 @@ export function InteractiveCollageEditor({
 
     const initialLayout = photos.map((photo, index) => getInitialLayoutItem(photo, index));
     setLayout(initialLayout);
+    isInitialLoad.current = true;
   }, [photos]);
 
   const handleLayoutChange = (newLayout: readonly LayoutItem[]) => {
     setLayout([...newLayout]);
-  };
-
-  const handleSaveLayout = async () => {
-    setIsSavingLayout(true);
-    try {
-      const updates = layout.map((item) => {
-        const gridObj = {
-          x: item.x,
-          y: item.y,
-          w: item.w,
-          h: item.h,
-        };
-        return supabase
-          .from("photos")
-          .update({ grid_layout: gridObj })
-          .eq("id", item.i);
-      });
-
-      await Promise.all(updates);
-      toast.success("Collage layout saved successfully!");
-      onSaveLayoutSuccess();
-    } catch (err: any) {
-      toast.error(`Failed to save layout: ${err.message}`);
-    } finally {
-      setIsSavingLayout(false);
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
     }
+    debouncedAutoSave(newLayout);
   };
 
   const startEditing = (photo: Photo) => {
@@ -240,18 +259,29 @@ export function InteractiveCollageEditor({
             <span>Reset Ratios</span>
           </button>
 
-          <button
-            onClick={handleSaveLayout}
-            disabled={isSavingLayout}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
-          >
-            {isSavingLayout ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+          {/* Auto-save status indicator */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-black/40 border border-white/10 font-mono text-[10px] uppercase tracking-wider">
+            {saveStatus === "saving" ? (
+              <div className="flex items-center gap-1.5 text-primary font-bold">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>Saving layout...</span>
+              </div>
+            ) : saveStatus === "saved" ? (
+              <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                <Check className="h-3.5 w-3.5" />
+                <span>Layout Saved</span>
+              </div>
+            ) : saveStatus === "error" ? (
+              <div className="flex items-center gap-1.5 text-red-400 font-bold">
+                <span>Save Failed</span>
+              </div>
             ) : (
-              <Save className="h-4 w-4" />
+              <div className="flex items-center gap-1.5 text-white/40">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Auto-save Active</span>
+              </div>
             )}
-            <span>Save Layout</span>
-          </button>
+          </div>
         </div>
       </div>
 

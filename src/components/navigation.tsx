@@ -64,8 +64,6 @@ export function Navigation() {
             
             <div className="flex items-center gap-2 text-[9px] font-mono tracking-[0.2em] text-foreground/50 uppercase group-hover:text-primary/80 transition-colors leading-none mt-0.5">
               <span>VISUAL ARCHIVE</span>
-              <span className="hidden lg:inline-block text-[8px] text-foreground/30">•</span>
-              <span className="hidden lg:inline-block text-[8px] text-foreground/40">DIGITAL / RAW</span>
             </div>
           </div>
         </Link>

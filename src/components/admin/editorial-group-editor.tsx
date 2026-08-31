@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Album, Photo } from "@/lib/types";
 import { Lightbox } from "@/components/lightbox";
@@ -12,6 +12,7 @@ import {
   X,
   Camera,
   Loader2,
+  Check,
   Rows,
   Layers,
   ArrowUp,
@@ -56,7 +57,8 @@ export function EditorialGroupEditor({
 }: EditorialGroupEditorProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [viewMode, setViewMode] = useState<"story" | "masonry">("story");
 
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
@@ -134,6 +136,38 @@ export function EditorialGroupEditor({
     }));
   };
 
+  const saveLayoutToDb = async (photoList: Photo[]) => {
+    setSaveStatus("saving");
+    try {
+      const updates = photoList.map((p, idx) =>
+        supabase
+          .from("photos")
+          .update({
+            sort_order: idx,
+            group_id: p.group_id || null,
+          })
+          .eq("id", p.id)
+      );
+
+      await Promise.all(updates);
+      setSaveStatus("saved");
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(() => {
+        setSaveStatus("idle");
+      }, 2000);
+      onSaveSuccess();
+    } catch (err: any) {
+      setSaveStatus("error");
+      toast.error(`Auto-save failed: ${err.message}`);
+    }
+  };
+
+  const updatePhotosWithAutoSave = (newPhotos: Photo[]) => {
+    const cleaned = cleanupGroups(newPhotos);
+    setPhotos(cleaned);
+    saveLayoutToDb(cleaned);
+  };
+
   const toggleSelectPhoto = (id: string) => {
     setSelectedPhotoIds((prev) =>
       prev.includes(id) ? prev.filter((pId) => pId !== id) : [...prev, id]
@@ -164,24 +198,21 @@ export function EditorialGroupEditor({
     }
 
     const newGroupId = `row_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    setPhotos((prev) =>
-      cleanupGroups(prev.map((p) => (selectedPhotoIds.includes(p.id) ? { ...p, group_id: newGroupId } : p)))
-    );
+    const updated = photos.map((p) => (selectedPhotoIds.includes(p.id) ? { ...p, group_id: newGroupId } : p));
+    updatePhotosWithAutoSave(updated);
     setSelectedPhotoIds([]);
     toast.success(`Grouped ${selectedPhotoIds.length} photos into a side-by-side row!`);
   };
 
   const handleUngroupRow = (groupId: string) => {
-    setPhotos((prev) =>
-      cleanupGroups(prev.map((p) => (p.group_id === groupId ? { ...p, group_id: null } : p)))
-    );
+    const updated = photos.map((p) => (p.group_id === groupId ? { ...p, group_id: null } : p));
+    updatePhotosWithAutoSave(updated);
     toast.info("Row group removed.");
   };
 
   const handleRemoveFromGroup = (photoId: string) => {
-    setPhotos((prev) =>
-      cleanupGroups(prev.map((p) => (p.id === photoId ? { ...p, group_id: null } : p)))
-    );
+    const updated = photos.map((p) => (p.id === photoId ? { ...p, group_id: null } : p));
+    updatePhotosWithAutoSave(updated);
   };
 
   const handleQuickGroupWithNext = (index: number) => {
@@ -189,16 +220,13 @@ export function EditorialGroupEditor({
     const currentPhoto = photos[index];
     const groupId = currentPhoto.group_id || `row_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-    setPhotos((prev) =>
-      cleanupGroups(
-        prev.map((p, idx) => {
-          if (idx === index || idx === index + 1) {
-            return { ...p, group_id: groupId };
-          }
-          return p;
-        })
-      )
-    );
+    const updated = photos.map((p, idx) => {
+      if (idx === index || idx === index + 1) {
+        return { ...p, group_id: groupId };
+      }
+      return p;
+    });
+    updatePhotosWithAutoSave(updated);
     toast.success("Grouped with next photo!");
   };
 
@@ -208,7 +236,7 @@ export function EditorialGroupEditor({
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(toIndex, 0, moved);
 
-    setPhotos(cleanupGroups(updated));
+    updatePhotosWithAutoSave(updated);
   };
 
   const handleDrop = (fromIdx: number, toIdx: number) => {
@@ -233,7 +261,7 @@ export function EditorialGroupEditor({
     }
 
     updated.splice(toIdx, 0, draggedPhoto);
-    setPhotos(cleanupGroups(updated));
+    updatePhotosWithAutoSave(updated);
     setDraggedIndex(null);
     setDragOverIndex(null);
   };
@@ -258,36 +286,13 @@ export function EditorialGroupEditor({
     if (insertIdx < 0) insertIdx = remainingPhotos.length;
 
     remainingPhotos.splice(insertIdx, 0, ...movedPhotos);
-    setPhotos(cleanupGroups(remainingPhotos));
+    updatePhotosWithAutoSave(remainingPhotos);
   };
 
   const handleDropBlock = (fromBlockIdx: number, toBlockIdx: number) => {
     moveBlockInList(fromBlockIdx, toBlockIdx);
     setDraggedBlockIndex(null);
     setDragOverBlockIndex(null);
-  };
-
-  const handleSaveAll = async () => {
-    setIsSaving(true);
-    try {
-      const updates = photos.map((p, idx) =>
-        supabase
-          .from("photos")
-          .update({
-            sort_order: idx,
-            group_id: p.group_id || null,
-          })
-          .eq("id", p.id)
-      );
-
-      await Promise.all(updates);
-      toast.success("Album order and row groupings saved successfully!");
-      onSaveSuccess();
-    } catch (err: any) {
-      toast.error(`Failed to save layout: ${err.message}`);
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const startEditing = (photo: Photo) => {
@@ -423,18 +428,29 @@ export function EditorialGroupEditor({
             <span>{selectedPhotoIds.length === photos.length ? "Deselect All" : "Select All"}</span>
           </button>
 
-          <button
-            onClick={handleSaveAll}
-            disabled={isSaving}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 px-5 py-2 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
-          >
-            {isSaving ? (
-              <ThinkingOrb state="thinking" size="sm" />
+          {/* Auto-save status indicator */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-black/40 border border-white/10 font-mono text-[10px] uppercase tracking-wider">
+            {saveStatus === "saving" ? (
+              <div className="flex items-center gap-1.5 text-primary font-bold">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>Saving layout...</span>
+              </div>
+            ) : saveStatus === "saved" ? (
+              <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                <Check className="h-3.5 w-3.5" />
+                <span>Layout Saved</span>
+              </div>
+            ) : saveStatus === "error" ? (
+              <div className="flex items-center gap-1.5 text-red-400 font-bold">
+                <span>Save Failed</span>
+              </div>
             ) : (
-              <Save className="h-4 w-4" />
+              <div className="flex items-center gap-1.5 text-white/40">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Auto-save Active</span>
+              </div>
             )}
-            <span>Save Layout</span>
-          </button>
+          </div>
         </div>
       </div>
 
@@ -680,6 +696,7 @@ export function EditorialGroupEditor({
         photos={photos}
         selectedIndex={lightboxIndex}
         onIndexChange={setLightboxIndex}
+        showScore={true}
       />
 
       {/* Edit Metadata Modal */}
