@@ -91,14 +91,16 @@ export function CollageGridViewer({ album, photos, onSelectPhoto }: CollageGridV
             <div
               key={photo.id}
               onClick={() => onSelectPhoto(index)}
-              className="group relative overflow-hidden bg-foreground/[0.03] border border-foreground/10 rounded-2xl cursor-pointer transition-all duration-500 hover:border-foreground/40 hover:shadow-2xl flex items-center justify-center p-1"
+              data-protected-image
+              className="group relative overflow-hidden bg-foreground/[0.03] border border-foreground/10 rounded-2xl cursor-pointer transition-all duration-500 hover:border-foreground/40 hover:shadow-2xl flex items-center justify-center p-1 select-none"
             >
               <Image
                 src={photo.url}
                 alt={photo.description || album.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
-                className="object-contain group-hover:scale-[1.02] transition-transform duration-700 ease-out rounded-2xl"
+                draggable={false}
+                className="object-contain group-hover:scale-[1.02] transition-transform duration-700 ease-out rounded-2xl select-none pointer-events-none"
               />
 
               {/* Hover Overlay with Lightbox trigger, EXIF, and caption */}

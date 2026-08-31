@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LenisProvider } from "@/components/lenis-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ImageGuard } from "@/components/image-guard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,22 @@ export const metadata: Metadata = {
     ],
     apple: "/icon.svg",
   },
+  robots: {
+    index: true,
+    follow: true,
+    noimageindex: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: true,
+    },
+  },
+  other: {
+    "tdm-reservation": "1",
+    "tdm-policy": "https://www.w3.org/community/tdmrep/",
+    "robots": "noai, noimageai",
+  },
 };
 
 export default function RootLayout({
@@ -45,6 +62,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground relative selection:bg-foreground selection:text-background overflow-x-hidden">
         <ThemeProvider>
           <LenisProvider>
+            <ImageGuard />
             <div className="grain" />
             <main className="flex-grow flex flex-col">{children}</main>
             <Toaster position="bottom-right" richColors />

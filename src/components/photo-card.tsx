@@ -34,7 +34,8 @@ export function PhotoCard({ photo, album, index, id, innerRef, onSelect, fillWid
         <div
           ref={innerRef}
           id={id}
-          className="relative overflow-hidden rounded-3xl bg-foreground/5 w-full border border-foreground/10 shadow-lg hover:shadow-2xl transition-all duration-500"
+          data-protected-image
+          className="relative overflow-hidden rounded-3xl bg-foreground/5 w-full border border-foreground/10 shadow-lg hover:shadow-2xl transition-all duration-500 select-none"
         >
           <Image
             src={photo.url}
@@ -43,7 +44,8 @@ export function PhotoCard({ photo, album, index, id, innerRef, onSelect, fillWid
             height={photo.height}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
             priority={index < 2}
-            className="w-full h-auto block transition-transform duration-700 ease-out group-hover:scale-[1.01] pointer-events-none rounded-3xl"
+            draggable={false}
+            className="w-full h-auto block transition-transform duration-700 ease-out group-hover:scale-[1.01] pointer-events-none rounded-3xl select-none"
           />
 
           {/* Elegant Dark/Light Glassmorphism overlay showing EXIF + Colors on Hover */}

@@ -176,7 +176,11 @@ export default async function HomePage() {
           </div>
 
           <div className="pt-8 border-t border-foreground/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono uppercase tracking-widest text-foreground/40">
-            <div>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+              <span>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</span>
+              <span className="hidden sm:inline text-foreground/20">•</span>
+              <span className="text-[10px] text-foreground/35 normal-case tracking-normal">No AI Training / Text & Data Mining Reserved</span>
+            </div>
             <div className="flex items-center gap-2 text-[10px]">
               <Globe className="h-3.5 w-3.5 text-primary" />
               <span>Personal Photography Portfolio</span>

@@ -246,14 +246,20 @@ export function Lightbox({
                   exit="exit"
                   className="absolute w-full h-full flex items-center justify-center p-2 sm:p-4 cursor-grab active:cursor-grabbing"
                 >
-                  <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl border border-foreground/15 bg-black/40 max-w-full max-h-full flex items-center justify-center">
+                  <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl border border-foreground/15 bg-black/40 max-w-full max-h-full flex items-center justify-center select-none" data-protected-image>
                     <Image
                       src={currentPhoto.url}
                       alt={currentPhoto.location || album?.title || "Photo"}
                       width={currentPhoto.width || 2000}
                       height={currentPhoto.height || 1500}
-                      className="w-auto h-auto max-w-full max-h-[78dvh] md:max-h-[88dvh] object-contain rounded-2xl sm:rounded-3xl"
+                      className="w-auto h-auto max-w-full max-h-[78dvh] md:max-h-[88dvh] object-contain rounded-2xl sm:rounded-3xl pointer-events-none select-none"
+                      draggable={false}
                       priority
+                    />
+                    {/* Transparent Click Shield */}
+                    <div 
+                      className="absolute inset-0 z-10 select-none bg-transparent"
+                      onContextMenu={(e) => e.preventDefault()}
                     />
                   </div>
                 </motion.div>
