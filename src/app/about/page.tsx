@@ -11,7 +11,6 @@ import {
   ArrowUpRight,
   Check,
   Copy,
-  Terminal,
   Compass,
   Film,
   Aperture,
@@ -52,7 +51,7 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center gap-2 text-[11px] text-foreground/50">
               <MapPin className="h-3.5 w-3.5 text-primary" />
-              <span>Santa Cruz de Tenerife, Canary Islands</span>
+              <span>Santa Cruz de Tenerife, Canary Islands, Spain</span>
             </div>
           </div>
 
@@ -76,7 +75,7 @@ export default function AboutPage() {
             <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-28">
               
               {/* Archival Portrait Frame */}
-              <div className="relative p-2 rounded-3xl border border-foreground/15 bg-background/80 shadow-2xl backdrop-blur-md group">
+              <div className="relative p-2 rounded-3xl border border-foreground/15 bg-background/80 shadow-2xl backdrop-blur-md group transition-all duration-500 hover:border-primary/60 hover:ring hover:ring-primary/70 hover:ring-offset-background">
                 <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-foreground/5">
                   <Image
                     src="/about-portrait.jpg"
@@ -184,7 +183,7 @@ export default function AboutPage() {
                 </p>
 
                 <p>
-                  I am a software engineer, visual creator, and photographer based in Santa Cruz de Tenerife, Canary Islands. My work revolves around building modern web architecture using React, Next.js, TS, Python, SQL, and FastAPI, alongside capturing the unique light and landscape geometries of volcanic and coastal terrain.
+                  I am a software engineer, visual creator, and photographer based in Santa Cruz de Tenerife, Canary Islands. My work spans designing and building modern software systems while documenting the unique light, volcanic textures, and coastal geometries of remote landscapes.
                 </p>
 
                 <p>
@@ -228,7 +227,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Equipment & Software Stack */}
+              {/* Equipment & Processing Stack */}
               <div className="space-y-6 pt-6 border-t border-foreground/10">
                 <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                   <Sliders className="h-4 w-4" />
@@ -237,58 +236,58 @@ export default function AboutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   
-                  {/* Photo Kit */}
+                  {/* Primary System & Lenses */}
                   <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-foreground/[0.015] space-y-4">
                     <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-foreground/60 font-semibold border-b border-foreground/10 pb-3">
                       <Camera className="h-4 w-4 text-primary" />
-                      <span>Camera & Optics</span>
+                      <span>Primary System • Fujifilm X</span>
                     </div>
-                    <ul className="space-y-3 text-xs font-mono text-foreground/80">
+                    <ul className="space-y-2.5 text-xs font-mono text-foreground/80">
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Primary Camera</span>
-                        <span className="text-foreground/60 font-semibold">Fujifilm X-T5</span>
+                        <span>Primary Body</span>
+                        <span className="text-foreground font-semibold">Fujifilm X-T5</span>
                       </li>
-                      <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2.5 border-t border-foreground/10">
                         <span>Standard Zoom</span>
-                        <span className="text-foreground/60">Sigma 18-50mm f/2.8</span>
+                        <span className="text-foreground/70">Sigma 18-50mm f/2.8</span>
                       </li>
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Ultra-Wide</span>
-                        <span className="text-foreground/60">Sigma 10-18mm f/2.8</span>
+                        <span>Ultra-Wide Zoom</span>
+                        <span className="text-foreground/70">Sigma 10-18mm f/2.8</span>
                       </li>
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Telephoto</span>
-                        <span className="text-foreground/60">Fujinon 70-300mm</span>
-                      </li>
-                      <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 border-t border-foreground/10 text-[11px] text-foreground/50">
-                        <span>Secondary Body</span>
-                        <span>Sony α6000</span>
+                        <span>Telephoto Zoom</span>
+                        <span className="text-foreground/70">Fujinon 70-300mm</span>
                       </li>
                     </ul>
                   </div>
 
-                  {/* Software Kit */}
+                  {/* Secondary Bodies, Drone & Software */}
                   <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-foreground/[0.015] space-y-4">
                     <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-foreground/60 font-semibold border-b border-foreground/10 pb-3">
-                      <Terminal className="h-4 w-4 text-primary" />
-                      <span>Software Engineering</span>
+                      <Film className="h-4 w-4 text-primary" />
+                      <span>Secondary, Aerial & Software</span>
                     </div>
-                    <ul className="space-y-3 text-xs font-mono text-foreground/80">
+                    <ul className="space-y-2.5 text-xs font-mono text-foreground/80">
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Web Frameworks</span>
-                        <span className="text-foreground/60">React • Next.js</span>
+                        <span>Micro 4/3 Body</span>
+                        <span className="text-foreground/70">Olympus E-M10 II</span>
                       </li>
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Core Languages</span>
-                        <span className="text-foreground/60">TS • Python • C++ • SQL</span>
+                        <span>Compact APS-C</span>
+                        <span className="text-foreground/70">Sony α6000</span>
                       </li>
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Backend Services</span>
-                        <span className="text-foreground/60">Supabase • FastAPI</span>
+                        <span>Aerial Drone</span>
+                        <span className="text-foreground/70">DJI Mini 3</span>
+                      </li>
+                      <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2.5 border-t border-foreground/10">
+                        <span>RAW Development</span>
+                        <span className="text-foreground font-semibold">DxO PhotoLab</span>
                       </li>
                       <li className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <span>Aesthetic Craft</span>
-                        <span className="text-foreground/60">TailwindCSS</span>
+                        <span>Film Simulations</span>
+                        <span className="text-foreground/70">DxO FilmPack</span>
                       </li>
                     </ul>
                   </div>
