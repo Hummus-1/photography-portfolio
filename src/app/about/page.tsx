@@ -298,16 +298,19 @@ export default function AboutPage() {
 
               {/* Availability & Project Inquiries Banner */}
               <div className="p-5 sm:p-6 rounded-2xl border border-primary/30 bg-primary/5 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6 shadow-sm">
-                <div className="flex items-start sm:items-center gap-3">
-                  <span className="size-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0 mt-1 sm:mt-0" />
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-semibold">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                    </span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-semibold">
                       Current Availability Status
-                    </div>
-                    <p className="text-xs sm:text-sm font-sans font-medium text-foreground/90 leading-snug">
-                      Open for select landscape expeditions, architecture & web engineering
-                    </p>
+                    </span>
                   </div>
+                  <p className="text-xs sm:text-sm font-sans font-medium text-foreground/90 leading-snug">
+                    Open for select landscape expeditions, architecture & web engineering
+                  </p>
                 </div>
 
                 <a

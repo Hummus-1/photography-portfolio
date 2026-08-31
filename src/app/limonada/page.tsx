@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { LogOut, MapPin, Loader2, FolderOpen, Eye, Sparkles, Layers, ShieldCheck, Database, ExternalLink } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { AdminLogin } from "@/components/admin/admin-login";
@@ -338,38 +340,97 @@ export default function AdminPage() {
           {activeAlbum ? (
             <>
               {/* Album Metadata Banner Header */}
-              <div className="p-6 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-white/[0.04] border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                  <div className="flex items-center gap-2">
+              <div className="p-6 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-white/[0.04] border border-white/10 flex flex-col gap-4">
+                {/* Top Row: Title, Badges, and Preview button */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <h3 className="font-serif text-2xl font-bold tracking-wide text-white">
                       {activeAlbum.title}
                     </h3>
-                  </div>
-                  <p className="text-xs text-white/60 mt-1 max-w-xl">
-                    {activeAlbum.description || "No description provided."}
-                  </p>
-                </div>
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                  <div className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-white/40">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-primary" />
-                      {activeAlbum.location_path && activeAlbum.location_path.length > 0 
-                        ? activeAlbum.location_path.map(n => n.name).join(" / ") 
-                        : activeAlbum.location || "Unspecified Location"}
-                    </span>
-                    <span>•</span>
-                    <span>{activeAlbum.date ? isoToDDMMYYYY(activeAlbum.date) : "Date pending"}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 border bg-white/10 text-white/60 border-white/15`}>
+                        {activeAlbum.is_published ? "Public" : "Draft"}
+                      </span>
+                      {activeAlbum.is_featured && (
+                        <span className="text-[9px] font-mono tracking-widest bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 uppercase font-semibold">
+                          ★ Featured
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <a
                     href={`/album/${activeAlbum.slug}?preview=true`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-mono text-xs uppercase tracking-wider transition-all"
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-mono text-xs uppercase tracking-wider transition-all self-start sm:self-auto"
                   >
                     <Eye className="h-4 w-4" />
                     Preview Album
                   </a>
+                </div>
+
+                {activeAlbum.description && (
+                  <p className="text-xs text-white/60 max-w-3xl leading-relaxed">
+                    {activeAlbum.description}
+                  </p>
+                )}
+
+                {/* Bottom Row: Metadata & Inline Quick Toggles */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-white/10">
+                  <div className="flex items-center gap-3 text-xs font-mono uppercase tracking-widest text-white/40 flex-wrap">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-primary" />
+                      {activeAlbum.location_path && activeAlbum.location_path.length > 0 
+                        ? activeAlbum.location_path.map(n => n.name).join(" / ") 
+                        : activeAlbum.location || "Unspecified Location"}
+                    </span>
+                    {activeAlbum.date && (
+                      <>
+                        <span>•</span>
+                        <span>{isoToDDMMYYYY(activeAlbum.date)}</span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span>{photos.length} Photo{photos.length !== 1 ? "s" : ""}</span>
+                  </div>
+
+                  {/* Clean Quick Visibility Toggles */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`editor-pub-${activeAlbum.id}`}
+                        checked={activeAlbum.is_published}
+                        onCheckedChange={(checked) => handlePublishToggle(activeAlbum.id, checked)}
+                        className="scale-75"
+                      />
+                      <Label
+                        htmlFor={`editor-pub-${activeAlbum.id}`}
+                        className={`text-[10px] font-mono uppercase tracking-widest cursor-pointer transition-colors ${
+                          activeAlbum.is_published ? "text-primary font-semibold" : "text-white/40"
+                        }`}
+                      >
+                        Publish
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`editor-feat-${activeAlbum.id}`}
+                        checked={activeAlbum.is_featured}
+                        onCheckedChange={(checked) => handleFeaturedToggle(activeAlbum.id, checked)}
+                        className="scale-75"
+                      />
+                      <Label
+                        htmlFor={`editor-feat-${activeAlbum.id}`}
+                        className={`text-[10px] font-mono uppercase tracking-widest cursor-pointer transition-colors ${
+                          activeAlbum.is_featured ? "text-primary font-semibold" : "text-white/40"
+                        }`}
+                      >
+                        Feature
+                      </Label>
+                    </div>
+                  </div>
                 </div>
               </div>
 

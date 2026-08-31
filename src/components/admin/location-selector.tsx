@@ -121,14 +121,12 @@ export function LocationSelector({
       current = locations.find((l) => l.id === current?.parent_id);
     }
 
-    const countryNode = pathNodes.find(
-      (n) => n.type === "country" || n.type === "sub-region"
-    );
+    const countryNode = pathNodes.find((n) => n.type === "country");
     const regionNode = pathNodes.find(
-      (n) => n.type === "region" || n.type === "island"
+      (n) => n.type === "region" || n.type === "island" || n.type === "state" || n.type === "province"
     );
     const spotNode = pathNodes.find(
-      (n) => n.type === "city" || n.type === "spot"
+      (n) => n.type === "city" || n.type === "spot" || n.type === "custom"
     );
 
     if (countryNode) setSelectedCountryId(countryNode.id);
@@ -158,7 +156,19 @@ export function LocationSelector({
     return () => clearTimeout(timer);
   }, [newSpotName, isCreatingNew]);
 
-  // Helper to build full display path name (e.g. "Anaga, Tenerife, Spain")
+  // Helper to find continent name for a country/node
+  const getContinentForNode = (node: LocationNode): string => {
+    let current: LocationNode | undefined = node;
+    const visited = new Set<string>();
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id);
+      if (current.type === "continent") return current.name;
+      current = locations.find((l) => l.id === current?.parent_id);
+    }
+    return "Global / Other";
+  };
+
+  // Helper to build full display path name (e.g. "Anaga, Tenerife, Spain" or "Europe")
   const buildFullName = (node: LocationNode): string => {
     const pathNodes: string[] = [];
     let current: LocationNode | undefined = node;
@@ -168,34 +178,52 @@ export function LocationSelector({
       }
       current = locations.find((l) => l.id === current?.parent_id);
     }
+    // If the node itself is a continent or sub-region, return its own name
+    if (pathNodes.length === 0) {
+      return node.name;
+    }
     return pathNodes.join(", ");
   };
 
-  // Helper to build hierarchy string (e.g. "Spain › Canary Islands")
+  // Helper to build hierarchy string (e.g. "Europe › Spain › Canary Islands")
   const buildHierarchyString = (node: LocationNode): string => {
     const pathNodes: string[] = [];
     let current: LocationNode | undefined = locations.find(
       (l) => l.id === node.parent_id
     );
     while (current) {
-      pathNodes.unshift(current.name);
+      if (current.type !== "sub-region") {
+        pathNodes.unshift(current.name);
+      }
       current = locations.find((l) => l.id === current?.parent_id);
+    }
+    if (pathNodes.length === 0) {
+      return node.type === "continent" ? "Top-Level Continent" : "";
     }
     return pathNodes.join(" › ");
   };
 
-  // Countries & Sub-regions list
-  const countriesList = useMemo(() => {
-    return locations
-      .filter((l) => l.type === "country" || l.type === "sub-region")
-      .sort((a, b) => a.name.localeCompare(b.name));
+  // Countries list cleanly grouped by Continent
+  const countriesGroupedByContinent = useMemo(() => {
+    const map = new Map<string, LocationNode[]>();
+    const countryNodes = locations.filter((l) => l.type === "country");
+    for (const c of countryNodes) {
+      const continent = getContinentForNode(c);
+      if (!map.has(continent)) map.set(continent, []);
+      map.get(continent)!.push(c);
+    }
+    const sortedContinents = Array.from(map.keys()).sort();
+    return sortedContinents.map((continent) => ({
+      continent,
+      countries: map.get(continent)!.sort((a, b) => a.name.localeCompare(b.name)),
+    }));
   }, [locations]);
 
   // Regions & Islands for active country
   const regionsList = useMemo(() => {
     if (!selectedCountryId) return [];
     return locations
-      .filter((l) => l.parent_id === selectedCountryId)
+      .filter((l) => l.parent_id === selectedCountryId && l.type !== "continent")
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [locations, selectedCountryId]);
 
@@ -209,12 +237,17 @@ export function LocationSelector({
 
   // Filtered search list across all nodes
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return locations.slice(0, 25);
+    if (!searchQuery.trim()) return locations.slice(0, 30);
     const q = searchQuery.toLowerCase().trim();
     return locations.filter((loc) => {
       const full = buildFullName(loc).toLowerCase();
       const hier = buildHierarchyString(loc).toLowerCase();
-      return loc.name.toLowerCase().includes(q) || full.includes(q) || hier.includes(q);
+      return (
+        loc.name.toLowerCase().includes(q) ||
+        full.includes(q) ||
+        hier.includes(q) ||
+        loc.type.toLowerCase().includes(q)
+      );
     });
   }, [locations, searchQuery]);
 
@@ -512,6 +545,59 @@ export function LocationSelector({
     );
   }
 
+  const renderTypeBadge = (typeStr: string) => {
+    const t = (typeStr || "").toLowerCase().trim();
+    if (t === "continent") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 shrink-0">
+          <Globe2 className="h-2.5 w-2.5" /> Continent
+        </span>
+      );
+    }
+    if (t === "sub-region") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shrink-0">
+          <Compass className="h-2.5 w-2.5" /> Sub-Region
+        </span>
+      );
+    }
+    if (t === "country") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 font-semibold shrink-0">
+          <Globe className="h-2.5 w-2.5" /> Country
+        </span>
+      );
+    }
+    if (t === "island") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-secondary/15 text-secondary border border-secondary/30 shrink-0">
+          <Layers className="h-2.5 w-2.5" /> Island
+        </span>
+      );
+    }
+    if (t === "region" || t === "subregion" || t === "state" || t === "province") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-secondary/15 text-secondary border border-secondary/30 shrink-0">
+          <Layers className="h-2.5 w-2.5" /> Region
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/10 text-white/80 border border-white/15 shrink-0">
+        <MapPin className="h-2.5 w-2.5 text-primary" /> {t.toUpperCase()}
+      </span>
+    );
+  };
+
+  const getLocationIcon = (typeStr: string) => {
+    const t = (typeStr || "").toLowerCase().trim();
+    if (t === "continent") return <Globe2 className="h-3.5 w-3.5 text-purple-400 shrink-0" />;
+    if (t === "sub-region") return <Compass className="h-3.5 w-3.5 text-indigo-400 shrink-0" />;
+    if (t === "country") return <Globe className="h-3.5 w-3.5 text-primary shrink-0" />;
+    if (t === "region" || t === "island") return <Layers className="h-3.5 w-3.5 text-secondary shrink-0" />;
+    return <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />;
+  };
+
   return (
     <div className="flex flex-col space-y-4 w-full bg-card border border-border p-4 text-foreground">
       {/* Top Bar: Title & Active Selection Card */}
@@ -558,11 +644,14 @@ export function LocationSelector({
               <Check className="h-3.5 w-3.5" />
             </div>
             <div className="flex flex-col truncate">
-              <div className="font-semibold text-primary truncate">
-                {buildFullName(activeNode)}
+              <div className="font-semibold text-primary truncate flex items-center gap-2">
+                <span>{buildFullName(activeNode)}</span>
+                {renderTypeBadge(activeNode.type)}
               </div>
-              <div className="text-[10px] font-mono text-primary/70 uppercase tracking-widest flex items-center gap-2">
-                <span>Type: {activeNode.type}</span>
+              <div className="text-[10px] font-mono text-primary/70 uppercase tracking-widest flex items-center gap-2 pt-0.5">
+                {buildHierarchyString(activeNode) && (
+                  <span>Hierarchy: {buildHierarchyString(activeNode)}</span>
+                )}
                 {activeNode.lat != null && activeNode.lng != null && (
                   <span>• GPS: {activeNode.lat}°, {activeNode.lng}°</span>
                 )}
@@ -621,7 +710,7 @@ export function LocationSelector({
             )}
           </div>
 
-          <ScrollArea className="h-48 border border-white/10 bg-black/20 p-2">
+          <ScrollArea className="h-52 border border-white/10 bg-black/20 p-2">
             <div className="space-y-1">
               {searchResults.length === 0 ? (
                 <div className="p-4 text-center text-xs font-mono text-white/40 space-y-1">
@@ -640,7 +729,7 @@ export function LocationSelector({
                     <div
                       key={loc.id}
                       onClick={() => handleSelectNode(loc)}
-                      className={`group p-2 flex items-center justify-between text-xs cursor-pointer transition-all border ${
+                      className={`group p-2.5 flex items-center justify-between text-xs cursor-pointer transition-all border ${
                         isSelected
                           ? "bg-primary/20 border-primary/40 text-primary font-semibold"
                           : "bg-white/[0.02] border-transparent hover:bg-white/[0.06] hover:border-white/10 text-white/80"
@@ -648,14 +737,12 @@ export function LocationSelector({
                     >
                       <div className="flex flex-col truncate pr-2">
                         <div className="flex items-center gap-2 truncate">
-                          <MapPin className="h-3 w-3 text-primary shrink-0" />
-                          <span className="truncate">{fullName}</span>
-                          <span className="text-[9px] font-mono opacity-50 uppercase px-1 bg-white/10 shrink-0">
-                            {loc.type}
-                          </span>
+                          {getLocationIcon(loc.type)}
+                          <span className="truncate font-medium">{fullName}</span>
+                          {renderTypeBadge(loc.type)}
                         </div>
                         {hierarchyStr && (
-                          <span className="text-[10px] font-mono text-white/40 truncate pl-5">
+                          <span className="text-[10px] font-mono text-white/40 truncate pl-5 pt-0.5">
                             {hierarchyStr}
                           </span>
                         )}
@@ -687,7 +774,7 @@ export function LocationSelector({
           <div className="space-y-1">
             <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
               <Globe className="h-3 w-3 text-primary" />
-              1. Select Country or Sub-Region
+              1. Select Country (Grouped by Continent)
             </label>
             <select
               value={selectedCountryId}
@@ -702,10 +789,18 @@ export function LocationSelector({
               className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-primary"
             >
               <option value="">-- Choose Country --</option>
-              {countriesList.map((c) => (
-                <option key={c.id} value={c.id} className="bg-card text-foreground">
-                  {c.name}
-                </option>
+              {countriesGroupedByContinent.map((group) => (
+                <optgroup
+                  key={group.continent}
+                  label={`— ${group.continent.toUpperCase()} —`}
+                  className="bg-card text-foreground font-semibold"
+                >
+                  {group.countries.map((c) => (
+                    <option key={c.id} value={c.id} className="bg-card text-foreground font-normal">
+                      {c.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>

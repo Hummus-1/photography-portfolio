@@ -50,6 +50,11 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "alphabetical" | "most_spots">("newest");
   const [density, setDensity] = useState<"expanded" | "compact">("expanded");
+  const [activeAlbumId, setActiveAlbumId] = useState<string>(albums[0]?.id || "");
+
+  const activeAlbum = useMemo(() => {
+    return albums.find((a) => a.id === activeAlbumId) || albums[0] || null;
+  }, [albums, activeAlbumId]);
 
   // Group albums by country & extract continents list
   const { countryGroups, continentsList, countriesList } = useMemo(() => {
@@ -170,7 +175,6 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
 
   return (
     <div className="w-full min-h-screen pb-24 space-y-6 sm:space-y-8">
-      
       {/* Global Expedition Header */}
       <section className="px-4 sm:px-6 md:px-12 max-w-6xl mx-auto pt-6 sm:pt-10">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-foreground/10 pb-6 sm:pb-8 gap-6">
@@ -415,6 +419,8 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
             countryGroups={filteredCountryGroups}
             allAlbums={filteredAlbums}
             density={density}
+            activeAlbum={activeAlbum}
+            onSelectAlbum={(album) => setActiveAlbumId(album.id)}
           />
         )}
       </main>

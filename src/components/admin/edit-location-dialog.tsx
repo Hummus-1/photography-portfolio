@@ -50,7 +50,7 @@ interface EditLocationDialogProps {
 
 export function isProtectedLocationType(typeStr?: string | null): boolean {
   const lower = (typeStr || "").toLowerCase().trim();
-  return lower === "continent" || lower === "country";
+  return lower === "continent" || lower === "country" || lower === "sub-region";
 }
 
 const LOCATION_TYPES = [

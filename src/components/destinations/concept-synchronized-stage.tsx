@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Album } from "@/lib/types";
+import { selectBestAccentColor } from "@/lib/color-utils";
 import {
   MapPin,
   ArrowRight,
@@ -35,6 +36,8 @@ interface ConceptSynchronizedStageProps {
   density: "expanded" | "compact";
   selectedCountry?: string;
   onSelectCountry?: (country: string) => void;
+  activeAlbum?: Album | null;
+  onSelectAlbum?: (album: Album) => void;
 }
 
 export function ConceptSynchronizedStage({
@@ -43,11 +46,31 @@ export function ConceptSynchronizedStage({
   density,
   selectedCountry = "all",
   onSelectCountry,
+  activeAlbum: externalActiveAlbum,
+  onSelectAlbum: externalOnSelectAlbum,
 }: ConceptSynchronizedStageProps) {
-  const [activeAlbum, setActiveAlbum] = useState<Album>(allAlbums[0] || null);
+  const [internalActiveAlbum, setInternalActiveAlbum] = useState<Album>(allAlbums[0] || null);
   const [expandedCountries, setExpandedCountries] = useState<Record<string, boolean>>({});
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const activeAlbum = externalActiveAlbum !== undefined ? (externalActiveAlbum || allAlbums[0]) : internalActiveAlbum;
+  const setActiveAlbum = (album: Album) => {
+    if (externalOnSelectAlbum) {
+      externalOnSelectAlbum(album);
+    } else {
+      setInternalActiveAlbum(album);
+    }
+  };
+
+  const accentColor = useMemo(() => {
+    if (!activeAlbum) return "#6184D8";
+    return selectBestAccentColor(
+      activeAlbum.cover_color_palette,
+      "#6184D8",
+      activeAlbum.custom_hero_color
+    );
+  }, [activeAlbum]);
 
   // Keep active album in sync if allAlbums updates
   useEffect(() => {
@@ -124,13 +147,11 @@ export function ConceptSynchronizedStage({
         <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-28 space-y-6">
           <div className="bg-foreground/[0.02] border border-foreground/15 rounded-3xl p-6 sm:p-8 space-y-6 backdrop-blur-md shadow-xl overflow-hidden relative">
             
-            {/* Ambient Background Glow based on cover color palette */}
-            {activeAlbum?.cover_color_palette?.[0] && (
-              <div
-                className="absolute -top-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-700"
-                style={{ backgroundColor: activeAlbum.cover_color_palette[0] }}
-              />
-            )}
+            {/* Ambient Background Glow based on dynamic accent color */}
+            <div
+              className="absolute -top-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-30 pointer-events-none transition-all duration-700"
+              style={{ backgroundColor: accentColor }}
+            />
 
             {/* Stage Cover Image */}
             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-lg border border-foreground/15 group z-10">
@@ -179,7 +200,10 @@ export function ConceptSynchronizedStage({
                       {activeAlbum.location_path.map((node, index) => (
                         <span key={node.id || index} className="flex items-center gap-1">
                           {index > 0 && <ChevronRight className="h-3 w-3 opacity-40" />}
-                          <span className={index === activeAlbum.location_path!.length - 1 ? "text-primary font-bold" : ""}>
+                          <span
+                            style={index === activeAlbum.location_path!.length - 1 ? { color: accentColor } : undefined}
+                            className={index === activeAlbum.location_path!.length - 1 ? "font-bold" : ""}
+                          >
                             {node.name}
                           </span>
                         </span>
@@ -194,7 +218,8 @@ export function ConceptSynchronizedStage({
                         href={`https://maps.google.com/?q=${activeAlbum.lat},${activeAlbum.lng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] text-primary font-mono bg-primary/10 px-2 py-1 rounded border border-primary/20 hover:bg-primary/20 transition-colors flex items-center gap-1"
+                        style={{ color: accentColor, backgroundColor: `${accentColor}18`, borderColor: `${accentColor}33` }}
+                        className="text-[10px] font-mono px-2.5 py-1 rounded border transition-colors flex items-center gap-1 hover:brightness-110"
                         title="View GPS Pin on Google Maps"
                       >
                         {activeAlbum.lat >= 0 ? `${activeAlbum.lat.toFixed(2)}° N` : `${Math.abs(activeAlbum.lat).toFixed(2)}° S`},{" "}
@@ -216,7 +241,8 @@ export function ConceptSynchronizedStage({
                 <div className="pt-2">
                   <Link
                     href={`/album/${activeAlbum.slug}`}
-                    className="w-full inline-flex items-center justify-center gap-2 group bg-foreground text-background py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold hover:opacity-90 active:scale-[0.99] transition-all shadow-md cursor-pointer"
+                    style={{ backgroundColor: accentColor }}
+                    className="w-full inline-flex items-center justify-center gap-2 group text-white py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold hover:brightness-110 active:scale-[0.99] transition-all shadow-md cursor-pointer"
                   >
                     <span>Explore Photo Series</span>
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -269,11 +295,19 @@ export function ConceptSynchronizedStage({
                           else cardRefs.current.delete(album.id);
                         }}
                         onClick={() => handleSelectAlbum(album)}
+                        style={
+                          isActive
+                            ? {
+                                borderColor: `${accentColor}80`,
+                                boxShadow: `0 0 30px -5px ${accentColor}35`,
+                              }
+                            : undefined
+                        }
                         className={`group cursor-pointer rounded-3xl border transition-all duration-300 active:scale-[0.99] ${
                           density === "compact" ? "p-3 sm:p-4 space-y-2" : "p-4 sm:p-5 space-y-3"
                         } ${
                           isActive
-                            ? "bg-foreground/[0.05] border-primary/60 shadow-lg ring-1 ring-primary/30"
+                            ? "bg-foreground/[0.05] ring-1"
                             : "bg-foreground/[0.01] border-foreground/10 hover:border-foreground/25 hover:bg-foreground/[0.03]"
                         }`}
                       >
@@ -302,7 +336,8 @@ export function ConceptSynchronizedStage({
                           <div className="flex-1 min-w-0 space-y-1">
                             <div className="flex items-center justify-between gap-2">
                               <h4
-                                className={`font-serif font-bold text-foreground truncate group-hover:text-primary transition-colors ${
+                                style={isActive ? { color: accentColor } : undefined}
+                                className={`font-serif font-bold text-foreground truncate transition-colors ${
                                   density === "compact" ? "text-sm sm:text-base" : "text-base sm:text-xl"
                                 }`}
                               >
@@ -314,7 +349,10 @@ export function ConceptSynchronizedStage({
                             </div>
 
                             <div className="text-xs font-mono text-foreground/60 flex items-center gap-1.5 truncate">
-                              <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                              <MapPin
+                                style={isActive ? { color: accentColor } : undefined}
+                                className="h-3 w-3 shrink-0 transition-colors"
+                              />
                               <span className="truncate">{album.location}</span>
                             </div>
 
@@ -339,9 +377,10 @@ export function ConceptSynchronizedStage({
                               href={`/album/${album.slug}`}
                               onClick={(e) => e.stopPropagation()}
                               title={`Open ${album.title} album`}
+                              style={isActive ? { backgroundColor: accentColor } : undefined}
                               className={`w-10 h-10 rounded-full transition-all flex items-center justify-center ${
                                 isActive
-                                  ? "bg-primary text-white hover:scale-110 shadow-md"
+                                  ? "text-white hover:scale-110 shadow-md"
                                   : "bg-foreground/10 text-foreground/70 hover:bg-foreground hover:text-background hover:scale-110"
                               }`}
                             >
@@ -382,7 +421,10 @@ export function ConceptSynchronizedStage({
           
           {/* Floating Pill Bar at Bottom of Mobile Viewport */}
           <div className="fixed bottom-4 left-4 right-4 z-40">
-            <div className="p-3 rounded-2xl bg-background/95 border border-primary/40 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 text-foreground">
+            <div
+              style={{ borderColor: `${accentColor}60` }}
+              className="p-3 rounded-2xl bg-background/95 border shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 text-foreground transition-colors duration-500"
+            >
               
               {/* Thumbnail & Title */}
               <div
@@ -402,7 +444,10 @@ export function ConceptSynchronizedStage({
                 </div>
 
                 <div className="min-w-0 space-y-0.5">
-                  <div className="text-[10px] font-mono text-primary uppercase tracking-wider flex items-center gap-1 truncate">
+                  <div
+                    style={{ color: accentColor }}
+                    className="text-[10px] font-mono uppercase tracking-wider flex items-center gap-1 truncate transition-colors duration-500"
+                  >
                     <MapPin className="h-3 w-3 shrink-0" />
                     <span className="truncate">{activeAlbum.location}</span>
                   </div>
@@ -424,7 +469,8 @@ export function ConceptSynchronizedStage({
 
                 <Link
                   href={`/album/${activeAlbum.slug}`}
-                  className="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px]"
+                  style={{ backgroundColor: accentColor }}
+                  className="px-3.5 py-2 rounded-xl text-white text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px] hover:brightness-110 transition-colors duration-500"
                 >
                   <span>View</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -455,7 +501,10 @@ export function ConceptSynchronizedStage({
                   className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-foreground/15 rounded-t-3xl p-6 space-y-5 max-h-[85vh] overflow-y-auto shadow-2xl"
                 >
                   <div className="flex items-center justify-between border-b border-foreground/10 pb-3">
-                    <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
+                    <div
+                      style={{ color: accentColor }}
+                      className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest font-semibold transition-colors duration-500"
+                    >
                       <Compass className="h-4 w-4" />
                       <span>Active Destination Preview</span>
                     </div>
@@ -485,7 +534,7 @@ export function ConceptSynchronizedStage({
                     </h3>
 
                     <div className="text-xs font-mono text-foreground/70 flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-primary" />
+                      <MapPin style={{ color: accentColor }} className="h-3.5 w-3.5 transition-colors duration-500" />
                       <span>{activeAlbum.location}</span>
                     </div>
 
@@ -500,7 +549,8 @@ export function ConceptSynchronizedStage({
                     <div className="pt-3">
                       <Link
                         href={`/album/${activeAlbum.slug}`}
-                        className="w-full inline-flex items-center justify-center gap-2 bg-foreground text-background py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold cursor-pointer shadow-md"
+                        style={{ backgroundColor: accentColor }}
+                        className="w-full inline-flex items-center justify-center gap-2 text-white py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold cursor-pointer shadow-md hover:brightness-110 transition-colors duration-500"
                       >
                         <span>Explore Photo Series</span>
                         <ArrowRight className="h-4 w-4" />
