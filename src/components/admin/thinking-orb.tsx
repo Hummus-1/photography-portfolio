@@ -27,14 +27,14 @@ export function ThinkingOrb({
 
   const stateColors = {
     idle: {
-      core: "bg-film-amber shadow-[0_0_12px_rgba(217,107,39,0.7)]",
-      ring: "border-film-amber/40 animate-ping-slow",
-      ring2: "border-film-amber/15",
+      core: "bg-primary shadow-orb-idle",
+      ring: "border-primary/40 animate-ping-slow",
+      ring2: "border-primary/15",
     },
     thinking: {
-      core: "bg-film-amber shadow-[0_0_16px_rgba(230,126,58,0.8)] animate-pulse",
-      ring: "border-film-amber/60 border-t-transparent animate-spin",
-      ring2: "border-film-amber/20 border-b-transparent animate-spin-reverse",
+      core: "bg-primary shadow-orb-thinking animate-pulse",
+      ring: "border-primary/60 border-t-transparent animate-spin",
+      ring2: "border-primary/20 border-b-transparent animate-spin-reverse",
     },
     uploading: {
       core: "bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.8)] animate-bounce",

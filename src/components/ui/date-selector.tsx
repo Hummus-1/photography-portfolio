@@ -175,14 +175,14 @@ export function DateSelector({
         disabled={disabled}
         maxLength={10}
         className={cn(
-          "w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-film-amber font-mono text-xs h-10 px-3 pr-10 transition-colors",
+          "w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary font-mono text-xs h-10 px-3 pr-10 transition-colors",
           className
         )}
       />
 
       {/* Calendar Icon Button overlaying Native Date Picker */}
-      <div className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-white/50 hover:text-film-amber transition-colors group">
-        <CalendarIcon className="h-4 w-4 pointer-events-none group-hover:text-film-amber" />
+      <div className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-white/50 hover:text-primary transition-colors group">
+        <CalendarIcon className="h-4 w-4 pointer-events-none group-hover:text-primary" />
         <input
           type="date"
           value={currentIsoValue}

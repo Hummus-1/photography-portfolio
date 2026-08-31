@@ -179,7 +179,7 @@ export function ConceptSynchronizedStage({
                       {activeAlbum.location_path.map((node, index) => (
                         <span key={node.id || index} className="flex items-center gap-1">
                           {index > 0 && <ChevronRight className="h-3 w-3 opacity-40" />}
-                          <span className={index === activeAlbum.location_path!.length - 1 ? "text-film-amber font-bold" : ""}>
+                          <span className={index === activeAlbum.location_path!.length - 1 ? "text-primary font-bold" : ""}>
                             {node.name}
                           </span>
                         </span>
@@ -194,7 +194,7 @@ export function ConceptSynchronizedStage({
                         href={`https://maps.google.com/?q=${activeAlbum.lat},${activeAlbum.lng}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] text-film-amber font-mono bg-film-amber/10 px-2 py-1 rounded border border-film-amber/20 hover:bg-film-amber/20 transition-colors flex items-center gap-1"
+                        className="text-[10px] text-primary font-mono bg-primary/10 px-2 py-1 rounded border border-primary/20 hover:bg-primary/20 transition-colors flex items-center gap-1"
                         title="View GPS Pin on Google Maps"
                       >
                         {activeAlbum.lat >= 0 ? `${activeAlbum.lat.toFixed(2)}° N` : `${Math.abs(activeAlbum.lat).toFixed(2)}° S`},{" "}
@@ -273,7 +273,7 @@ export function ConceptSynchronizedStage({
                           density === "compact" ? "p-3 sm:p-4 space-y-2" : "p-4 sm:p-5 space-y-3"
                         } ${
                           isActive
-                            ? "bg-foreground/[0.05] border-film-amber/60 shadow-lg ring-1 ring-film-amber/30"
+                            ? "bg-foreground/[0.05] border-primary/60 shadow-lg ring-1 ring-primary/30"
                             : "bg-foreground/[0.01] border-foreground/10 hover:border-foreground/25 hover:bg-foreground/[0.03]"
                         }`}
                       >
@@ -302,7 +302,7 @@ export function ConceptSynchronizedStage({
                           <div className="flex-1 min-w-0 space-y-1">
                             <div className="flex items-center justify-between gap-2">
                               <h4
-                                className={`font-serif font-bold text-foreground truncate group-hover:text-film-amber transition-colors ${
+                                className={`font-serif font-bold text-foreground truncate group-hover:text-primary transition-colors ${
                                   density === "compact" ? "text-sm sm:text-base" : "text-base sm:text-xl"
                                 }`}
                               >
@@ -314,7 +314,7 @@ export function ConceptSynchronizedStage({
                             </div>
 
                             <div className="text-xs font-mono text-foreground/60 flex items-center gap-1.5 truncate">
-                              <MapPin className="h-3 w-3 shrink-0 text-film-amber" />
+                              <MapPin className="h-3 w-3 shrink-0 text-primary" />
                               <span className="truncate">{album.location}</span>
                             </div>
 
@@ -341,7 +341,7 @@ export function ConceptSynchronizedStage({
                               title={`Open ${album.title} album`}
                               className={`w-10 h-10 rounded-full transition-all flex items-center justify-center ${
                                 isActive
-                                  ? "bg-film-amber text-white hover:scale-110 shadow-md"
+                                  ? "bg-primary text-white hover:scale-110 shadow-md"
                                   : "bg-foreground/10 text-foreground/70 hover:bg-foreground hover:text-background hover:scale-110"
                               }`}
                             >
@@ -382,7 +382,7 @@ export function ConceptSynchronizedStage({
           
           {/* Floating Pill Bar at Bottom of Mobile Viewport */}
           <div className="fixed bottom-4 left-4 right-4 z-40">
-            <div className="p-3 rounded-2xl bg-background/95 border border-film-amber/40 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 text-foreground">
+            <div className="p-3 rounded-2xl bg-background/95 border border-primary/40 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 text-foreground">
               
               {/* Thumbnail & Title */}
               <div
@@ -402,7 +402,7 @@ export function ConceptSynchronizedStage({
                 </div>
 
                 <div className="min-w-0 space-y-0.5">
-                  <div className="text-[10px] font-mono text-film-amber uppercase tracking-wider flex items-center gap-1 truncate">
+                  <div className="text-[10px] font-mono text-primary uppercase tracking-wider flex items-center gap-1 truncate">
                     <MapPin className="h-3 w-3 shrink-0" />
                     <span className="truncate">{activeAlbum.location}</span>
                   </div>
@@ -424,7 +424,7 @@ export function ConceptSynchronizedStage({
 
                 <Link
                   href={`/album/${activeAlbum.slug}`}
-                  className="px-3.5 py-2 rounded-xl bg-film-amber text-white text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px]"
+                  className="px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px]"
                 >
                   <span>View</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -455,7 +455,7 @@ export function ConceptSynchronizedStage({
                   className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-foreground/15 rounded-t-3xl p-6 space-y-5 max-h-[85vh] overflow-y-auto shadow-2xl"
                 >
                   <div className="flex items-center justify-between border-b border-foreground/10 pb-3">
-                    <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+                    <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                       <Compass className="h-4 w-4" />
                       <span>Active Destination Preview</span>
                     </div>
@@ -485,7 +485,7 @@ export function ConceptSynchronizedStage({
                     </h3>
 
                     <div className="text-xs font-mono text-foreground/70 flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-film-amber" />
+                      <MapPin className="h-3.5 w-3.5 text-primary" />
                       <span>{activeAlbum.location}</span>
                     </div>
 

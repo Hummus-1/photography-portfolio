@@ -86,7 +86,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-baseline border-b border-foreground/10 pb-6 sm:pb-8">
           
           <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
-            <span className="text-film-amber font-bold flex items-center gap-1">
+            <span className="text-primary font-bold flex items-center gap-1">
               <Film className="h-3.5 w-3.5" />
               03
             </span>
@@ -96,7 +96,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
 
           <div className="md:col-span-9 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
             <div className="space-y-2.5 max-w-2xl">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                 <Compass className="h-4 w-4 shrink-0" />
                 <span>Geographic Index • Expedition Coordinates</span>
               </div>
@@ -111,7 +111,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
             <div>
               <Link
                 href="/destinations"
-                className="inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group min-h-[44px] w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group min-h-[44px] w-full sm:w-auto"
               >
                 <Globe2 className="h-4 w-4" />
                 <span>Destinations Index</span>
@@ -134,18 +134,18 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
             >
               <Link
                 href={`/album/${spot.slug}`}
-                className="block p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/70 backdrop-blur-md hover:border-film-amber/50 hover:shadow-lg transition-all active:scale-[0.99] group h-full flex flex-col justify-between"
+                className="block p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/70 backdrop-blur-md hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group h-full flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between text-xs font-mono text-foreground/60 uppercase tracking-widest mb-3">
                     <span className="flex items-center gap-1.5 truncate">
-                      <MapPin className="h-3.5 w-3.5 text-film-amber shrink-0" />
+                      <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span className="truncate">{spot.country}</span>
                     </span>
-                    <Navigation className="h-3.5 w-3.5 text-foreground/30 group-hover:text-film-amber transition-colors shrink-0" />
+                    <Navigation className="h-3.5 w-3.5 text-foreground/30 group-hover:text-primary transition-colors shrink-0" />
                   </div>
 
-                  <h3 className="font-serif text-lg sm:text-xl font-bold text-foreground group-hover:text-film-amber transition-colors line-clamp-1">
+                  <h3 className="font-serif text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
                     {spot.name}
                   </h3>
 

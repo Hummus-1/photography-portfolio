@@ -13,7 +13,7 @@ export function ApertureDemo() {
     <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-foreground/10 pb-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
             <Aperture className="h-4 w-4" />
             <span>Interactive Optics Engine</span>
           </div>
@@ -28,7 +28,7 @@ export function ApertureDemo() {
             onClick={() => setFStop("f1.4")}
             className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
               isLight
-                ? "bg-film-amber text-white font-bold shadow"
+                ? "bg-primary text-white font-bold shadow"
                 : "text-foreground/70 hover:text-foreground"
             }`}
           >
@@ -40,7 +40,7 @@ export function ApertureDemo() {
             onClick={() => setFStop("f22")}
             className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
               !isLight
-                ? "bg-film-amber text-white font-bold shadow"
+                ? "bg-primary text-white font-bold shadow"
                 : "text-foreground/70 hover:text-foreground"
             }`}
           >
@@ -86,18 +86,18 @@ export function ApertureDemo() {
             </motion.div>
 
             {/* Central Iris Light Beam */}
-            <div className="absolute size-8 rounded-full bg-film-amber/20 border border-film-amber blur-xs flex items-center justify-center" />
+            <div className="absolute size-8 rounded-full bg-primary/20 border border-primary blur-xs flex items-center justify-center" />
           </div>
 
           <div className="mt-4 font-mono text-xs text-foreground/60 uppercase tracking-widest text-center">
-            Lens Iris State: <span className="text-film-amber font-bold">{fStop.toUpperCase()}</span>
+            Lens Iris State: <span className="text-primary font-bold">{fStop.toUpperCase()}</span>
           </div>
         </div>
 
         {/* Right Column: Optics Explanation (7 Cols) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="space-y-2">
-            <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+            <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold">
               Photographic Metaphor in Code
             </div>
             <h4 className="font-serif text-xl sm:text-2xl font-bold text-foreground">
@@ -110,8 +110,8 @@ export function ApertureDemo() {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs pt-2">
-            <div className={`p-3.5 rounded-xl border transition-all ${isLight ? "border-film-amber bg-film-amber/10" : "border-foreground/10 bg-foreground/[0.02]"}`}>
-              <div className="text-[10px] text-film-amber font-semibold uppercase tracking-widest">
+            <div className={`p-3.5 rounded-xl border transition-all ${isLight ? "border-primary bg-primary/10" : "border-foreground/10 bg-foreground/[0.02]"}`}>
+              <div className="text-[10px] text-primary font-semibold uppercase tracking-widest">
                 F/1.4 Light Mode
               </div>
               <div className="text-foreground/80 mt-1">
@@ -119,8 +119,8 @@ export function ApertureDemo() {
               </div>
             </div>
 
-            <div className={`p-3.5 rounded-xl border transition-all ${!isLight ? "border-film-amber bg-film-amber/10" : "border-foreground/10 bg-foreground/[0.02]"}`}>
-              <div className="text-[10px] text-film-amber font-semibold uppercase tracking-widest">
+            <div className={`p-3.5 rounded-xl border transition-all ${!isLight ? "border-primary bg-primary/10" : "border-foreground/10 bg-foreground/[0.02]"}`}>
+              <div className="text-[10px] text-primary font-semibold uppercase tracking-widest">
                 F/22 Dark Mode
               </div>
               <div className="text-foreground/80 mt-1">

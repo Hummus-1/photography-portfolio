@@ -31,7 +31,7 @@ export function Logo({
           cy="32"
           r="26"
           className={`stroke-foreground/30 fill-none transition-all duration-700 ease-out origin-center ${
-            animated ? "group-hover:stroke-film-amber/60 group-hover:rotate-[30deg]" : ""
+            animated ? "group-hover:stroke-primary/60 group-hover:rotate-[30deg]" : ""
           }`}
           strokeWidth="1"
         />
@@ -56,7 +56,7 @@ export function Logo({
           cy="32"
           r="13"
           className={`stroke-foreground/80 fill-none transition-all duration-700 ease-out origin-center ${
-            animated ? "group-hover:stroke-film-amber group-hover:-rotate-45" : ""
+            animated ? "group-hover:stroke-primary group-hover:-rotate-45" : ""
           }`}
           strokeWidth="1.5"
           strokeDasharray="2.55 2.55"
@@ -71,7 +71,7 @@ export function Logo({
                 cx="32"
                 cy="32"
                 r="6"
-                className="fill-film-amber/25 opacity-0 group-hover:opacity-100 group-hover:scale-125 origin-center transition-all duration-300 pointer-events-none"
+                className="fill-primary/25 opacity-0 group-hover:opacity-100 group-hover:scale-125 origin-center transition-all duration-300 pointer-events-none"
               />
             )}
             {/* Núcleo Central Red Dot */}
@@ -79,7 +79,7 @@ export function Logo({
               cx="32"
               cy="32"
               r="3.5"
-              className={`fill-film-amber transition-all duration-300 origin-center ${
+              className={`fill-primary transition-all duration-300 origin-center ${
                 animated ? "group-hover:scale-110" : ""
               }`}
             />

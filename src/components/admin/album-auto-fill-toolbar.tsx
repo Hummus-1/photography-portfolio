@@ -114,9 +114,9 @@ export function AlbumAutoFillToolbar({
   return (
     <div className="space-y-3">
       {/* Action Bar */}
-      <div className="relative overflow-hidden p-5 bg-gradient-to-r from-[#14171a] via-[#111417] to-[#14171a] border border-white/10 flex flex-wrap items-center justify-between gap-4">
+      <div className="relative overflow-hidden p-5 bg-card border border-border flex flex-wrap items-center justify-between gap-4">
         {/* Glow backdrop */}
-        <div className="absolute top-0 right-0 w-64 h-full bg-film-amber/5 blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-full bg-primary/5 blur-2xl pointer-events-none" />
 
         <div className="flex items-center gap-3.5 z-10">
           <ThinkingOrb
@@ -129,7 +129,7 @@ export function AlbumAutoFillToolbar({
                 {album.title}
               </span>
               {isUntitled && (
-                <span className="text-[9px] font-mono bg-film-amber/20 text-film-amber border border-film-amber/30 px-2 py-0.5 uppercase tracking-widest flex items-center gap-1">
+                <span className="text-[9px] font-mono bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 uppercase tracking-widest flex items-center gap-1">
                   <Wand2 className="h-3 w-3" /> Auto-Fill Ready
                 </span>
               )}
@@ -152,7 +152,7 @@ export function AlbumAutoFillToolbar({
             size="sm"
             onClick={() => handleAutoFill(true)}
             disabled={loading || photosCount === 0}
-            className="bg-film-amber/20 text-film-amber border border-film-amber/40 hover:bg-film-amber/30 rounded-none font-mono text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all"
+            className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30 rounded-none font-mono text-xs uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all"
           >
             {loading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -166,15 +166,14 @@ export function AlbumAutoFillToolbar({
 
       {/* Suggested Titles Palette (if generated) */}
       {suggestions && (
-        <div className="p-4 bg-[#0A0C0E] border border-film-amber/30 space-y-3 font-sans transition-all">
-          <div className="flex items-center justify-between text-xs text-film-amber font-mono uppercase tracking-wider">
+        <div className="p-4 bg-card border border-primary/30 space-y-3 font-sans transition-all">
+          <div className="flex items-center justify-between text-xs text-primary font-mono uppercase tracking-wider">
             <span className="flex items-center gap-2">
-              <ThinkingOrb state="ai-analyzing" size="sm" />
               <span>AI Suggested Album Titles</span>
             </span>
             {suggestions.earliestDate && (
               <span className="flex items-center gap-1.5 text-white/60 text-[10px]">
-                <Calendar className="h-3 w-3 text-film-amber" /> Earliest Photo: {isoToDDMMYYYY(suggestions.earliestDate)}
+                <Calendar className="h-3 w-3 text-primary" /> Earliest Photo: {isoToDDMMYYYY(suggestions.earliestDate)}
               </span>
             )}
           </div>
@@ -186,8 +185,8 @@ export function AlbumAutoFillToolbar({
                 onClick={() => handleApplyTitle(suggestions.aiTitle!)}
                 className={`px-3 py-1.5 text-xs border font-medium flex items-center gap-2 transition-all ${
                   album.title === suggestions.aiTitle
-                    ? "bg-film-amber text-white border-film-amber font-bold"
-                    : "bg-white/5 border-white/20 text-white hover:bg-film-amber/20 hover:border-film-amber"
+                    ? "bg-primary text-white border-primary font-bold"
+                    : "bg-white/5 border-white/20 text-white hover:bg-primary/20 hover:border-primary"
                 }`}
               >
                 {album.title === suggestions.aiTitle && <Check className="h-3 w-3" />}
@@ -203,7 +202,7 @@ export function AlbumAutoFillToolbar({
                 onClick={() => handleApplyTitle(alt)}
                 className={`px-3 py-1.5 text-xs border font-medium flex items-center gap-2 transition-all ${
                   album.title === alt
-                    ? "bg-film-amber text-white border-film-amber font-bold"
+                    ? "bg-primary text-white border-primary font-bold"
                     : "bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/40"
                 }`}
               >
@@ -215,7 +214,7 @@ export function AlbumAutoFillToolbar({
 
           {suggestions.autoResolvedLocation && !album.location && (
             <div className="text-[11px] font-mono text-white/50 flex items-center gap-1.5 pt-2 border-t border-white/5">
-              <MapPin className="h-3 w-3 text-film-amber" />
+              <MapPin className="h-3 w-3 text-primary" />
               Auto Detected Location: {suggestions.autoResolvedLocation}
             </div>
           )}

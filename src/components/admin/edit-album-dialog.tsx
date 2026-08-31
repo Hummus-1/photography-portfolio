@@ -155,12 +155,12 @@ export function EditAlbumDialog({
       )}
       <DialogContent
         data-lenis-prevent
-        className="bg-[#121519]/95 backdrop-blur-2xl border-white/15 text-white rounded-none max-w-3xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
+        className="bg-card/95 backdrop-blur-2xl border-border text-foreground rounded-none max-w-3xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
       >
         {/* Static Header */}
         <DialogHeader className="shrink-0 p-6 sm:p-8 border-b border-white/10 relative pr-12">
           <DialogTitle className="font-serif text-xl font-bold uppercase tracking-wider flex items-center gap-2 text-white">
-            <Sliders className="h-5 w-5 text-film-amber" />
+            <Sliders className="h-5 w-5 text-primary" />
             Edit Collection Metadata
           </DialogTitle>
           <DialogDescription className="text-white/60 text-xs font-mono">
@@ -182,7 +182,7 @@ export function EditAlbumDialog({
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder="Album Title"
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary font-mono text-xs"
                   required
                 />
               </div>
@@ -196,7 +196,7 @@ export function EditAlbumDialog({
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="e.g. visit-greenland"
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary font-mono text-xs"
                 />
               </div>
             </div>
@@ -218,7 +218,7 @@ export function EditAlbumDialog({
             {/* Hierarchical Location Selector */}
             <div className="space-y-1.5 border-t border-white/10 pt-4">
               <Label className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1 mb-1">
-                <MapPin className="h-3 w-3 text-film-amber" /> Location Hierarchy Selection
+                <MapPin className="h-3 w-3 text-primary" /> Location Hierarchy Selection
               </Label>
               <LocationSelector
                 selectedLocationId={locationId}
@@ -232,14 +232,14 @@ export function EditAlbumDialog({
             {/* Custom Tags */}
             <div className="space-y-1.5">
               <Label htmlFor="edit-tags" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1">
-                <Tag className="h-3 w-3 text-film-amber" /> Album Hashtags (comma separated)
+                <Tag className="h-3 w-3 text-primary" /> Album Hashtags (comma separated)
               </Label>
               <Input
                 id="edit-tags"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="e.g. nature, winter, glaciers, arctic"
-                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs"
+                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary font-mono text-xs"
               />
             </div>
 
@@ -254,7 +254,7 @@ export function EditAlbumDialog({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe this photo collection..."
                 rows={3}
-                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber resize-none text-xs"
+                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary resize-none text-xs"
               />
             </div>
 
@@ -262,13 +262,13 @@ export function EditAlbumDialog({
             <div className="space-y-2 border-t border-white/10 pt-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="edit-hero-color" className="font-mono text-[10px] uppercase tracking-widest text-white/70 flex items-center gap-1.5">
-                  <Palette className="h-3.5 w-3.5 text-film-amber" /> Hero Accent Color (Custom Override)
+                  <Palette className="h-3.5 w-3.5 text-primary" /> Hero Accent Color (Custom Override)
                 </Label>
                 {customHeroColor && (
                   <button
                     type="button"
                     onClick={() => setCustomHeroColor("")}
-                    className="text-[10px] font-mono text-film-amber hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[10px] font-mono text-primary hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw className="h-2.5 w-2.5" /> Reset to Auto
                   </button>
@@ -287,7 +287,7 @@ export function EditAlbumDialog({
                         onClick={() => setCustomHeroColor(colorHex)}
                         style={{ backgroundColor: colorHex }}
                         className={`w-5 h-5 rounded-full border cursor-pointer transition-transform hover:scale-110 ${
-                          customHeroColor.toLowerCase() === colorHex.toLowerCase() ? "border-white ring-2 ring-film-amber scale-110" : "border-white/20 opacity-80 hover:opacity-100"
+                          customHeroColor.toLowerCase() === colorHex.toLowerCase() ? "border-white ring-2 ring-primary scale-110" : "border-white/20 opacity-80 hover:opacity-100"
                         }`}
                         title={`Select swatch ${colorHex}`}
                       />
@@ -309,7 +309,7 @@ export function EditAlbumDialog({
                   value={customHeroColor}
                   onChange={(e) => setCustomHeroColor(e.target.value)}
                   placeholder="Auto-extracted from cover photo"
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs max-w-xs"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary font-mono text-xs max-w-xs"
                 />
               </div>
             </div>
@@ -333,7 +333,7 @@ export function EditAlbumDialog({
                   checked={isFeatured}
                   onCheckedChange={setIsFeatured}
                 />
-                <Label htmlFor="edit-featured" className="font-mono text-xs uppercase tracking-wider text-film-amber cursor-pointer">
+                <Label htmlFor="edit-featured" className="font-mono text-xs uppercase tracking-wider text-primary cursor-pointer">
                   ★ Featured on Homepage
                 </Label>
               </div>
@@ -342,12 +342,12 @@ export function EditAlbumDialog({
         </div>
 
         {/* Static Footer Actions */}
-        <div className="shrink-0 p-4 sm:p-6 border-t border-white/10 bg-[#0E1012] flex justify-between items-center">
+        <div className="shrink-0 p-4 sm:p-6 border-t border-border bg-card flex justify-between items-center">
           <a
             href={`/album/${album.slug}?preview=true`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-film-amber/10 hover:bg-film-amber/20 border border-film-amber/30 text-film-amber font-mono text-xs uppercase tracking-wider transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-mono text-xs uppercase tracking-wider transition-all"
           >
             <Eye className="h-3.5 w-3.5" />
             Preview Album
@@ -355,11 +355,11 @@ export function EditAlbumDialog({
 
           <div className="flex gap-3">
             <DialogClose render={
-              <Button type="button" variant="outline" className="border-white/15 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs">
+              <Button type="button" variant="outline" className="border-border text-foreground rounded-none hover:bg-background/5 font-mono uppercase tracking-wider text-xs">
                 Cancel
               </Button>
             } />
-            <Button form="edit-album-form" type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs flex items-center gap-2">
+            <Button form="edit-album-form" type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none font-bold uppercase tracking-wider text-xs flex items-center gap-2">
               {loading ? <ThinkingOrb state="thinking" size="sm" /> : null}
               <span>{loading ? "Saving..." : "Save Changes"}</span>
             </Button>

@@ -48,12 +48,12 @@ export function Navigation() {
           className="group flex items-center gap-3 py-1 transition-all"
         >
           {/* Viewfinder Icon Glass Container */}
-          <div className="relative p-1.5 sm:p-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] group-hover:border-film-amber/40 group-hover:bg-film-amber/10 group-hover:shadow-[0_0_15px_rgba(217,107,39,0.15)] transition-all duration-300 flex items-center justify-center">
+          <div className="relative p-1.5 sm:p-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:shadow-[0_0_15px_rgba(217,107,39,0.15)] transition-all duration-300 flex items-center justify-center">
             <Logo className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
             
             {/* Corner Tech Accents */}
-            <span className="absolute -top-0.5 -left-0.5 w-1 h-1 border-t border-l border-foreground/40 group-hover:border-film-amber transition-colors duration-300" />
-            <span className="absolute -bottom-0.5 -right-0.5 w-1 h-1 border-b border-r border-foreground/40 group-hover:border-film-amber transition-colors duration-300" />
+            <span className="absolute -top-0.5 -left-0.5 w-1 h-1 border-t border-l border-foreground/40 group-hover:border-primary transition-colors duration-300" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-1 h-1 border-b border-r border-foreground/40 group-hover:border-primary transition-colors duration-300" />
           </div>
 
           {/* Brand Name & Subtitle */}
@@ -62,7 +62,7 @@ export function Navigation() {
               <span>DANI'S STILLS</span>
             </div>
             
-            <div className="flex items-center gap-2 text-[9px] font-mono tracking-[0.2em] text-foreground/50 uppercase group-hover:text-film-amber/80 transition-colors leading-none mt-0.5">
+            <div className="flex items-center gap-2 text-[9px] font-mono tracking-[0.2em] text-foreground/50 uppercase group-hover:text-primary/80 transition-colors leading-none mt-0.5">
               <span>VISUAL ARCHIVE</span>
               <span className="hidden lg:inline-block text-[8px] text-foreground/30">•</span>
               <span className="hidden lg:inline-block text-[8px] text-foreground/40">DIGITAL / RAW</span>
@@ -76,24 +76,24 @@ export function Navigation() {
             <Link
               href="/"
               className={`relative py-1 transition-colors duration-300 ${
-                pathname === "/" ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+                pathname === "/" ? "text-primary font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
               <span>Exhibition</span>
               {pathname === "/" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
               )}
             </Link>
 
             <Link
               href="/destinations"
               className={`relative py-1 transition-colors duration-300 ${
-                pathname?.startsWith("/destinations") ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+                pathname?.startsWith("/destinations") ? "text-primary font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
               <span>Spatial Index</span>
               {pathname?.startsWith("/destinations") && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
               )}
             </Link>
 
@@ -101,12 +101,12 @@ export function Navigation() {
               <Link
                 href="/limonada"
                 className={`relative py-1 transition-colors duration-300 ${
-                  pathname?.startsWith("/limonada") ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+                  pathname?.startsWith("/limonada") ? "text-primary font-bold" : "text-foreground/70 hover:text-foreground"
                 }`}
               >
                 <span>Dashboard</span>
                 {pathname?.startsWith("/limonada") && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
                 )}
               </Link>
             )}
@@ -114,24 +114,24 @@ export function Navigation() {
             <Link
               href="/how-it-works"
               className={`relative py-1 transition-colors duration-300 ${
-                pathname === "/how-it-works" ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+                pathname === "/how-it-works" ? "text-primary font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
               <span>How It Works</span>
               {pathname === "/how-it-works" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
               )}
             </Link>
 
             <Link
               href="/about"
               className={`relative py-1 transition-colors duration-300 ${
-                pathname === "/about" ? "text-film-amber font-bold" : "text-foreground/70 hover:text-foreground"
+                pathname === "/about" ? "text-primary font-bold" : "text-foreground/70 hover:text-foreground"
               }`}
             >
               <span>About</span>
               {pathname === "/about" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-film-amber rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
               )}
             </Link>
           </nav>
@@ -144,7 +144,7 @@ export function Navigation() {
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="sm:hidden p-2 rounded-full border border-foreground/15 bg-background/80 text-foreground hover:border-film-amber transition-colors cursor-pointer"
+            className="sm:hidden p-2 rounded-full border border-foreground/15 bg-background/80 text-foreground hover:border-primary transition-colors cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -166,7 +166,7 @@ export function Navigation() {
               href="/"
               className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
                 pathname === "/"
-                  ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
+                  ? "border-primary/50 bg-primary/10 text-primary font-bold"
                   : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
               }`}
             >
@@ -178,7 +178,7 @@ export function Navigation() {
               href="/destinations"
               className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
                 pathname?.startsWith("/destinations")
-                  ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
+                  ? "border-primary/50 bg-primary/10 text-primary font-bold"
                   : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
               }`}
             >
@@ -191,7 +191,7 @@ export function Navigation() {
                 href="/limonada"
                 className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
                   pathname?.startsWith("/limonada")
-                    ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
+                    ? "border-primary/50 bg-primary/10 text-primary font-bold"
                     : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
                 }`}
               >
@@ -204,7 +204,7 @@ export function Navigation() {
               href="/how-it-works"
               className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
                 pathname === "/how-it-works"
-                  ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
+                  ? "border-primary/50 bg-primary/10 text-primary font-bold"
                   : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
               }`}
             >
@@ -216,7 +216,7 @@ export function Navigation() {
               href="/about"
               className={`flex items-center gap-3 py-3 px-4 rounded-xl border transition-all ${
                 pathname === "/about"
-                  ? "border-film-amber/50 bg-film-amber/10 text-film-amber font-bold"
+                  ? "border-primary/50 bg-primary/10 text-primary font-bold"
                   : "border-foreground/10 text-foreground/80 hover:bg-foreground/5"
               }`}
             >

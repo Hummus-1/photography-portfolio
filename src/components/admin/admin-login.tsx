@@ -38,12 +38,12 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center bg-[#0B0D0F] px-6 text-[#e8e5f0] overflow-hidden">
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-background px-6 text-foreground overflow-hidden">
       {/* Background ambient glowing orbs */}
-      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-film-amber/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <Card className="relative z-10 w-full max-w-md bg-[#121519]/80 backdrop-blur-2xl border-white/10 text-white rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+      <Card className="relative z-10 w-full max-w-md bg-card/80 backdrop-blur-2xl border-border text-foreground rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
         <CardHeader className="space-y-3 text-center pb-2">
           <div className="mx-auto flex items-center justify-center py-2">
             <ThinkingOrb
@@ -51,11 +51,11 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               size="lg"
             />
           </div>
-          <CardTitle className="font-serif text-2xl font-bold tracking-wider uppercase text-white">
+          <CardTitle className="font-serif text-2xl font-bold tracking-wider uppercase text-foreground">
             Admin Control Center
           </CardTitle>
-          <CardDescription className="text-white/50 font-mono text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-film-amber" />
+          <CardDescription className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
             <span>Supabase RLS & R2 Secured Portal</span>
           </CardDescription>
         </CardHeader>
@@ -63,7 +63,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         <CardContent className="pt-4">
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="font-mono uppercase tracking-widest text-[10px] text-white/70">
+              <Label htmlFor="email" className="font-mono uppercase tracking-widest text-[10px] text-muted-foreground">
                 Admin Email
               </Label>
               <Input
@@ -72,12 +72,12 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 placeholder="admin@stills.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/5 border-white/15 rounded-none h-11 focus-visible:ring-film-amber focus:border-film-amber text-white font-mono text-xs"
+                className="bg-background/50 border-border rounded-none h-11 focus-visible:ring-primary focus:border-primary text-foreground font-mono text-xs"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="font-mono uppercase tracking-widest text-[10px] text-white/70">
+              <Label htmlFor="password" className="font-mono uppercase tracking-widest text-[10px] text-muted-foreground">
                 Password
               </Label>
               <Input
@@ -86,7 +86,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-white/5 border-white/15 rounded-none h-11 focus-visible:ring-film-amber focus:border-film-amber text-white font-mono text-xs"
+                className="bg-background/50 border-border rounded-none h-11 focus-visible:ring-primary focus:border-primary text-foreground font-mono text-xs"
                 required
               />
             </div>
@@ -94,7 +94,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
             <Button
               type="submit"
               disabled={loginLoading}
-              className="w-full bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] transition-all h-11 rounded-none font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all h-11 rounded-none font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg"
             >
               <span>{loginLoading ? "Authenticating..." : "Enter Portal"}</span>
               {!loginLoading && <ArrowRight className="h-4 w-4" />}

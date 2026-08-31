@@ -11,7 +11,7 @@ export function CuratorialManifesto() {
         {/* Section Header with Left-Margin Numbered Label */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline border-b border-foreground/10 pb-8">
           <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
-            <span className="text-film-amber font-bold flex items-center gap-1">
+            <span className="text-primary font-bold flex items-center gap-1">
               04
             </span>
             <span className="w-6 h-px bg-foreground/20" />
@@ -37,13 +37,13 @@ export function CuratorialManifesto() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="pt-8 border-t border-foreground/15 space-y-4 hover:border-film-amber transition-colors group"
+            className="pt-8 border-t border-foreground/15 space-y-4 hover:border-primary transition-colors group"
           >
-            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-primary font-semibold">
               <span>GEOGRAPHY</span>
-              <Compass className="h-4 w-4 text-foreground/40 group-hover:text-film-amber transition-colors" />
+              <Compass className="h-4 w-4 text-foreground/40 group-hover:text-primary transition-colors" />
             </div>
-            <h3 className="font-serif text-2xl font-bold text-foreground group-hover:text-film-amber transition-colors">
+            <h3 className="font-serif text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
               Volcanic & Sub-Arctic Expeditions
             </h3>
             <p className="text-sm font-sans text-foreground/70 leading-relaxed">
@@ -57,13 +57,13 @@ export function CuratorialManifesto() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="pt-8 border-t border-foreground/15 space-y-4 hover:border-film-amber transition-colors group"
+            className="pt-8 border-t border-foreground/15 space-y-4 hover:border-primary transition-colors group"
           >
-            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-primary font-semibold">
               <span>ATMOSPHERE</span>
-              <Camera className="h-4 w-4 text-foreground/40 group-hover:text-film-amber transition-colors" />
+              <Camera className="h-4 w-4 text-foreground/40 group-hover:text-primary transition-colors" />
             </div>
-            <h3 className="font-serif text-2xl font-bold text-foreground group-hover:text-film-amber transition-colors">
+            <h3 className="font-serif text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
               Chiaroscuro & Filmic Tones
             </h3>
             <p className="text-sm font-sans text-foreground/70 leading-relaxed">
@@ -77,13 +77,13 @@ export function CuratorialManifesto() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="pt-8 border-t border-foreground/15 space-y-4 hover:border-film-amber transition-colors group"
+            className="pt-8 border-t border-foreground/15 space-y-4 hover:border-primary transition-colors group"
           >
-            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest text-primary font-semibold">
               <span>GEOMETRY</span>
-              <Sparkles className="h-4 w-4 text-foreground/40 group-hover:text-film-amber transition-colors" />
+              <Sparkles className="h-4 w-4 text-foreground/40 group-hover:text-primary transition-colors" />
             </div>
-            <h3 className="font-serif text-2xl font-bold text-foreground group-hover:text-film-amber transition-colors">
+            <h3 className="font-serif text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
               Architectural Form
             </h3>
             <p className="text-sm font-sans text-foreground/70 leading-relaxed">
@@ -96,7 +96,7 @@ export function CuratorialManifesto() {
         {/* Bottom Colophon Quote */}
         <div className="pt-8 border-t border-foreground/10 flex flex-col md:flex-row items-center justify-between gap-6 text-xs font-mono text-foreground/60 uppercase tracking-widest">
           <div className="flex items-center gap-2">
-            <Aperture className="h-3.5 w-3.5 text-film-amber" />
+            <Aperture className="h-3.5 w-3.5 text-primary" />
             <span>Daniel García • Personal Photography Portfolio</span>
           </div>
           <div className="text-[11px] text-foreground/50">

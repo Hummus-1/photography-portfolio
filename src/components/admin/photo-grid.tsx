@@ -154,8 +154,8 @@ export function PhotoGrid({
             return (
               <Card
                 key={photo.id}
-                className={`bg-[#14171a] border rounded-none text-white overflow-hidden flex flex-col justify-between transition-all ${
-                  isCover ? "border-amber-500/60 ring-1 ring-amber-500/30" : "border-white/10"
+                className={`bg-card border rounded-none text-white overflow-hidden flex flex-col justify-between transition-all ${
+                  isCover ? "border-primary/60 ring-1 ring-primary/30" : "border-white/10"
                 }`}
               >
                 <div className="relative aspect-[3/2] w-full bg-black/20">
@@ -169,8 +169,8 @@ export function PhotoGrid({
 
                   {/* Cover Badge */}
                   {isCover && (
-                    <div className="absolute top-3 left-3 bg-amber-500 text-black font-mono text-[9px] font-bold uppercase tracking-widest px-2 py-1 flex items-center gap-1 shadow-md">
-                      <Star className="h-3 w-3 fill-black text-black" />
+                    <div className="absolute top-3 left-3 bg-primary text-primary-foreground font-mono text-[9px] font-bold uppercase tracking-widest px-2 py-1 flex items-center gap-1 shadow-md">
+                      <Star className="h-3 w-3 fill-primary-foreground text-primary-foreground" />
                       <span>Album Cover</span>
                     </div>
                   )}
@@ -199,10 +199,10 @@ export function PhotoGrid({
                     {!isCover && (
                       <button
                         onClick={() => onSetCoverPhoto(photo.url)}
-                        className="bg-black/75 hover:bg-amber-500/80 p-1.5 rounded-none transition-colors border border-white/10 text-white cursor-pointer"
+                        className="bg-black/75 hover:bg-primary/80 p-1.5 rounded-none transition-colors border border-white/10 text-white cursor-pointer"
                         title="Set as Album Cover"
                       >
-                        <Star className="h-3.5 w-3.5 text-amber-400" />
+                        <Star className="h-3.5 w-3.5 text-primary" />
                       </button>
                     )}
 
@@ -386,7 +386,7 @@ export function PhotoGrid({
                   <CardContent className="p-4 space-y-4">
                     {/* Score display */}
                     {photo.score !== undefined && photo.score !== null && (
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-500">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
                         <span>★ Score: {photo.score} / 10</span>
                       </div>
                     )}

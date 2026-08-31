@@ -36,7 +36,7 @@ export function HeroShowcase({ featuredAlbums = [], hoverEffect = "focus" }: Her
           transition={{ duration: 0.5 }}
           className="flex items-center pb-4 justify-between border-b border-foreground/10 text-xs font-mono tracking-widest uppercase text-foreground/60"
         >
-          <div className="flex items-center gap-2 text-film-amber font-bold">
+          <div className="flex items-center gap-2 text-primary font-bold">
             <Aperture className="h-4 w-4 shrink-0" />
             <span>01 — Visual Journal</span>
           </div>
@@ -71,7 +71,7 @@ export function HeroShowcase({ featuredAlbums = [], hoverEffect = "focus" }: Her
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={handleScrollToCollections}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
               >
                 <span>View Collections</span>
                 <ArrowDown className="h-3.5 w-3.5 group-hover:translate-y-1 transition-transform duration-300" />
@@ -79,7 +79,7 @@ export function HeroShowcase({ featuredAlbums = [], hoverEffect = "focus" }: Her
 
               <Link
                 href="/destinations"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 border border-foreground/25 hover:border-film-amber px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-film-amber/5 active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 border border-foreground/25 hover:border-primary px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary/5 active:scale-[0.98] transition-all"
               >
                 <Globe className="h-4 w-4 text-foreground/70" />
                 <span>Spatial Index</span>

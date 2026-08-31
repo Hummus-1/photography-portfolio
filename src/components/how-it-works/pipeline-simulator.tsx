@@ -136,7 +136,7 @@ export function PipelineSimulator() {
     <div className="space-y-6">
       {/* Photo Selector Strip */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-foreground/10 pb-4">
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
           <Sliders className="h-4 w-4" />
           <span>Interactive Media Pipeline Simulator</span>
         </div>
@@ -152,7 +152,7 @@ export function PipelineSimulator() {
                 onClick={() => setSelectedPhoto(photo)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
                   selectedPhoto.id === photo.id
-                    ? "bg-film-amber text-white font-bold shadow-md"
+                    ? "bg-primary text-white font-bold shadow-md"
                     : "bg-foreground/5 border border-foreground/10 text-foreground/70 hover:bg-foreground/10"
                 }`}
               >
@@ -185,7 +185,7 @@ export function PipelineSimulator() {
                 {selectedPhoto.location}
               </div>
 
-              <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-film-amber/90 backdrop-blur-md text-[10px] font-mono text-white font-bold tracking-wider">
+              <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-primary/90 backdrop-blur-md text-[10px] font-mono text-white font-bold tracking-wider">
                 Ratio: {selectedPhoto.aspectRatio.toFixed(2)}
               </div>
             </div>
@@ -202,11 +202,11 @@ export function PipelineSimulator() {
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-film-amber/30 bg-film-amber/5 space-y-1">
-              <div className="text-[10px] text-film-amber font-semibold uppercase tracking-widest">
+            <div className="p-3.5 rounded-xl border border-primary/30 bg-primary/5 space-y-1">
+              <div className="text-[10px] text-primary font-semibold uppercase tracking-widest">
                 WebP Optimization
               </div>
-              <div className="font-semibold text-film-amber truncate">
+              <div className="font-semibold text-primary truncate">
                 {selectedPhoto.webpSize}
               </div>
             </div>
@@ -221,7 +221,7 @@ export function PipelineSimulator() {
               onClick={() => setActiveTab("ai")}
               className={`py-2 px-3 border-b-2 transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
                 activeTab === "ai"
-                  ? "border-film-amber text-film-amber font-bold"
+                  ? "border-primary text-primary font-bold"
                   : "border-transparent text-foreground/60 hover:text-foreground"
               }`}
             >
@@ -233,7 +233,7 @@ export function PipelineSimulator() {
               onClick={() => setActiveTab("palette")}
               className={`py-2 px-3 border-b-2 transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
                 activeTab === "palette"
-                  ? "border-film-amber text-film-amber font-bold"
+                  ? "border-primary text-primary font-bold"
                   : "border-transparent text-foreground/60 hover:text-foreground"
               }`}
             >
@@ -245,7 +245,7 @@ export function PipelineSimulator() {
               onClick={() => setActiveTab("exif")}
               className={`py-2 px-3 border-b-2 transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
                 activeTab === "exif"
-                  ? "border-film-amber text-film-amber font-bold"
+                  ? "border-primary text-primary font-bold"
                   : "border-transparent text-foreground/60 hover:text-foreground"
               }`}
             >
@@ -257,7 +257,7 @@ export function PipelineSimulator() {
               onClick={() => setActiveTab("compression")}
               className={`py-2 px-3 border-b-2 transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
                 activeTab === "compression"
-                  ? "border-film-amber text-film-amber font-bold"
+                  ? "border-primary text-primary font-bold"
                   : "border-transparent text-foreground/60 hover:text-foreground"
               }`}
             >
@@ -282,7 +282,7 @@ export function PipelineSimulator() {
                     <span className="text-foreground/60 uppercase tracking-widest">
                       Model: @cf/openai/clip-vit-base-patch32
                     </span>
-                    <span className="text-film-amber font-semibold">
+                    <span className="text-primary font-semibold">
                       Threshold: &gt; 0.15
                     </span>
                   </div>
@@ -301,7 +301,7 @@ export function PipelineSimulator() {
                             initial={{ width: 0 }}
                             animate={{ width: `${item.confidence}%` }}
                             transition={{ duration: 0.6, ease: "easeOut" }}
-                            className="h-full bg-gradient-to-r from-film-amber/70 to-film-amber rounded-full"
+                            className="h-full bg-gradient-to-r from-primary/70 to-primary rounded-full"
                           />
                         </div>
                       </div>
@@ -329,7 +329,7 @@ export function PipelineSimulator() {
                       <button
                         key={hex}
                         onClick={() => copyToClipboard(hex)}
-                        className="group flex flex-col items-center gap-2 p-2 rounded-xl border border-foreground/10 hover:border-film-amber transition-all cursor-pointer"
+                        className="group flex flex-col items-center gap-2 p-2 rounded-xl border border-foreground/10 hover:border-primary transition-all cursor-pointer"
                       >
                         <div
                           className="size-12 rounded-full border border-black/20 shadow-inner transition-transform group-hover:scale-110 flex items-center justify-center text-white"
@@ -407,7 +407,7 @@ export function PipelineSimulator() {
                     </div>
                     <div className="flex justify-between border-b border-foreground/10 pb-2">
                       <span>Sharp WebP Output (2048px)</span>
-                      <span className="font-bold text-film-amber">{selectedPhoto.webpSize}</span>
+                      <span className="font-bold text-primary">{selectedPhoto.webpSize}</span>
                     </div>
                     <div className="flex justify-between border-b border-foreground/10 pb-2">
                       <span>Timeline WebP Thumbnail (300px)</span>

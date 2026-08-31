@@ -62,7 +62,6 @@ export function AlbumSidebar({
       {/* Sidebar Header & Live Status */}
       <div className="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-2">
-          <ThinkingOrb state={albumLoading ? "thinking" : "idle"} size="sm" />
           <span className="font-serif font-bold text-sm tracking-wide text-white">Collections</span>
         </div>
         <span className="font-mono text-[10px] bg-white/10 px-2 py-0.5 text-white/60 uppercase tracking-widest rounded-full">
@@ -78,7 +77,7 @@ export function AlbumSidebar({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Filter albums or locations..."
-          className="w-full bg-white/5 border border-white/10 text-xs font-mono text-white placeholder-white/40 pl-9 pr-3 py-2 rounded-none focus:outline-none focus:border-film-amber/50 transition-colors"
+          className="w-full bg-white/5 border border-white/10 text-xs font-mono text-white placeholder-white/40 pl-9 pr-3 py-2 rounded-none focus:outline-none focus:border-primary/50 transition-colors"
         />
         {searchQuery && (
           <button
@@ -98,7 +97,7 @@ export function AlbumSidebar({
             onClick={() => setFilterTab(tab)}
             className={`py-1 text-[9px] font-mono uppercase tracking-widest transition-all ${
               filterTab === tab
-                ? "bg-film-amber/20 text-film-amber border border-film-amber/40 font-bold"
+                ? "bg-primary/20 text-primary border border-primary/40 font-bold"
                 : "text-white/40 hover:text-white hover:bg-white/5 border border-transparent"
             }`}
           >
@@ -119,7 +118,7 @@ export function AlbumSidebar({
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="text-[10px] font-mono text-film-amber hover:underline uppercase"
+              className="text-[10px] font-mono text-primary hover:underline uppercase"
             >
               Reset Search Filter
             </button>
@@ -138,28 +137,24 @@ export function AlbumSidebar({
                 onClick={() => onSelectAlbum(album.id)}
                 className={`group relative p-4 flex flex-col items-start text-left transition-all duration-300 cursor-pointer border shrink-0 ${
                   isSelected
-                    ? "bg-gradient-to-r from-film-amber/10 via-white/5 to-white/5 border-film-amber/50 shadow-[0_0_20px_rgba(230,126,58,0.15)]"
+                    ? "bg-gradient-to-r from-primary/10 via-white/5 to-white/5 border-primary/50 shadow-[0_0_20px_rgba(230,126,58,0.15)]"
                     : "bg-white/[0.02] border-white/10 hover:border-white/25 hover:bg-white/[0.05]"
                 }`}
               >
                 {/* Active Indicator Bar */}
                 {isSelected && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-film-amber shadow-[0_0_8px_#e67e3a]" />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_8px_#e67e3a]" />
                 )}
 
                 <div className="flex w-full items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <ThinkingOrb
-                      state={isSelected ? "idle" : "success"}
-                      size="sm"
-                    />
                     <h4 className="font-serif font-bold text-sm tracking-wide truncate text-white">
                       {album.title}
                     </h4>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     {album.is_featured && (
-                      <span className="text-[8px] font-mono tracking-widest bg-film-amber/20 text-film-amber border border-film-amber/30 px-1.5 py-0.5 uppercase">
+                      <span className="text-[8px] font-mono tracking-widest bg-primary/20 text-primary border border-primary/30 px-1.5 py-0.5 uppercase">
                         ★ Featured
                       </span>
                     )}
@@ -173,7 +168,7 @@ export function AlbumSidebar({
 
                 <div className="flex items-center gap-2 text-[10px] font-mono text-white/40 uppercase flex-wrap">
                   <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3 text-film-amber" />
+                    <MapPin className="h-3 w-3 text-primary" />
                     {album.location_path && album.location_path.length > 0
                       ? album.location_path[album.location_path.length - 1].name
                       : album.location || "Location pending"}
@@ -208,7 +203,7 @@ export function AlbumSidebar({
                         onCheckedChange={(checked) => onFeaturedToggle(album.id, checked)}
                         className="scale-75"
                       />
-                      <Label htmlFor={`feat-${album.id}`} className="text-[9px] font-mono uppercase tracking-widest text-film-amber/90 cursor-pointer">
+                      <Label htmlFor={`feat-${album.id}`} className="text-[9px] font-mono uppercase tracking-widest text-primary/90 cursor-pointer">
                         Featured
                       </Label>
                     </div>
@@ -220,7 +215,7 @@ export function AlbumSidebar({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-white/40 hover:text-film-amber p-1 transition-colors"
+                      className="text-white/40 hover:text-primary p-1 transition-colors"
                       title="Preview Album"
                     >
                       <Eye className="h-3.5 w-3.5" />

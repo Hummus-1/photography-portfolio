@@ -30,7 +30,7 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-400 selection:bg-film-amber selection:text-white">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-400 selection:bg-primary selection:text-white">
       {/* Navigation */}
       <Navigation />
 
@@ -41,7 +41,7 @@ export default function AboutPage() {
           {/* Eyebrow Header Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-foreground/10 pb-6 text-xs font-mono tracking-widest uppercase text-foreground/60">
             <div className="flex items-center gap-3">
-              <span className="text-film-amber font-bold flex items-center gap-1.5">
+              <span className="text-primary font-bold flex items-center gap-1.5">
                 <Aperture className="h-3.5 w-3.5" />
                 01
               </span>
@@ -51,15 +51,15 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-foreground/50">
-              <MapPin className="h-3.5 w-3.5 text-film-amber" />
+              <MapPin className="h-3.5 w-3.5 text-primary" />
               <span>Santa Cruz de Tenerife, Canary Islands</span>
             </div>
           </div>
 
           {/* Page Hero Title */}
           <div className="space-y-4 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-film-amber/10 border border-film-amber/30 text-[10px] font-mono uppercase tracking-widest text-film-amber font-semibold">
-              <span className="size-1.5 rounded-full bg-film-amber animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-[10px] font-mono uppercase tracking-widest text-primary font-semibold">
+              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
               <span>Software Engineer & Visual Creator</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.05]">
@@ -91,7 +91,7 @@ export default function AboutPage() {
 
               {/* Quick Connect & Links Box */}
               <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-foreground/[0.015] space-y-5">
-                <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-1.5 border-b border-foreground/10 pb-3">
+                <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-1.5 border-b border-foreground/10 pb-3">
                   <Mail className="h-3.5 w-3.5" />
                   <span>Direct Contact</span>
                 </div>
@@ -100,13 +100,13 @@ export default function AboutPage() {
                   {/* Clickable Email with Copy Button */}
                   <a
                     href="mailto:dani@danigh.dev"
-                    className="flex items-center justify-between p-3.5 rounded-xl border border-foreground/10 bg-background/60 hover:border-film-amber/50 transition-all group"
+                    className="flex items-center justify-between p-3.5 rounded-xl border border-foreground/10 bg-background/60 hover:border-primary/50 transition-all group"
                   >
                     <div>
                       <div className="text-[10px] font-mono text-foreground/50 uppercase tracking-widest">
                         Email Address
                       </div>
-                      <div className="text-xs sm:text-sm font-mono font-semibold text-foreground group-hover:text-film-amber transition-colors">
+                      <div className="text-xs sm:text-sm font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
                         dani@danigh.dev
                       </div>
                     </div>
@@ -114,7 +114,7 @@ export default function AboutPage() {
                     <button
                       onClick={handleCopyEmail}
                       title="Copy email to clipboard"
-                      className="p-2 rounded-lg bg-foreground/5 hover:bg-film-amber/20 hover:text-film-amber transition-all cursor-pointer text-foreground/70"
+                      className="p-2 rounded-lg bg-foreground/5 hover:bg-primary/20 hover:text-primary transition-all cursor-pointer text-foreground/70"
                     >
                       {copied ? (
                         <Check className="h-4 w-4 text-emerald-500" />
@@ -129,17 +129,17 @@ export default function AboutPage() {
                     href="https://www.danigh.dev/"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center justify-between p-3.5 rounded-xl border border-foreground/10 bg-background/60 hover:border-film-amber/50 transition-all group"
+                    className="flex items-center justify-between p-3.5 rounded-xl border border-foreground/10 bg-background/60 hover:border-primary/50 transition-all group"
                   >
                     <div>
                       <div className="text-[10px] font-mono text-foreground/50 uppercase tracking-widest">
                         Engineering Portfolio
                       </div>
-                      <div className="text-xs sm:text-sm font-mono font-semibold text-foreground group-hover:text-film-amber transition-colors">
+                      <div className="text-xs sm:text-sm font-mono font-semibold text-foreground group-hover:text-primary transition-colors">
                         danigh.dev
                       </div>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-foreground/40 group-hover:text-film-amber transition-colors" />
+                    <ArrowUpRight className="h-4 w-4 text-foreground/40 group-hover:text-primary transition-colors" />
                   </a>
                 </div>
 
@@ -149,7 +149,7 @@ export default function AboutPage() {
                     href="https://github.com/Hummus-1"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-1.5 rounded-lg border border-foreground/15 hover:border-film-amber hover:text-film-amber transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-foreground/15 hover:border-primary hover:text-primary transition-colors"
                   >
                     GitHub
                   </a>
@@ -157,7 +157,7 @@ export default function AboutPage() {
                     href="https://www.linkedin.com/in/daniel-garc%C3%ADa-hern%C3%A1ndez-866a99264/"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-1.5 rounded-lg border border-foreground/15 hover:border-film-amber hover:text-film-amber transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-foreground/15 hover:border-primary hover:text-primary transition-colors"
                   >
                     LinkedIn
                   </a>
@@ -165,7 +165,7 @@ export default function AboutPage() {
                     href="https://www.behance.net/danielgarciaher2"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-1.5 rounded-lg border border-foreground/15 hover:border-film-amber hover:text-film-amber transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-foreground/15 hover:border-primary hover:text-primary transition-colors"
                   >
                     Behance
                   </a>
@@ -194,15 +194,15 @@ export default function AboutPage() {
 
               {/* Practice Pillars */}
               <div className="space-y-6 pt-6 border-t border-foreground/10">
-                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                   <Compass className="h-4 w-4" />
                   <span>Photographic Philosophy & Practice</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   
-                  <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/60 hover:border-film-amber/40 transition-colors space-y-3">
-                    <div className="text-[11px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                  <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/60 hover:border-primary/40 transition-colors space-y-3">
+                    <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                       01 • CHIAROSCURO & LIGHT
                     </div>
                     <h3 className="font-serif text-lg font-bold text-foreground">
@@ -213,8 +213,8 @@ export default function AboutPage() {
                     </p>
                   </div>
 
-                  <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/60 hover:border-film-amber/40 transition-colors space-y-3">
-                    <div className="text-[11px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                  <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/60 hover:border-primary/40 transition-colors space-y-3">
+                    <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                       02 • GEOLOGY & SCALE
                     </div>
                     <h3 className="font-serif text-lg font-bold text-foreground">
@@ -230,7 +230,7 @@ export default function AboutPage() {
 
               {/* Equipment & Software Stack */}
               <div className="space-y-6 pt-6 border-t border-foreground/10">
-                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                   <Sliders className="h-4 w-4" />
                   <span>Field Kit & Technical Craft</span>
                 </div>
@@ -240,7 +240,7 @@ export default function AboutPage() {
                   {/* Photo Kit */}
                   <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-foreground/[0.015] space-y-4">
                     <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-foreground/60 font-semibold border-b border-foreground/10 pb-3">
-                      <Camera className="h-4 w-4 text-film-amber" />
+                      <Camera className="h-4 w-4 text-primary" />
                       <span>Camera & Optics</span>
                     </div>
                     <ul className="space-y-3 text-xs font-mono text-foreground/80">
@@ -270,7 +270,7 @@ export default function AboutPage() {
                   {/* Software Kit */}
                   <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-foreground/[0.015] space-y-4">
                     <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-foreground/60 font-semibold border-b border-foreground/10 pb-3">
-                      <Terminal className="h-4 w-4 text-film-amber" />
+                      <Terminal className="h-4 w-4 text-primary" />
                       <span>Software Engineering</span>
                     </div>
                     <ul className="space-y-3 text-xs font-mono text-foreground/80">
@@ -297,11 +297,11 @@ export default function AboutPage() {
               </div>
 
               {/* Availability & Project Inquiries Banner */}
-              <div className="p-5 sm:p-6 rounded-2xl border border-film-amber/30 bg-film-amber/5 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6 shadow-sm">
+              <div className="p-5 sm:p-6 rounded-2xl border border-primary/30 bg-primary/5 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6 shadow-sm">
                 <div className="flex items-start sm:items-center gap-3">
                   <span className="size-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0 mt-1 sm:mt-0" />
                   <div className="space-y-1">
-                    <div className="text-[10px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-semibold">
                       Current Availability Status
                     </div>
                     <p className="text-xs sm:text-sm font-sans font-medium text-foreground/90 leading-snug">
@@ -312,7 +312,7 @@ export default function AboutPage() {
 
                 <a
                   href="mailto:dani@danigh.dev"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-film-amber text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-film-amber/90 active:scale-[0.98] transition-all shadow-md shrink-0 cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shrink-0 cursor-pointer"
                 >
                   <span>Inquire</span>
                   <ArrowUpRight className="h-4 w-4" />
@@ -331,7 +331,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</div>
           <div className="flex items-center gap-2 text-[10px]">
-            <Globe className="h-3.5 w-3.5 text-film-amber" />
+            <Globe className="h-3.5 w-3.5 text-primary" />
             <span>Santa Cruz de Tenerife</span>
           </div>
         </div>

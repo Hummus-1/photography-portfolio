@@ -97,10 +97,10 @@ export default async function AlbumPage({ params, searchParams }: AlbumPageProps
   return (
     <div className="flex flex-col min-h-screen bg-background transition-colors duration-400">
       {isDraft && (
-        <div className="bg-amber-500/20 border-b border-amber-500/30 text-amber-300 px-4 py-2.5 text-xs font-mono text-center flex items-center justify-center gap-2">
-          <Eye className="h-4 w-4 text-amber-400 shrink-0" />
+        <div className="bg-primary/20 border-b border-primary/30 text-primary px-4 py-2.5 text-xs font-mono text-center flex items-center justify-center gap-2">
+          <Eye className="h-4 w-4 text-primary shrink-0" />
           <span>UNPUBLISHED DRAFT PREVIEW — Only visible in admin preview mode</span>
-          <a href="/limonada" className="underline text-white hover:text-amber-200 ml-3">
+          <a href="/limonada" className="underline text-foreground hover:text-primary ml-3">
             ← Return to Dashboard
           </a>
         </div>

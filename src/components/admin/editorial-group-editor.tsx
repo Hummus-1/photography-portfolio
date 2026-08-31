@@ -379,7 +379,7 @@ export function EditorialGroupEditor({
             <h4 className="font-serif text-xl font-bold tracking-wide text-white">
               Editorial Layout & Story Manager
             </h4>
-            <span className="font-mono text-[10px] bg-film-amber/10 border border-film-amber/30 px-2 py-0.5 text-film-amber uppercase tracking-widest font-semibold">
+            <span className="font-mono text-[10px] bg-primary/10 border border-primary/30 px-2 py-0.5 text-primary uppercase tracking-widest font-semibold">
               {photos.length} Stills
             </span>
           </div>
@@ -395,7 +395,7 @@ export function EditorialGroupEditor({
               onClick={() => setViewMode("story")}
               className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                 viewMode === "story"
-                  ? "bg-film-amber/20 text-film-amber border border-film-amber/40 font-bold"
+                  ? "bg-primary/20 text-primary border border-primary/40 font-bold"
                   : "text-white/40 hover:text-white"
               }`}
             >
@@ -406,7 +406,7 @@ export function EditorialGroupEditor({
               onClick={() => setViewMode("masonry")}
               className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                 viewMode === "masonry"
-                  ? "bg-film-amber/20 text-film-amber border border-film-amber/40 font-bold"
+                  ? "bg-primary/20 text-primary border border-primary/40 font-bold"
                   : "text-white/40 hover:text-white"
               }`}
             >
@@ -426,7 +426,7 @@ export function EditorialGroupEditor({
           <button
             onClick={handleSaveAll}
             disabled={isSaving}
-            className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] disabled:opacity-50 px-5 py-2 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 px-5 py-2 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
           >
             {isSaving ? (
               <ThinkingOrb state="thinking" size="sm" />
@@ -440,16 +440,16 @@ export function EditorialGroupEditor({
 
       {/* Floating Batch Action Command Dock */}
       {selectedPhotoIds.length > 0 && (
-        <div className="sticky top-4 z-30 p-4 bg-[#121519]/90 backdrop-blur-xl border border-film-amber/40 shadow-2xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
+        <div className="sticky top-4 z-30 p-4 bg-card/90 backdrop-blur-xl border border-primary/40 shadow-2xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
           <div className="flex items-center gap-2 text-xs font-mono text-white">
             <ThinkingOrb state="idle" size="sm" />
-            <span className="font-bold text-film-amber">{selectedPhotoIds.length} Photos Selected</span>
+            <span className="font-bold text-primary">{selectedPhotoIds.length} Photos Selected</span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleGroupSelected}
-              className="bg-film-amber text-white hover:bg-film-amber/90 font-bold px-3.5 py-1.5 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
+              className="bg-primary text-white hover:bg-primary/90 font-bold px-3.5 py-1.5 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
             >
               <Layers className="h-3.5 w-3.5" />
               <span>Group Row</span>
@@ -497,18 +497,18 @@ export function EditorialGroupEditor({
                       handleDropBlock(draggedBlockIndex, blockIndex);
                     }
                   }}
-                  className={`bg-film-amber/5 border-2 border-dashed rounded-none p-4 space-y-4 relative transition-all ${
+                  className={`bg-primary/5 border-2 border-dashed rounded-none p-4 space-y-4 relative transition-all ${
                     isGroupDragging
-                      ? "opacity-30 border-film-amber scale-[0.99]"
+                      ? "opacity-30 border-primary scale-[0.99]"
                       : isGroupDragOver
-                      ? "border-film-amber border-2 bg-film-amber/15 scale-[1.01]"
-                      : "border-film-amber/30"
+                      ? "border-primary border-2 bg-primary/15 scale-[1.01]"
+                      : "border-primary/30"
                   }`}
                 >
                   {/* Group Header Bar with Move Handles */}
-                  <div className="flex items-center justify-between border-b border-film-amber/20 pb-2.5">
-                    <div className="flex items-center gap-2 text-film-amber font-mono text-xs font-bold uppercase tracking-wider">
-                      <div className="cursor-grab active:cursor-grabbing p-1 text-film-amber/80 hover:text-film-amber transition-colors" title="Drag to move entire group row">
+                  <div className="flex items-center justify-between border-b border-primary/20 pb-2.5">
+                    <div className="flex items-center gap-2 text-primary font-mono text-xs font-bold uppercase tracking-wider">
+                      <div className="cursor-grab active:cursor-grabbing p-1 text-primary/80 hover:text-primary transition-colors" title="Drag to move entire group row">
                         <GripVertical className="h-4 w-4" />
                       </div>
                       <Layers className="h-4 w-4" />
@@ -519,7 +519,7 @@ export function EditorialGroupEditor({
                       <button
                         disabled={blockIndex === 0}
                         onClick={() => moveBlockInList(blockIndex, blockIndex - 1)}
-                        className="hover:bg-film-amber/20 disabled:opacity-20 p-1.5 rounded text-film-amber text-xs font-mono flex items-center gap-1 transition-colors"
+                        className="hover:bg-primary/20 disabled:opacity-20 p-1.5 rounded text-primary text-xs font-mono flex items-center gap-1 transition-colors"
                         title="Move Row Group Up"
                       >
                         <ArrowUp className="h-3.5 w-3.5" />
@@ -528,7 +528,7 @@ export function EditorialGroupEditor({
                       <button
                         disabled={blockIndex === visualBlocks.length - 1}
                         onClick={() => moveBlockInList(blockIndex, blockIndex + 1)}
-                        className="hover:bg-film-amber/20 disabled:opacity-20 p-1.5 rounded text-film-amber text-xs font-mono flex items-center gap-1 transition-colors"
+                        className="hover:bg-primary/20 disabled:opacity-20 p-1.5 rounded text-primary text-xs font-mono flex items-center gap-1 transition-colors"
                         title="Move Row Group Down"
                       >
                         <ArrowDown className="h-3.5 w-3.5" />
@@ -536,7 +536,7 @@ export function EditorialGroupEditor({
                       </button>
                       <button
                         onClick={() => handleUngroupRow(block.groupId!)}
-                        className="text-film-amber hover:text-film-amber/80 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 bg-film-amber/10 hover:bg-film-amber/20 border border-film-amber/20 rounded-none transition-all cursor-pointer"
+                        className="text-primary hover:text-primary/80 font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 px-3 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-none transition-all cursor-pointer"
                         title="Break row into individual photos"
                       >
                         <Unlink className="h-3.5 w-3.5" />
@@ -629,9 +629,9 @@ export function EditorialGroupEditor({
             <div
               key={photo.id}
               onClick={() => toggleSelectPhoto(photo.id)}
-              className={`group relative bg-[#14171a] border overflow-hidden cursor-pointer transition-all ${
+              className={`group relative bg-card border overflow-hidden cursor-pointer transition-all ${
                 selectedPhotoIds.includes(photo.id)
-                  ? "border-film-amber ring-2 ring-film-amber/50"
+                  ? "border-primary ring-2 ring-primary/50"
                   : "border-white/10 hover:border-white/30"
               }`}
             >
@@ -644,7 +644,7 @@ export function EditorialGroupEditor({
                   className="object-cover"
                 />
                 {coverImageUrl === photo.url && (
-                  <span className="absolute top-2 left-2 bg-film-amber text-white text-[9px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider">
+                  <span className="absolute top-2 left-2 bg-primary text-white text-[9px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider">
                     Cover
                   </span>
                 )}
@@ -685,10 +685,10 @@ export function EditorialGroupEditor({
       {/* Edit Metadata Modal */}
       {editingPhotoId && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#14171a] border border-white/20 p-6 max-w-md w-full rounded-none space-y-4 shadow-2xl">
+          <div className="bg-card border border-border p-6 max-w-md w-full rounded-none space-y-4 shadow-2xl">
             <div className="flex justify-between items-center pb-2 border-b border-white/10">
               <span className="font-mono text-xs uppercase tracking-widest text-white/80 font-bold flex items-center gap-2">
-                <Pencil className="h-3.5 w-3.5 text-film-amber" /> Edit Photo Metadata
+                <Pencil className="h-3.5 w-3.5 text-primary" /> Edit Photo Metadata
               </span>
               <button onClick={() => setEditingPhotoId(null)} className="text-white/50 hover:text-white">
                 <X className="h-4 w-4" />
@@ -704,7 +704,7 @@ export function EditorialGroupEditor({
                 max="10"
                 value={editScore}
                 onChange={(e) => setEditScore(e.target.value)}
-                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-film-amber"
+                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
               />
             </div>
 
@@ -714,7 +714,7 @@ export function EditorialGroupEditor({
                 type="text"
                 value={editTags}
                 onChange={(e) => setEditTags(e.target.value)}
-                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-film-amber"
+                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
               />
             </div>
 
@@ -724,7 +724,7 @@ export function EditorialGroupEditor({
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 rows={3}
-                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs text-white resize-none focus:outline-none focus:border-film-amber"
+                className="w-full bg-white/5 border border-white/15 px-3 py-2 text-xs text-white resize-none focus:outline-none focus:border-primary"
               />
             </div>
 
@@ -810,20 +810,20 @@ function PhotoCardTile({
         e.preventDefault();
         onDrop();
       }}
-      className={`relative bg-[#14171a] border rounded-none overflow-hidden flex flex-col sm:flex-row gap-4 p-3.5 transition-all group shadow-sm ${
+      className={`relative bg-card border rounded-none overflow-hidden flex flex-col sm:flex-row gap-4 p-3.5 transition-all group shadow-sm ${
         isDragging
-          ? "opacity-30 border-film-amber scale-[0.98]"
+          ? "opacity-30 border-primary scale-[0.98]"
           : isDragOver
-          ? "border-film-amber border-2 border-dashed bg-film-amber/10 scale-[1.01]"
+          ? "border-primary border-2 border-dashed bg-primary/10 scale-[1.01]"
           : isSelected
-          ? "border-film-amber ring-1 ring-film-amber/50"
+          ? "border-primary ring-1 ring-primary/50"
           : "border-white/10 hover:border-white/25"
       }`}
     >
       {/* Left side: Drag Handle & Thumbnail Container */}
       <div className="flex items-center gap-3">
         <div
-          className="text-white/30 hover:text-film-amber cursor-grab active:cursor-grabbing p-1 shrink-0 select-none transition-colors"
+          className="text-white/30 hover:text-primary cursor-grab active:cursor-grabbing p-1 shrink-0 select-none transition-colors"
           title="Click and drag to reorder"
         >
           <GripVertical className="h-5 w-5" />
@@ -842,7 +842,7 @@ function PhotoCardTile({
             className="object-contain transition-transform duration-500 group-hover/thumb:scale-105"
           />
           {isCover && (
-            <div className="absolute top-2 left-2 bg-film-amber text-white text-[9px] font-bold font-mono px-2 py-0.5 uppercase tracking-wider flex items-center gap-1 shadow-md z-10">
+            <div className="absolute top-2 left-2 bg-primary text-white text-[9px] font-bold font-mono px-2 py-0.5 uppercase tracking-wider flex items-center gap-1 shadow-md z-10">
               <Star className="h-3 w-3 fill-white" />
               Cover
             </div>
@@ -865,7 +865,7 @@ function PhotoCardTile({
               type="checkbox"
               checked={isSelected}
               onChange={onToggleSelect}
-              className="rounded border-white/30 text-film-amber focus:ring-film-amber cursor-pointer h-4 w-4"
+              className="rounded border-white/30 text-primary focus:ring-primary cursor-pointer h-4 w-4"
             />
             <span className="font-mono text-xs text-white/80 font-bold tracking-wider select-none">
               Still #{originalIndex + 1}
@@ -875,7 +875,7 @@ function PhotoCardTile({
           <div className="flex items-center gap-3 text-xs font-mono text-white/50 select-none">
             {photo.location && (
               <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-film-amber" />
+                <MapPin className="h-3 w-3 text-primary" />
                 {photo.location}
               </span>
             )}
@@ -899,14 +899,14 @@ function PhotoCardTile({
 
           <div className="flex flex-wrap items-center gap-3 text-xs select-none">
             {photo.score !== undefined && photo.score !== null && (
-              <span className="bg-film-amber/10 text-film-amber font-mono text-[10px] font-bold px-2 py-0.5 border border-film-amber/20">
+              <span className="bg-primary/10 text-primary font-mono text-[10px] font-bold px-2 py-0.5 border border-primary/20">
                 ★ {photo.score} / 10
               </span>
             )}
 
             {photo.tags && photo.tags.length > 0 && (
               <div className="flex items-center gap-1.5 text-[10px] font-mono text-white/50">
-                <Tag className="h-3 w-3 opacity-60 text-film-amber" />
+                <Tag className="h-3 w-3 opacity-60 text-primary" />
                 <span>{photo.tags.map((t) => `#${t}`).join(" ")}</span>
               </div>
             )}
@@ -948,7 +948,7 @@ function PhotoCardTile({
             {!isCover && (
               <button
                 onClick={onSetCoverPhoto}
-                className="hover:bg-film-amber/20 p-1.5 rounded text-white/60 hover:text-film-amber transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
+                className="hover:bg-primary/20 p-1.5 rounded text-white/60 hover:text-primary transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
                 title="Set as Album Cover"
               >
                 <Star className="h-3.5 w-3.5" />
@@ -959,7 +959,7 @@ function PhotoCardTile({
             {isInGroup ? (
               <button
                 onClick={onRemoveFromGroup}
-                className="hover:bg-film-amber/20 p-1.5 rounded text-film-amber transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
+                className="hover:bg-primary/20 p-1.5 rounded text-primary transition-colors flex items-center gap-1 text-[10px] font-mono cursor-pointer"
                 title="Remove photo from row group"
               >
                 <Unlink className="h-3.5 w-3.5" />

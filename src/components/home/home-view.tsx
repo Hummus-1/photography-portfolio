@@ -32,7 +32,7 @@ export function HomeView({ featuredAlbums }: HomeViewProps) {
         {isMinimized ? (
           <button
             onClick={() => setIsMinimized(false)}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-background/90 border border-film-amber/40 shadow-2xl backdrop-blur-xl text-xs font-mono uppercase tracking-widest text-film-amber font-semibold hover:bg-film-amber hover:text-white transition-all cursor-pointer group"
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-background/90 border border-primary/40 shadow-2xl backdrop-blur-xl text-xs font-mono uppercase tracking-widest text-primary font-semibold hover:bg-primary hover:text-white transition-all cursor-pointer group"
           >
             <Aperture className="h-4 w-4 animate-spin-slow" />
             <span>Hover FX: {options.find((o) => o.id === hoverEffect)?.label}</span>
@@ -42,7 +42,7 @@ export function HomeView({ featuredAlbums }: HomeViewProps) {
             
             {/* Pill Header Label */}
             <div className="flex items-center justify-between w-full md:w-auto px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-foreground/60 border-b md:border-b-0 md:border-r border-foreground/15 pr-3">
-              <div className="flex items-center gap-1.5 font-bold text-film-amber">
+              <div className="flex items-center gap-1.5 font-bold text-primary">
                 <Aperture className="h-3.5 w-3.5" />
                 <span>Hover Animation Tester</span>
               </div>
@@ -63,7 +63,7 @@ export function HomeView({ featuredAlbums }: HomeViewProps) {
                   onClick={() => setHoverEffect(opt.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl md:rounded-full text-xs font-mono uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
                     hoverEffect === opt.id
-                      ? "bg-film-amber text-white font-bold shadow-md shadow-film-amber/25 scale-[1.02]"
+                      ? "bg-primary text-white font-bold shadow-md shadow-primary/25 scale-[1.02]"
                       : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
                   }`}
                 >

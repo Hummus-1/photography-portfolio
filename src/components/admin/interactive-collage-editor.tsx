@@ -243,7 +243,7 @@ export function InteractiveCollageEditor({
           <button
             onClick={handleSaveLayout}
             disabled={isSavingLayout}
-            className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] disabled:opacity-50 px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md"
           >
             {isSavingLayout ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -283,8 +283,8 @@ export function InteractiveCollageEditor({
               return (
                 <div
                   key={photo.id}
-                  className={`bg-[#14171a] border rounded-lg overflow-hidden flex flex-col justify-between group transition-all duration-300 ${
-                    isCover ? "border-amber-500 ring-2 ring-amber-500/40 shadow-xl" : "border-white/15 hover:border-white/40"
+                  className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between group transition-all duration-300 ${
+                    isCover ? "border-primary ring-2 ring-primary/40 shadow-xl" : "border-white/15 hover:border-white/40"
                   }`}
                 >
                   {/* Drag Handle Top Bar */}
@@ -295,8 +295,8 @@ export function InteractiveCollageEditor({
 
                     <div className="flex items-center gap-1.5">
                       {isCover && (
-                        <span className="bg-amber-500 text-black text-[9px] font-bold font-mono px-2 py-0.5 uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                          <Star className="h-3 w-3 fill-black" />
+                        <span className="bg-primary text-primary-foreground text-[9px] font-bold font-mono px-2 py-0.5 uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                          <Star className="h-3 w-3 fill-primary-foreground" />
                           Cover
                         </span>
                       )}
@@ -306,10 +306,10 @@ export function InteractiveCollageEditor({
                             e.stopPropagation();
                             onSetCoverPhoto(photo.url);
                           }}
-                          className="hover:text-amber-400 p-1 transition-colors"
+                          className="hover:text-primary p-1 transition-colors"
                           title="Set as Album Cover"
                         >
-                          <Star className="h-3.5 w-3.5 text-white/50 hover:text-amber-400" />
+                          <Star className="h-3.5 w-3.5 text-white/50 hover:text-primary" />
                         </button>
                       )}
                       <button

@@ -175,8 +175,8 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
       <section className="px-4 sm:px-6 md:px-12 max-w-6xl mx-auto pt-6 sm:pt-10">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between border-b border-foreground/10 pb-6 sm:pb-8 gap-6">
           <div className="space-y-3">
-            <div className="text-[11px] sm:text-xs font-mono tracking-widest uppercase text-film-amber font-semibold flex items-center gap-2">
-              <Compass className="h-4 w-4 animate-spin-slow text-film-amber shrink-0" />
+            <div className="text-[11px] sm:text-xs font-mono tracking-widest uppercase text-primary font-semibold flex items-center gap-2">
+              <Compass className="h-4 w-4 animate-spin-slow text-primary shrink-0" />
               <span>02 • Spatial Index & Location Archive</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
@@ -189,7 +189,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
 
           <div className="flex items-center justify-around sm:justify-start gap-4 sm:gap-6 text-xs font-mono text-foreground/70 border border-foreground/15 px-4 sm:px-6 py-3 rounded-2xl bg-foreground/[0.015] shadow-sm">
             <div className="text-center">
-              <span className="block font-bold text-film-amber text-base sm:text-lg">{albums.length}</span>
+              <span className="block font-bold text-primary text-base sm:text-lg">{albums.length}</span>
               <span className="text-[10px] text-foreground/50 uppercase tracking-wider">Series</span>
             </div>
             <div className="h-7 w-px bg-foreground/10" />
@@ -221,7 +221,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
                 placeholder="Search destinations, spots, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 sm:h-10 w-full pl-10 pr-9 text-xs font-mono uppercase tracking-wider bg-background/60 border border-foreground/15 rounded-full placeholder:text-foreground/40 focus:outline-none focus:border-film-amber focus:ring-1 focus:ring-film-amber/30 transition-all"
+                className="h-11 sm:h-10 w-full pl-10 pr-9 text-xs font-mono uppercase tracking-wider bg-background/60 border border-foreground/15 rounded-full placeholder:text-foreground/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
               />
               {searchQuery && (
                 <button
@@ -243,7 +243,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
               >
                 <SelectTrigger className="h-11 sm:h-10 w-full rounded-full text-xs font-mono bg-background/60 border-foreground/15 min-h-[44px]">
                   <div className="flex items-center gap-1.5 truncate">
-                    <MapPin className="h-3.5 w-3.5 text-film-amber shrink-0" />
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                     <SelectValue placeholder="All Countries" />
                   </div>
                 </SelectTrigger>
@@ -328,7 +328,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
                     onClick={() => setSelectedCountry(c)}
                     className={`px-3 py-1.5 rounded-full text-[11px] font-mono uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer min-h-[34px] ${
                       isSelected
-                        ? "bg-film-amber text-white font-bold shadow-sm"
+                        ? "bg-primary text-white font-bold shadow-sm"
                         : "bg-foreground/5 hover:bg-foreground/10 text-foreground/70 border border-foreground/10"
                     }`}
                   >
@@ -381,7 +381,7 @@ export function DestinationsClient({ albums }: DestinationsClientProps) {
             {hasActiveFilters && (
               <button
                 onClick={handleResetFilters}
-                className="px-3 py-1.5 rounded-full border border-film-amber/30 text-film-amber text-[10px] font-mono uppercase tracking-wider hover:bg-film-amber/10 transition-colors shrink-0 flex items-center gap-1 cursor-pointer min-h-[34px]"
+                className="px-3 py-1.5 rounded-full border border-primary/30 text-primary text-[10px] font-mono uppercase tracking-wider hover:bg-primary/10 transition-colors shrink-0 flex items-center gap-1 cursor-pointer min-h-[34px]"
               >
                 <RotateCcw className="h-3 w-3" />
                 <span>Reset</span>

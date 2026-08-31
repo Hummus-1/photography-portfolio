@@ -513,11 +513,11 @@ export function LocationSelector({
   }
 
   return (
-    <div className="flex flex-col space-y-4 w-full bg-[#16181c] border border-white/10 p-4 text-white">
+    <div className="flex flex-col space-y-4 w-full bg-card border border-border p-4 text-foreground">
       {/* Top Bar: Title & Active Selection Card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-film-amber" />
+          <Globe className="h-4 w-4 text-primary" />
           <span className="font-mono text-xs uppercase tracking-wider font-semibold">
             Location Atlas Selector
           </span>
@@ -530,7 +530,7 @@ export function LocationSelector({
             onClick={() => setActiveTab("search")}
             className={`px-3 py-1 transition-all cursor-pointer ${
               activeTab === "search"
-                ? "bg-film-amber text-white font-bold shadow-sm"
+                ? "bg-primary text-white font-bold shadow-sm"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -541,7 +541,7 @@ export function LocationSelector({
             onClick={() => setActiveTab("cascade")}
             className={`px-3 py-1 transition-all cursor-pointer ${
               activeTab === "cascade"
-                ? "bg-film-amber text-white font-bold shadow-sm"
+                ? "bg-primary text-white font-bold shadow-sm"
                 : "text-white/60 hover:text-white"
             }`}
           >
@@ -552,16 +552,16 @@ export function LocationSelector({
 
       {/* Active Selection Display Banner */}
       {activeNode ? (
-        <div className="p-3 bg-film-amber/10 border border-film-amber/30 flex items-center justify-between gap-3 text-xs">
+        <div className="p-3 bg-primary/10 border border-primary/30 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5 truncate">
-            <div className="p-1.5 rounded-full bg-film-amber/20 text-film-amber shrink-0">
+            <div className="p-1.5 rounded-full bg-primary/20 text-primary shrink-0">
               <Check className="h-3.5 w-3.5" />
             </div>
             <div className="flex flex-col truncate">
-              <div className="font-semibold text-film-amber truncate">
+              <div className="font-semibold text-primary truncate">
                 {buildFullName(activeNode)}
               </div>
-              <div className="text-[10px] font-mono text-film-amber/70 uppercase tracking-widest flex items-center gap-2">
+              <div className="text-[10px] font-mono text-primary/70 uppercase tracking-widest flex items-center gap-2">
                 <span>Type: {activeNode.type}</span>
                 {activeNode.lat != null && activeNode.lng != null && (
                   <span>• GPS: {activeNode.lat}°, {activeNode.lng}°</span>
@@ -576,7 +576,7 @@ export function LocationSelector({
               variant="outline"
               size="sm"
               onClick={() => handleOpenEdit(activeNode)}
-              className="h-7 px-2.5 border-film-amber/40 text-film-amber hover:bg-film-amber/20 text-[10px] font-mono uppercase tracking-wider cursor-pointer"
+              className="h-7 px-2.5 border-primary/40 text-primary hover:bg-primary/20 text-[10px] font-mono uppercase tracking-wider cursor-pointer"
             >
               <Pencil className="h-3 w-3 mr-1" /> Edit
             </Button>
@@ -594,7 +594,7 @@ export function LocationSelector({
       ) : (
         <div className="p-3 bg-white/[0.02] border border-dashed border-white/10 text-xs text-white/40 font-mono flex items-center justify-between">
           <span>No location selected for this album container.</span>
-          <span className="text-[10px] uppercase text-film-amber">Optional</span>
+          <span className="text-[10px] uppercase text-primary">Optional</span>
         </div>
       )}
 
@@ -608,7 +608,7 @@ export function LocationSelector({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search spots, regions, or countries (e.g. Seville, Teide, Spain)..."
-              className="w-full bg-black/40 border-white/10 text-xs font-mono text-white placeholder-white/40 pl-9 pr-3 py-2 rounded-none focus-visible:ring-film-amber"
+              className="w-full bg-black/40 border-white/10 text-xs font-mono text-white placeholder-white/40 pl-9 pr-3 py-2 rounded-none focus-visible:ring-primary"
             />
             {searchQuery && (
               <button
@@ -626,7 +626,7 @@ export function LocationSelector({
               {searchResults.length === 0 ? (
                 <div className="p-4 text-center text-xs font-mono text-white/40 space-y-1">
                   <p>No existing locations match &quot;{searchQuery}&quot;</p>
-                  <p className="text-[10px] text-film-amber uppercase">
+                  <p className="text-[10px] text-primary uppercase">
                     Use &quot;Quick Add Location&quot; below to resolve &amp; save it!
                   </p>
                 </div>
@@ -642,13 +642,13 @@ export function LocationSelector({
                       onClick={() => handleSelectNode(loc)}
                       className={`group p-2 flex items-center justify-between text-xs cursor-pointer transition-all border ${
                         isSelected
-                          ? "bg-film-amber/20 border-film-amber/40 text-film-amber font-semibold"
+                          ? "bg-primary/20 border-primary/40 text-primary font-semibold"
                           : "bg-white/[0.02] border-transparent hover:bg-white/[0.06] hover:border-white/10 text-white/80"
                       }`}
                     >
                       <div className="flex flex-col truncate pr-2">
                         <div className="flex items-center gap-2 truncate">
-                          <MapPin className="h-3 w-3 text-film-amber shrink-0" />
+                          <MapPin className="h-3 w-3 text-primary shrink-0" />
                           <span className="truncate">{fullName}</span>
                           <span className="text-[9px] font-mono opacity-50 uppercase px-1 bg-white/10 shrink-0">
                             {loc.type}
@@ -665,7 +665,7 @@ export function LocationSelector({
                         <button
                           type="button"
                           onClick={(e) => handleOpenEdit(loc, e)}
-                          className="p-1 text-white/40 hover:text-film-amber transition-colors"
+                          className="p-1 text-white/40 hover:text-primary transition-colors"
                           title="Edit Location Node"
                         >
                           <Pencil className="h-3 w-3" />
@@ -686,7 +686,7 @@ export function LocationSelector({
           {/* Step 1: Select Country */}
           <div className="space-y-1">
             <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
-              <Globe className="h-3 w-3 text-film-amber" />
+              <Globe className="h-3 w-3 text-primary" />
               1. Select Country or Sub-Region
             </label>
             <select
@@ -699,11 +699,11 @@ export function LocationSelector({
                 const node = locations.find((l) => l.id === id);
                 handleSelectNode(node || null);
               }}
-              className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
+              className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-primary"
             >
               <option value="">-- Choose Country --</option>
               {countriesList.map((c) => (
-                <option key={c.id} value={c.id} className="bg-[#16181c] text-white">
+                <option key={c.id} value={c.id} className="bg-card text-foreground">
                   {c.name}
                 </option>
               ))}
@@ -714,7 +714,7 @@ export function LocationSelector({
           {selectedCountryId && (
             <div className="space-y-1">
               <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
-                <Compass className="h-3 w-3 text-film-amber" />
+                <Compass className="h-3 w-3 text-primary" />
                 2. Select Island or Region (Optional)
               </label>
               <select
@@ -728,11 +728,11 @@ export function LocationSelector({
                     node || locations.find((l) => l.id === selectedCountryId) || null
                   );
                 }}
-                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
+                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-primary"
               >
                 <option value="">-- All Regions / Whole Country --</option>
                 {regionsList.map((r) => (
-                  <option key={r.id} value={r.id} className="bg-[#16181c] text-white">
+                  <option key={r.id} value={r.id} className="bg-card text-foreground">
                     {r.name} ({r.type})
                   </option>
                 ))}
@@ -744,7 +744,7 @@ export function LocationSelector({
           {selectedRegionId && spotsList.length > 0 && (
             <div className="space-y-1">
               <label className="text-[10px] font-mono uppercase tracking-widest text-white/60 flex items-center gap-1">
-                <MapPin className="h-3 w-3 text-film-amber" />
+                <MapPin className="h-3 w-3 text-primary" />
                 3. Select Specific Spot or City (Optional)
               </label>
               <select
@@ -755,11 +755,11 @@ export function LocationSelector({
                   const node = locations.find((l) => l.id === id);
                   if (node) handleSelectNode(node);
                 }}
-                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-film-amber"
+                className="w-full h-9 bg-black/40 border border-white/15 text-white text-xs px-3 focus:outline-none focus:border-primary"
               >
                 <option value="">-- All Spots --</option>
                 {spotsList.map((spot) => (
-                  <option key={spot.id} value={spot.id} className="bg-[#16181c] text-white">
+                  <option key={spot.id} value={spot.id} className="bg-card text-foreground">
                     {spot.name}
                   </option>
                 ))}
@@ -782,14 +782,14 @@ export function LocationSelector({
             onClick={() => setIsCreatingNew(true)}
             className="h-7 border-white/15 text-white hover:bg-white/10 text-[10px] font-mono uppercase tracking-wider cursor-pointer"
           >
-            <Plus className="h-3.5 w-3.5 mr-1 text-film-amber" /> Quick Add Location
+            <Plus className="h-3.5 w-3.5 mr-1 text-primary" /> Quick Add Location
           </Button>
         </div>
       ) : (
-        <div className="p-3.5 bg-black/60 border border-film-amber/40 space-y-3 relative">
+        <div className="p-3.5 bg-black/60 border border-primary/40 space-y-3 relative">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-film-amber" /> Quick Add Location (With OSM Smart Suggestions)
+            <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Quick Add Location (With OSM Smart Suggestions)
             </span>
             <button
               type="button"
@@ -810,13 +810,13 @@ export function LocationSelector({
                 placeholder="Type name (e.g. Seville, Teide National Park, Cordoba)..."
                 value={newSpotName}
                 onChange={(e) => setNewSpotName(e.target.value)}
-                className="bg-black/40 border-white/15 text-xs text-white h-9 focus-visible:ring-film-amber"
+                className="bg-black/40 border-white/15 text-xs text-white h-9 focus-visible:ring-primary"
               />
               <Button
                 type="button"
                 onClick={handleCreateNewSpotManual}
                 disabled={creating || !newSpotName.trim()}
-                className="bg-film-amber text-white hover:bg-film-amber/90 text-xs font-bold uppercase tracking-wider h-9 shrink-0 px-4 cursor-pointer"
+                className="bg-primary text-white hover:bg-primary/90 text-xs font-bold uppercase tracking-wider h-9 shrink-0 px-4 cursor-pointer"
               >
                 {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save Location"}
               </Button>
@@ -824,7 +824,7 @@ export function LocationSelector({
 
             {/* Smart Suggestions Box (e.g. Seville Spain, Teide National Park, etc.) */}
             {loadingSuggestions ? (
-              <div className="p-2 text-[10px] font-mono text-film-amber/70 flex items-center gap-2">
+              <div className="p-2 text-[10px] font-mono text-primary/70 flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 Fetching geographic suggestions...
               </div>
@@ -838,15 +838,15 @@ export function LocationSelector({
                     <div
                       key={idx}
                       onClick={() => handleSelectSuggestion(sugg)}
-                      className="p-2.5 bg-white/5 hover:bg-film-amber/20 border border-white/10 hover:border-film-amber/40 transition-all cursor-pointer flex items-center justify-between text-xs group"
+                      className="p-2.5 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 transition-all cursor-pointer flex items-center justify-between text-xs group"
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <Navigation className="h-3.5 w-3.5 text-film-amber shrink-0 group-hover:scale-110 transition-transform" />
+                        <Navigation className="h-3.5 w-3.5 text-primary shrink-0 group-hover:scale-110 transition-transform" />
                         <div className="flex flex-col truncate">
                           <span className="font-bold text-white truncate">
                             {sugg.name}
                             {sugg.country && (
-                              <span className="font-normal text-film-amber ml-1.5 text-[11px]">
+                              <span className="font-normal text-primary ml-1.5 text-[11px]">
                                 ({sugg.state ? `${sugg.state}, ` : ""}{sugg.country})
                               </span>
                             )}
@@ -857,7 +857,7 @@ export function LocationSelector({
                         </div>
                       </div>
 
-                      <span className="text-[9px] font-mono text-film-amber/90 shrink-0 bg-black/40 px-2 py-0.5 border border-film-amber/30">
+                      <span className="text-[9px] font-mono text-primary/90 shrink-0 bg-black/40 px-2 py-0.5 border border-primary/30">
                         {sugg.lat}°, {sugg.lng}°
                       </span>
                     </div>

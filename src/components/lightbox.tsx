@@ -122,7 +122,7 @@ export function Lightbox({
             
             {/* Step / Frame Counter */}
             <div className="pointer-events-auto text-[11px] font-mono text-foreground/80 bg-background/60 px-3.5 py-1.5 rounded-full border border-foreground/15 backdrop-blur-md shadow-sm">
-              <span className="font-bold text-film-amber">{selectedIndex + 1}</span> / {photos.length}
+              <span className="font-bold text-primary">{selectedIndex + 1}</span> / {photos.length}
             </div>
 
             {/* Top Action Buttons Group */}
@@ -132,7 +132,7 @@ export function Lightbox({
               <button
                 onClick={() => setShowMobileInfo(!showMobileInfo)}
                 className={`md:hidden p-2.5 rounded-full bg-background/60 hover:bg-background/90 border border-foreground/15 backdrop-blur-md text-foreground transition-all cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  showMobileInfo ? "bg-film-amber text-white border-film-amber shadow-md" : ""
+                  showMobileInfo ? "bg-primary text-white border-primary shadow-md" : ""
                 }`}
                 title="Toggle EXIF & Info"
                 aria-label="Toggle photo metadata"
@@ -144,7 +144,7 @@ export function Lightbox({
               <button
                 onClick={() => setIsAutoplay(!isAutoplay)}
                 className={`p-2.5 rounded-full bg-background/60 hover:bg-background/90 border border-foreground/15 backdrop-blur-md text-foreground transition-all cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  isAutoplay ? "border-film-amber text-film-amber bg-film-amber/10" : ""
+                  isAutoplay ? "border-primary text-primary bg-primary/10" : ""
                 }`}
                 title={isAutoplay ? "Pause Slideshow" : "Play Slideshow"}
                 aria-label={isAutoplay ? "Pause Slideshow" : "Play Slideshow"}
@@ -246,7 +246,7 @@ export function Lightbox({
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 4, ease: "linear" }}
-                className="h-full bg-film-amber"
+                className="h-full bg-primary"
               />
             </div>
           )}
@@ -255,10 +255,10 @@ export function Lightbox({
           <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
             <button
               onClick={() => setShowMobileInfo(!showMobileInfo)}
-              className="px-4 py-2 rounded-full bg-background/80 backdrop-blur-md border border-foreground/20 text-foreground text-xs font-mono flex items-center gap-2 shadow-lg hover:border-film-amber transition-colors min-h-[40px] cursor-pointer"
+              className="px-4 py-2 rounded-full bg-background/80 backdrop-blur-md border border-foreground/20 text-foreground text-xs font-mono flex items-center gap-2 shadow-lg hover:border-primary transition-colors min-h-[40px] cursor-pointer"
             >
               <span>{currentPhoto.location || album.title}</span>
-              <ChevronUp className={`h-3.5 w-3.5 text-film-amber transition-transform ${showMobileInfo ? "rotate-180" : ""}`} />
+              <ChevronUp className={`h-3.5 w-3.5 text-primary transition-transform ${showMobileInfo ? "rotate-180" : ""}`} />
             </button>
           </div>
         </div>
@@ -276,7 +276,7 @@ export function Lightbox({
             {/* Header Title & Date */}
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono tracking-widest uppercase text-film-amber font-semibold block mb-1">
+                <span className="text-[10px] font-mono tracking-widest uppercase text-primary font-semibold block mb-1">
                   {album.title}
                 </span>
 
@@ -305,7 +305,7 @@ export function Lightbox({
               )}
 
               {currentPhoto.score !== undefined && currentPhoto.score !== null && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 font-mono text-xs font-bold mt-3">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/30 rounded-lg text-primary font-mono text-xs font-bold mt-3">
                   ★ Score: {currentPhoto.score} / 10
                 </div>
               )}
@@ -334,7 +334,7 @@ export function Lightbox({
               return (
                 <div className="bg-foreground/[0.02] border border-foreground/10 rounded-2xl p-4 sm:p-5 space-y-3.5">
                   <h3 className="text-xs font-mono font-semibold uppercase tracking-widest text-foreground/60 flex items-center gap-2 border-b border-foreground/10 pb-2">
-                    <Sliders className="h-3.5 w-3.5 text-film-amber" />
+                    <Sliders className="h-3.5 w-3.5 text-primary" />
                     <span>EXIF DATA</span>
                   </h3>
 
@@ -343,7 +343,7 @@ export function Lightbox({
                       <div className="col-span-2 space-y-1">
                         <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Camera</span>
                         <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                          <Camera className="h-3.5 w-3.5 text-film-amber shrink-0" />
+                          <Camera className="h-3.5 w-3.5 text-primary shrink-0" />
                           <span className="truncate">{currentExif.camera}</span>
                         </div>
                       </div>
@@ -353,7 +353,7 @@ export function Lightbox({
                       <div className="col-span-2 space-y-1">
                         <span className="text-[9px] font-mono text-foreground/40 uppercase tracking-wider block">Lens</span>
                         <div className="flex items-center gap-1.5 text-xs text-foreground/80">
-                          <span className="w-1.5 h-1.5 rounded-full bg-film-amber shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                           <span className="truncate">{currentExif.lens}</span>
                         </div>
                       </div>

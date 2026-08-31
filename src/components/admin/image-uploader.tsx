@@ -275,12 +275,12 @@ export function ImageUploader({
       onClick={() => fileInputRef.current?.click()}
       className={`relative cursor-pointer border-2 border-dashed py-12 px-6 flex flex-col items-center justify-center transition-all duration-300 rounded-none overflow-hidden ${
         dragActive
-          ? "border-film-amber bg-film-amber/10 shadow-[0_0_30px_rgba(230,126,58,0.15)]"
-          : "border-white/15 bg-[#121518]/60 hover:border-white/30 hover:bg-white/[0.04]"
+          ? "border-primary bg-primary/10 shadow-[0_0_30px_rgba(230,126,58,0.15)]"
+          : "border-border bg-card/60 hover:border-foreground/30 hover:bg-background/50"
       }`}
     >
       {/* Background ambient glow */}
-      <div className="absolute inset-0 bg-radial from-film-amber/5 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-radial from-primary/5 via-transparent to-transparent pointer-events-none" />
 
       <input
         type="file"
@@ -303,8 +303,8 @@ export function ImageUploader({
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3 text-center z-10">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:border-film-amber/50 transition-colors">
-            <Upload className="h-6 w-6 text-film-amber" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:border-primary/50 transition-colors">
+            <Upload className="h-6 w-6 text-primary" />
           </div>
           <div>
             <p className="font-serif font-bold text-base text-white tracking-wide">

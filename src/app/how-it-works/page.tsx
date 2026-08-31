@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function HowItWorksPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-400 selection:bg-film-amber selection:text-white">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-400 selection:bg-primary selection:text-white">
       {/* Top Header Navigation */}
       <Navigation />
 
@@ -38,7 +38,7 @@ export default function HowItWorksPage() {
           {/* Eyebrow Colophon Header */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-foreground/10 pb-6 text-xs font-mono tracking-widest uppercase text-foreground/60">
             <div className="flex items-center gap-3">
-              <span className="text-film-amber font-bold flex items-center gap-1.5">
+              <span className="text-primary font-bold flex items-center gap-1.5">
                 <Cpu className="h-3.5 w-3.5" />
                 SYSTEM COLOPHON
               </span>
@@ -48,15 +48,15 @@ export default function HowItWorksPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-foreground/50">
-              <Sparkles className="h-3.5 w-3.5 text-film-amber" />
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
               <span>Next.js 15 • Supabase • Cloudflare Workers</span>
             </div>
           </div>
 
           {/* Page Hero Header */}
           <div className="space-y-6 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-film-amber/10 border border-film-amber/30 text-[10px] font-mono uppercase tracking-widest text-film-amber font-semibold">
-              <span className="size-1.5 rounded-full bg-film-amber animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-[10px] font-mono uppercase tracking-widest text-primary font-semibold">
+              <span className="size-1.5 rounded-full bg-primary animate-pulse" />
               <span>Technical Colophon & Infrastructure Breakdown</span>
             </div>
 
@@ -77,7 +77,7 @@ export default function HowItWorksPage() {
           <section className="space-y-8 pt-6 border-t border-foreground/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-2">
+                <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
                   <Layers className="h-4 w-4" />
                   <span>SECTION 01 • DATA PIPELINE ARCHITECTURE</span>
                 </div>
@@ -96,7 +96,7 @@ export default function HowItWorksPage() {
           {/* 02 / INTERACTIVE PIPELINE SIMULATOR */}
           <section className="space-y-8 pt-10 border-t border-foreground/10">
             <div className="space-y-1">
-              <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-2">
+              <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
                 <Terminal className="h-4 w-4" />
                 <span>SECTION 02 • INTERACTIVE WORKBENCH</span>
               </div>
@@ -111,7 +111,7 @@ export default function HowItWorksPage() {
           {/* 03 / OPTICS ENGINE & APERTURE SWITCHER */}
           <section className="space-y-8 pt-10 border-t border-foreground/10">
             <div className="space-y-1">
-              <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-2">
+              <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
                 <Aperture className="h-4 w-4" />
                 <span>SECTION 03 • INTERACTIVE OPTICS & THEMING</span>
               </div>
@@ -126,7 +126,7 @@ export default function HowItWorksPage() {
           {/* 04 / TECHNICAL DEEP DIVES GRID */}
           <section className="space-y-8 pt-10 border-t border-foreground/10">
             <div className="space-y-1">
-              <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-2">
+              <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4" />
                 <span>SECTION 04 • CORE ARCHITECTURAL PILLARS</span>
               </div>
@@ -137,15 +137,15 @@ export default function HowItWorksPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               {/* Pillar 1 */}
-              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-film-amber/40 transition-colors">
-                <div className="size-10 rounded-2xl bg-film-amber/10 border border-film-amber/30 text-film-amber flex items-center justify-center font-mono font-bold text-xs">
+              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-primary/40 transition-colors">
+                <div className="size-10 rounded-2xl bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-mono font-bold text-xs">
                   01
                 </div>
                 <h3 className="font-serif text-xl font-bold text-foreground">
                   PostgreSQL Schemas & Row Level Security
                 </h3>
                 <p className="text-xs sm:text-sm text-foreground/75 font-sans leading-relaxed">
-                  Supabase hosts relational tables for <code className="font-mono text-film-amber">albums</code> and <code className="font-mono text-film-amber">photos</code>. RLS policies explicitly restrict insert, update, and delete mutations to authenticated admin JWT tokens while granting public select policies for published albums.
+                  Supabase hosts relational tables for <code className="font-mono text-primary">albums</code> and <code className="font-mono text-primary">photos</code>. RLS policies explicitly restrict insert, update, and delete mutations to authenticated admin JWT tokens while granting public select policies for published albums.
                 </p>
                 <div className="pt-2 text-xs font-mono text-foreground/50 uppercase tracking-widest">
                   Key Tech: Supabase RLS • PostgreSQL Indexing
@@ -153,15 +153,15 @@ export default function HowItWorksPage() {
               </div>
 
               {/* Pillar 2 */}
-              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-film-amber/40 transition-colors">
-                <div className="size-10 rounded-2xl bg-film-amber/10 border border-film-amber/30 text-film-amber flex items-center justify-center font-mono font-bold text-xs">
+              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-primary/40 transition-colors">
+                <div className="size-10 rounded-2xl bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-mono font-bold text-xs">
                   02
                 </div>
                 <h3 className="font-serif text-xl font-bold text-foreground">
                   Zero Cumulative Layout Shift (CLS) Masonry
                 </h3>
                 <p className="text-xs sm:text-sm text-foreground/75 font-sans leading-relaxed">
-                  Every photo record stores precomputed <code className="font-mono text-film-amber">aspect_ratio = width / height</code> values. The Next.js image container enforces inline aspect ratios before image download, preventing jarring page layout reflows during image loading.
+                  Every photo record stores precomputed <code className="font-mono text-primary">aspect_ratio = width / height</code> values. The Next.js image container enforces inline aspect ratios before image download, preventing jarring page layout reflows during image loading.
                 </p>
                 <div className="pt-2 text-xs font-mono text-foreground/50 uppercase tracking-widest">
                   Key Tech: Precomputed Ratios • CSS Grid
@@ -169,15 +169,15 @@ export default function HowItWorksPage() {
               </div>
 
               {/* Pillar 3 */}
-              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-film-amber/40 transition-colors">
-                <div className="size-10 rounded-2xl bg-film-amber/10 border border-film-amber/30 text-film-amber flex items-center justify-center font-mono font-bold text-xs">
+              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-primary/40 transition-colors">
+                <div className="size-10 rounded-2xl bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-mono font-bold text-xs">
                   03
                 </div>
                 <h3 className="font-serif text-xl font-bold text-foreground">
                   Lenis Momentum Scroll & Timeline Observer
                 </h3>
                 <p className="text-xs sm:text-sm text-foreground/75 font-sans leading-relaxed">
-                  Smooth inertia scroll physics powered by Lenis are integrated with high-efficiency <code className="font-mono text-film-amber">IntersectionObserver</code> hooks to auto-highlight active timeline thumbnails as visitors navigate down photo collections.
+                  Smooth inertia scroll physics powered by Lenis are integrated with high-efficiency <code className="font-mono text-primary">IntersectionObserver</code> hooks to auto-highlight active timeline thumbnails as visitors navigate down photo collections.
                 </p>
                 <div className="pt-2 text-xs font-mono text-foreground/50 uppercase tracking-widest">
                   Key Tech: Lenis Scroll • IntersectionObserver
@@ -185,15 +185,15 @@ export default function HowItWorksPage() {
               </div>
 
               {/* Pillar 4 */}
-              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-film-amber/40 transition-colors">
-                <div className="size-10 rounded-2xl bg-film-amber/10 border border-film-amber/30 text-film-amber flex items-center justify-center font-mono font-bold text-xs">
+              <div className="p-6 sm:p-8 rounded-3xl border border-foreground/15 bg-foreground/[0.015] space-y-4 hover:border-primary/40 transition-colors">
+                <div className="size-10 rounded-2xl bg-primary/10 border border-primary/30 text-primary flex items-center justify-center font-mono font-bold text-xs">
                   04
                 </div>
                 <h3 className="font-serif text-xl font-bold text-foreground">
                   Atmospheric SVG Fractal Grain Overlay
                 </h3>
                 <p className="text-xs sm:text-sm text-foreground/75 font-sans leading-relaxed">
-                  Rather than using bulky external video loops or PNG assets, film texture is produced using a pure SVG <code className="font-mono text-film-amber">&lt;feTurbulence&gt;</code> fractal noise matrix rendered as a fixed grain overlay.
+                  Rather than using bulky external video loops or PNG assets, film texture is produced using a pure SVG <code className="font-mono text-primary">&lt;feTurbulence&gt;</code> fractal noise matrix rendered as a fixed grain overlay.
                 </p>
                 <div className="pt-2 text-xs font-mono text-foreground/50 uppercase tracking-widest">
                   Key Tech: Inline SVG Noise • Zero Egress Overhead
@@ -205,7 +205,7 @@ export default function HowItWorksPage() {
           {/* 05 / FULL TECHNOLOGY SPECS TABLE */}
           <section className="space-y-8 pt-10 border-t border-foreground/10">
             <div className="space-y-1">
-              <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold flex items-center gap-2">
+              <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold flex items-center gap-2">
                 <Database className="h-4 w-4" />
                 <span>SECTION 05 • TECHNICAL STACK MATRIX</span>
               </div>
@@ -217,7 +217,7 @@ export default function HowItWorksPage() {
             <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-background">
               <table className="w-full text-left border-collapse font-mono text-xs">
                 <thead>
-                  <tr className="border-b border-foreground/15 bg-foreground/[0.03] text-film-amber uppercase tracking-widest">
+                  <tr className="border-b border-foreground/15 bg-foreground/[0.03] text-primary uppercase tracking-widest">
                     <th className="py-4 px-6 font-bold">Layer / Domain</th>
                     <th className="py-4 px-6 font-bold">Technology / Service</th>
                     <th className="py-4 px-6 font-bold">Primary Function</th>
@@ -273,9 +273,9 @@ export default function HowItWorksPage() {
           </section>
 
           {/* 06 / EXPLORE CTA BANNER */}
-          <div className="p-8 sm:p-10 rounded-3xl border border-film-amber/30 bg-film-amber/5 space-y-6 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-8">
+          <div className="p-8 sm:p-10 rounded-3xl border border-primary/30 bg-primary/5 space-y-6 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-8">
             <div className="space-y-2">
-              <div className="text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+              <div className="text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                 Explore the Exhibition
               </div>
               <h3 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
@@ -289,14 +289,14 @@ export default function HowItWorksPage() {
             <div className="flex flex-wrap items-center gap-3 shrink-0">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-film-amber text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-film-amber/90 active:scale-[0.98] transition-all shadow-md cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-mono text-xs uppercase tracking-widest font-bold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md cursor-pointer"
               >
                 <span>Exhibition</span>
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/destinations"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-foreground/20 hover:border-film-amber font-mono text-xs uppercase tracking-widest font-bold hover:text-film-amber transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-foreground/20 hover:border-primary font-mono text-xs uppercase tracking-widest font-bold hover:text-primary transition-all cursor-pointer"
               >
                 <span>Spatial Index</span>
               </Link>
@@ -311,7 +311,7 @@ export default function HowItWorksPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</div>
           <div className="flex items-center gap-2 text-[10px]">
-            <Globe className="h-3.5 w-3.5 text-film-amber" />
+            <Globe className="h-3.5 w-3.5 text-primary" />
             <span>Architecture & System Colophon</span>
           </div>
         </div>

@@ -88,7 +88,7 @@ export default async function HomePage() {
   const featuredAlbums = await getFeaturedAlbums();
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-400 selection:bg-film-amber selection:text-white">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-400 selection:bg-primary selection:text-white">
       {/* Navigation Bar */}
       <Navigation />
 
@@ -110,34 +110,34 @@ export default async function HomePage() {
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline">
             <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
-              <span className="text-film-amber font-bold">05</span>
+              <span className="text-primary font-bold">05</span>
               <span className="w-6 h-px bg-foreground/20" />
               <span>Colophon</span>
             </div>
 
             <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-3 gap-8">
               <div className="space-y-3">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                   Navigation
                 </div>
                 <ul className="space-y-2 text-xs font-mono uppercase tracking-widest">
                   <li>
-                    <Link href="/" className="hover:text-film-amber transition-colors">
+                    <Link href="/" className="hover:text-primary transition-colors">
                       Exhibition Gallery
                     </Link>
                   </li>
                   <li>
-                    <Link href="/destinations" className="hover:text-film-amber transition-colors">
+                    <Link href="/destinations" className="hover:text-primary transition-colors">
                       Spatial Index
                     </Link>
                   </li>
                   <li>
-                    <Link href="/how-it-works" className="hover:text-film-amber transition-colors">
+                    <Link href="/how-it-works" className="hover:text-primary transition-colors">
                       How It Works
                     </Link>
                   </li>
                   <li>
-                    <Link href="/about" className="hover:text-film-amber transition-colors">
+                    <Link href="/about" className="hover:text-primary transition-colors">
                       About & Contact
                     </Link>
                   </li>
@@ -145,7 +145,7 @@ export default async function HomePage() {
               </div>
 
               <div className="space-y-3">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                   Medium & Craft
                 </div>
                 <ul className="space-y-2 text-xs font-mono uppercase tracking-widest text-foreground/70">
@@ -157,7 +157,7 @@ export default async function HomePage() {
               </div>
 
               <div className="space-y-3">
-                <div className="text-[11px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                   Personal Site
                 </div>
                 <div>
@@ -165,7 +165,7 @@ export default async function HomePage() {
                     href="https://www.danigh.dev/"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest border-b border-foreground/30 hover:border-film-amber hover:text-film-amber transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest border-b border-foreground/30 hover:border-primary hover:text-primary transition-colors"
                   >
                     <span>danigh.dev</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -178,7 +178,7 @@ export default async function HomePage() {
           <div className="pt-8 border-t border-foreground/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono uppercase tracking-widest text-foreground/40">
             <div>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</div>
             <div className="flex items-center gap-2 text-[10px]">
-              <Globe className="h-3.5 w-3.5 text-film-amber" />
+              <Globe className="h-3.5 w-3.5 text-primary" />
               <span>Personal Photography Portfolio</span>
             </div>
           </div>

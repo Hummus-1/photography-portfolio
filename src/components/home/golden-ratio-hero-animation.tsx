@@ -23,7 +23,7 @@ function hexToRgb(hex: string): RGB {
   }
   const num = parseInt(cleaned, 16);
   if (isNaN(num)) {
-    return { r: 217, g: 107, b: 39 }; // Fallback to --film-amber (#d96b27)
+    return { r: 217, g: 107, b: 39 }; // Fallback to --primary (#d96b27)
   }
   return {
     r: (num >> 16) & 255,
@@ -97,7 +97,7 @@ export function GoldenRatioHeroAnimation() {
       // Immediately fetch accent color on resize
       const rootStyles = getComputedStyle(document.documentElement);
       const accentHex =
-        rootStyles.getPropertyValue("--film-amber").trim() ||
+        rootStyles.getPropertyValue("--primary").trim() ||
         rootStyles.getPropertyValue("--accent").trim() ||
         "#d96b27";
       accentRgbRef.current = hexToRgb(accentHex);
@@ -120,7 +120,7 @@ export function GoldenRatioHeroAnimation() {
       if (frameCountRef.current % 60 === 0) {
         const rootStyles = getComputedStyle(document.documentElement);
         const accentHex =
-          rootStyles.getPropertyValue("--film-amber").trim() ||
+          rootStyles.getPropertyValue("--primary").trim() ||
           rootStyles.getPropertyValue("--accent").trim() ||
           "#d96b27";
         accentRgbRef.current = hexToRgb(accentHex);

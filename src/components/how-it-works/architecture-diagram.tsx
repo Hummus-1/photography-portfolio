@@ -168,12 +168,12 @@ export function ArchitectureDiagram() {
               onClick={() => setActiveStepIndex(idx)}
               className={`relative p-4 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between group overflow-hidden ${
                 isActive
-                  ? "border-film-amber bg-film-amber/10 shadow-[0_0_20px_rgba(217,107,39,0.15)] text-foreground"
-                  : "border-foreground/15 bg-background/60 hover:border-film-amber/40 hover:bg-foreground/[0.02] text-foreground/70"
+                  ? "border-primary bg-primary/10 shadow-[0_0_20px_rgba(217,107,39,0.15)] text-foreground"
+                  : "border-foreground/15 bg-background/60 hover:border-primary/40 hover:bg-foreground/[0.02] text-foreground/70"
               }`}
             >
               {/* Subtle Step Number Background */}
-              <span className="absolute top-2 right-3 font-mono text-xs font-bold text-foreground/20 group-hover:text-film-amber/40 transition-colors">
+              <span className="absolute top-2 right-3 font-mono text-xs font-bold text-foreground/20 group-hover:text-primary/40 transition-colors">
                 {step.number}
               </span>
 
@@ -181,15 +181,15 @@ export function ArchitectureDiagram() {
                 <div
                   className={`size-10 rounded-xl flex items-center justify-center border transition-all ${
                     isActive
-                      ? "border-film-amber bg-film-amber text-white"
-                      : "border-foreground/10 bg-foreground/5 text-foreground/70 group-hover:border-film-amber/30 group-hover:text-film-amber"
+                      ? "border-primary bg-primary text-white"
+                      : "border-foreground/10 bg-foreground/5 text-foreground/70 group-hover:border-primary/30 group-hover:text-primary"
                   }`}
                 >
                   <StepIcon className="h-5 w-5" />
                 </div>
 
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-film-amber font-semibold">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-primary font-semibold">
                     Stage {step.number}
                   </div>
                   <h4 className="font-serif text-sm font-bold text-foreground leading-snug">
@@ -202,7 +202,7 @@ export function ArchitectureDiagram() {
               {isActive && (
                 <motion.div
                   layoutId="active-step-bar"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-film-amber"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary"
                 />
               )}
             </button>
@@ -223,7 +223,7 @@ export function ArchitectureDiagram() {
           {/* Left Column: Description & Feature Points (7 Cols) */}
           <div className="lg:col-span-7 space-y-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-film-amber font-semibold">
+              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                 <Layers className="h-4 w-4" />
                 <span>Stage {activeStep.number} Operational Deep Dive</span>
               </div>
@@ -262,7 +262,7 @@ export function ArchitectureDiagram() {
               <ul className="space-y-2.5">
                 {activeStep.details.map((detail, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-foreground/75 font-sans leading-normal">
-                    <CheckCircle2 className="h-4 w-4 text-film-amber shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                     <span>{detail}</span>
                   </li>
                 ))}
@@ -281,7 +281,7 @@ export function ArchitectureDiagram() {
                   <span className="size-2.5 rounded-full bg-green-500/80" />
                   <span className="ml-2 font-mono text-white/60">pipeline_stage_{activeStep.number}.ts</span>
                 </div>
-                <Code2 className="h-3.5 w-3.5 text-film-amber" />
+                <Code2 className="h-3.5 w-3.5 text-primary" />
               </div>
 
               {/* Code Display */}
@@ -291,12 +291,12 @@ export function ArchitectureDiagram() {
             </div>
 
             {/* Interactive Control Hint */}
-            <div className="p-4 rounded-xl border border-film-amber/20 bg-film-amber/5 flex items-center justify-between text-xs font-mono">
+            <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-between text-xs font-mono">
               <div className="flex items-center gap-2 text-foreground/80">
-                <Zap className="h-4 w-4 text-film-amber animate-pulse" />
+                <Zap className="h-4 w-4 text-primary animate-pulse" />
                 <span>Select any stage above to inspect system code</span>
               </div>
-              <div className="flex items-center gap-1 text-[11px] text-film-amber font-bold">
+              <div className="flex items-center gap-1 text-[11px] text-primary font-bold">
                 <span>{activeStepIndex + 1} / {PIPELINE_STEPS.length}</span>
               </div>
             </div>

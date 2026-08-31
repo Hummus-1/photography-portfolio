@@ -283,12 +283,12 @@ export function EditLocationDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         data-lenis-prevent
-        className="bg-[#14171a] border border-white/10 text-white rounded-none max-w-xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
+        className="bg-card border border-border text-foreground rounded-none max-w-xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
       >
         {/* Static Header */}
         <DialogHeader className="shrink-0 p-6 sm:p-7 border-b border-white/10 relative pr-12">
           <DialogTitle className="font-serif text-lg font-bold uppercase tracking-wider flex items-center gap-2 text-white">
-            <Pencil className="h-4 w-4 text-film-amber" />
+            <Pencil className="h-4 w-4 text-primary" />
             Edit Location Item & Hierarchy
           </DialogTitle>
           <DialogDescription className="text-white/60 text-xs font-mono">
@@ -299,8 +299,8 @@ export function EditLocationDialog({
         {/* Scrollable Inner Body */}
         <div data-lenis-prevent className="flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-7 space-y-5">
           {isProtected && (
-            <div className="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono flex items-center gap-2">
-              <Lock className="h-4 w-4 shrink-0 text-amber-400" />
+            <div className="p-3 bg-primary/10 border border-primary/30 text-primary text-xs font-mono flex items-center gap-2">
+              <Lock className="h-4 w-4 shrink-0 text-primary" />
               <span>Continents and countries are protected system locations and cannot be edited, re-parented, or removed.</span>
             </div>
           )}
@@ -309,9 +309,9 @@ export function EditLocationDialog({
             {/* Current Path Info */}
             <div className="p-3 bg-white/5 border border-white/10 text-xs font-mono">
               <div className="text-[10px] text-white/40 uppercase tracking-widest mb-1 flex items-center gap-1">
-                <FolderTree className="h-3 w-3 text-film-amber" /> Current Hierarchy Path
+                <FolderTree className="h-3 w-3 text-primary" /> Current Hierarchy Path
               </div>
-              <div className="text-film-amber font-medium truncate">
+              <div className="text-primary font-medium truncate">
                 {currentPath}
               </div>
             </div>
@@ -327,7 +327,7 @@ export function EditLocationDialog({
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Location Name"
                   disabled={isProtected}
-                  className="bg-black/30 border-white/10 rounded-none text-white focus-visible:ring-film-amber text-xs disabled:opacity-50"
+                  className="bg-black/30 border-white/10 rounded-none text-white focus-visible:ring-primary text-xs disabled:opacity-50"
                   required
                 />
               </div>
@@ -340,15 +340,15 @@ export function EditLocationDialog({
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   disabled={isProtected}
-                  className="w-full h-9 bg-black/30 border border-white/10 text-white text-xs px-3 focus:outline-none focus:border-film-amber disabled:opacity-50"
+                  className="w-full h-9 bg-black/30 border border-white/10 text-white text-xs px-3 focus:outline-none focus:border-primary disabled:opacity-50"
                 >
                   {isProtected ? (
-                    <option value={node.type} className="bg-[#14171a] text-white">
+                    <option value={node.type} className="bg-card text-foreground">
                       {node.type.toUpperCase()} (PROTECTED)
                     </option>
                   ) : (
                     LOCATION_TYPES.map((t) => (
-                      <option key={t} value={t} className="bg-[#14171a] text-white">
+                      <option key={t} value={t} className="bg-card text-foreground">
                         {t.toUpperCase()}
                       </option>
                     ))
@@ -360,7 +360,7 @@ export function EditLocationDialog({
             {/* GPS Coordinates Section with Auto-Geocode Button */}
             <div className="p-3.5 bg-black/40 border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-mono text-film-amber uppercase tracking-widest">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-primary uppercase tracking-widest">
                   <MapPin className="h-3.5 w-3.5" />
                   <span>GPS Coordinates</span>
                 </div>
@@ -368,12 +368,12 @@ export function EditLocationDialog({
                   type="button"
                   onClick={handleAutoGeocode}
                   disabled={geocoding || !name.trim()}
-                  className="h-7 px-3 bg-film-amber/10 hover:bg-film-amber/20 text-film-amber border border-film-amber/30 text-[10px] font-mono uppercase tracking-widest cursor-pointer"
+                  className="h-7 px-3 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-[10px] font-mono uppercase tracking-widest cursor-pointer"
                 >
                   {geocoding ? (
                     <Loader2 className="h-3 w-3 animate-spin mr-1" />
                   ) : (
-                    <Sparkles className="h-3 w-3 mr-1 text-film-amber" />
+                    <Sparkles className="h-3 w-3 mr-1 text-primary" />
                   )}
                   Auto-Detect GPS
                 </Button>
@@ -423,7 +423,7 @@ export function EditLocationDialog({
                   placeholder="Search parent by country, island, or region..."
                   value={parentSearch}
                   onChange={(e) => setParentSearch(e.target.value)}
-                  className="h-8 bg-black/40 border-white/10 rounded-none text-xs text-white pl-8 placeholder-white/20 focus-visible:ring-film-amber"
+                  className="h-8 bg-black/40 border-white/10 rounded-none text-xs text-white pl-8 placeholder-white/20 focus-visible:ring-primary"
                 />
               </div>
 
@@ -436,12 +436,12 @@ export function EditLocationDialog({
                     onClick={() => setParentId(null)}
                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-all ${
                       parentId === null
-                        ? "bg-film-amber/20 text-film-amber font-semibold border-l-2 border-film-amber"
+                        ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
                         : "text-white/60 hover:bg-white/5 hover:text-white"
                     }`}
                   >
                     <span className="font-mono text-[11px]">None (Root Level / Continent)</span>
-                    {parentId === null && <Check className="h-3.5 w-3.5 text-film-amber shrink-0" />}
+                    {parentId === null && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
                   </button>
 
                   {/* Filtered Parent Nodes */}
@@ -456,7 +456,7 @@ export function EditLocationDialog({
                         onClick={() => setParentId(parent.id)}
                         className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-all ${
                           isSelected
-                            ? "bg-film-amber/20 text-film-amber font-semibold border-l-2 border-film-amber"
+                            ? "bg-primary/20 text-primary font-semibold border-l-2 border-primary"
                             : "text-white/70 hover:bg-white/5 hover:text-white"
                         }`}
                       >
@@ -466,7 +466,7 @@ export function EditLocationDialog({
                             {parentPathStr}
                           </span>
                         </div>
-                        {isSelected && <Check className="h-3.5 w-3.5 text-film-amber shrink-0" />}
+                        {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
                       </button>
                     );
                   })}
@@ -475,8 +475,8 @@ export function EditLocationDialog({
             </div>
 
             {/* New Path Preview */}
-            <div className="p-3 bg-film-amber/10 border border-film-amber/30 text-xs font-mono">
-              <div className="text-[10px] text-film-amber uppercase tracking-widest mb-1 flex items-center gap-1">
+            <div className="p-3 bg-primary/10 border border-primary/30 text-xs font-mono">
+              <div className="text-[10px] text-primary uppercase tracking-widest mb-1 flex items-center gap-1">
                 <ArrowRight className="h-3 w-3" /> Updated Hierarchy Preview
               </div>
               <div className="text-white font-medium truncate">
@@ -487,7 +487,7 @@ export function EditLocationDialog({
         </div>
 
         {/* Static Footer */}
-        <div className="shrink-0 p-4 sm:p-6 border-t border-white/10 bg-[#0E1012] flex items-center justify-between">
+        <div className="shrink-0 p-4 sm:p-6 border-t border-border bg-card flex items-center justify-between">
           <Button
             type="button"
             variant="outline"
@@ -518,7 +518,7 @@ export function EditLocationDialog({
               form="edit-location-form"
               type="submit"
               disabled={isProtected || saving || deleting}
-              className="bg-film-amber hover:bg-film-amber/90 text-white font-bold rounded-none uppercase text-xs tracking-wider h-9 px-4 cursor-pointer disabled:opacity-30"
+              className="bg-primary hover:bg-primary/90 text-white font-bold rounded-none uppercase text-xs tracking-wider h-9 px-4 cursor-pointer disabled:opacity-30"
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

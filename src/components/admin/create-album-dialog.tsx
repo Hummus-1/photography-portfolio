@@ -101,19 +101,19 @@ export function CreateAlbumDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger render={
-        <Button className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer shadow-md">
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none px-5 py-2.5 font-bold text-xs uppercase tracking-widest flex items-center gap-2 cursor-pointer shadow-md">
           <Plus className="h-4 w-4" />
           Create Album
         </Button>
       } />
       <DialogContent
         data-lenis-prevent
-        className="bg-[#121519]/95 backdrop-blur-2xl border-white/15 text-white rounded-none max-w-2xl md:max-w-3xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
+        className="bg-card/95 backdrop-blur-2xl border-border text-foreground rounded-none max-w-3xl md:max-w-4xl w-full max-h-[85vh] flex flex-col p-0 overflow-hidden shadow-2xl"
       >
         {/* Static Header */}
         <DialogHeader className="shrink-0 p-6 sm:p-8 border-b border-white/10 space-y-1.5 relative pr-12">
           <DialogTitle className="font-serif text-2xl font-bold uppercase tracking-wider flex items-center gap-2 text-white">
-            <FolderPlus className="h-5 w-5 text-film-amber" /> New Album Collection
+            <FolderPlus className="h-5 w-5 text-primary" /> New Album Collection
           </DialogTitle>
           <DialogDescription className="text-white/60 text-xs font-mono">
             Initialize a new photography album container. Leave title, date, or location empty for AI auto-fill.
@@ -122,7 +122,7 @@ export function CreateAlbumDialog({
 
         {/* Scrollable Inner Body */}
         <div data-lenis-prevent className="flex-1 overflow-y-auto overflow-x-hidden p-6 sm:p-8 space-y-6">
-          <div className="bg-film-amber/10 border border-film-amber/20 p-3.5 text-xs text-film-amber flex items-start gap-3 font-mono">
+          <div className="bg-primary/10 border border-primary/20 p-3.5 text-xs text-primary flex items-start gap-3 font-mono">
             <ThinkingOrb state="idle" size="sm" className="mt-0.5 shrink-0" />
             <span>
               <strong className="font-bold">AI Auto-Fill Enabled:</strong> Once photos are uploaded, AI Workers will parse camera EXIF dates, detect GPS coordinates, and suggest collection titles automatically.
@@ -140,8 +140,8 @@ export function CreateAlbumDialog({
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Iceland Glaciers (Leave blank to auto-generate)"
-                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber font-mono text-xs h-10"
+                  placeholder="e.g. Iceland Glaciers"
+                  className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary font-mono text-xs h-10"
                 />
               </div>
 
@@ -184,20 +184,20 @@ export function CreateAlbumDialog({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe this photo collection..."
                 rows={3}
-                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-film-amber resize-none text-xs"
+                className="bg-white/5 border-white/15 rounded-none text-white focus-visible:ring-primary resize-none text-xs"
               />
             </div>
           </form>
         </div>
 
         {/* Static Footer Actions */}
-        <div className="shrink-0 p-4 sm:p-6 border-t border-white/10 bg-[#0E1012] flex justify-end gap-3">
+        <div className="shrink-0 p-4 sm:p-6 border-t border-border bg-card flex justify-end gap-3">
           <DialogClose render={
-            <Button type="button" variant="outline" className="border-white/15 text-white rounded-none hover:bg-white/5 font-mono uppercase tracking-wider text-xs px-5 py-2">
+            <Button type="button" variant="outline" className="border-border text-foreground rounded-none hover:bg-background/5 font-mono uppercase tracking-wider text-xs px-5 py-2">
               Cancel
             </Button>
           } />
-          <Button form="create-album-form" type="submit" disabled={loading} className="bg-[#e8e5f0] text-[#0E1012] hover:bg-[#d4d0de] rounded-none font-bold uppercase tracking-wider text-xs px-6 py-2 flex items-center gap-2 cursor-pointer shadow-md">
+          <Button form="create-album-form" type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none font-bold uppercase tracking-wider text-xs px-6 py-2 flex items-center gap-2 cursor-pointer shadow-md">
             {loading ? <ThinkingOrb state="thinking" size="sm" /> : null}
             <span>{loading ? "Creating..." : "Create Album"}</span>
           </Button>
