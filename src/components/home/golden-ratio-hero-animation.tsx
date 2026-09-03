@@ -23,7 +23,7 @@ function hexToRgb(hex: string): RGB {
   }
   const num = parseInt(cleaned, 16);
   if (isNaN(num)) {
-    return { r: 217, g: 107, b: 39 }; // Fallback to --primary (#d96b27)
+    return { r: 97, g: 132, b: 216 }; // Fallback to --primary (#6184D8)
   }
   return {
     r: (num >> 16) & 255,
@@ -50,7 +50,7 @@ export function GoldenRatioHeroAnimation() {
   const isVisibleRef = useRef<boolean>(true);
   
   // Performance optimization refs
-  const accentRgbRef = useRef<RGB>({ r: 217, g: 107, b: 39 });
+  const accentRgbRef = useRef<RGB>({ r: 97, g: 132, b: 216 });
 
   // Generate randomized line speeds and start delays once on component initialization
   if (lineConfigsRef.current.length === 0) {
@@ -81,7 +81,7 @@ export function GoldenRatioHeroAnimation() {
     const accentHex =
       rootStyles.getPropertyValue("--primary").trim() ||
       rootStyles.getPropertyValue("--accent").trim() ||
-      "#d96b27";
+      "#6184D8";
     accentRgbRef.current = hexToRgb(accentHex);
   };
 
@@ -306,20 +306,28 @@ export function GoldenRatioHeroAnimation() {
       ctx.lineWidth = 3.6;
       ctx.stroke(linePath);
 
-      // 3. Core Shimmering Multi-tone Golden Spiral Stroke
+      // 3. Core Shimmering Multi-tone Spiral Stroke
       const shimmerOffset = (Math.sin(elapsedTime * 1.8 + lineIdx * 0.4) + 1) * 0.06;
 
+      const lightAccentR = Math.min(255, accent.r + 55);
+      const lightAccentG = Math.min(255, accent.g + 55);
+      const lightAccentB = Math.min(255, accent.b + 55);
+
+      const darkAccentR = Math.round(accent.r * 0.7);
+      const darkAccentG = Math.round(accent.g * 0.7);
+      const darkAccentB = Math.round(accent.b * 0.7);
+
       const strokeGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, maxPathRadius);
-      strokeGrad.addColorStop(0, `rgba(255, 253, 245, ${0.98 * lineAlpha})`);
+      strokeGrad.addColorStop(0, `rgba(255, 255, 255, ${0.98 * lineAlpha})`);
       strokeGrad.addColorStop(
         Math.min(0.38, 0.22 + shimmerOffset),
-        `rgba(247, 226, 185, ${0.95 * lineAlpha})`
+        `rgba(${lightAccentR}, ${lightAccentG}, ${lightAccentB}, ${0.95 * lineAlpha})`
       );
       strokeGrad.addColorStop(
         Math.min(0.72, 0.52 + shimmerOffset),
         `rgba(${accent.r}, ${accent.g}, ${accent.b}, ${0.85 * lineAlpha})`
       );
-      strokeGrad.addColorStop(0.82, `rgba(195, 88, 32, ${0.7 * lineAlpha})`);
+      strokeGrad.addColorStop(0.82, `rgba(${darkAccentR}, ${darkAccentG}, ${darkAccentB}, ${0.7 * lineAlpha})`);
       strokeGrad.addColorStop(1, `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0)`);
 
       ctx.strokeStyle = strokeGrad;
