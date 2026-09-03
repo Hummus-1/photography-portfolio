@@ -94,28 +94,28 @@ export function Hero({
       } as React.CSSProperties}
       className="relative w-full min-h-[88vh] lg:min-h-[92vh] bg-background overflow-hidden flex flex-col items-center justify-center border-b border-foreground/10 select-none pt-20 pb-12 transition-colors duration-700"
     >
-      {/* Multi-Layer Animated Palette Wave Canvas */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Multi-Layer Animated Palette Wave Canvas (GPU Optimized) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden transform-gpu">
         <motion.div
           animate={{
-            scale: [1, 1.2, 0.95, 1.15, 1],
-            x: ["-10%", "15%", "-5%", "10%", "-10%"],
-            y: ["-15%", "10%", "15%", "-10%", "-15%"],
+            scale: [1, 1.15, 0.96, 1.1, 1],
+            x: ["-8%", "10%", "-4%", "8%", "-8%"],
+            y: ["-10%", "8%", "10%", "-8%", "-10%"],
           }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          style={{ backgroundColor: accentColor, opacity: glowOpacity }}
-          className="absolute -top-36 -left-36 w-[650px] h-[650px] rounded-full blur-[140px] transition-all duration-700"
+          style={{ backgroundColor: accentColor, opacity: glowOpacity * 0.9 }}
+          className="absolute -top-24 -left-24 w-[480px] h-[480px] rounded-full blur-[72px] will-change-transform transform-gpu transition-all duration-700 motion-reduce:animate-none"
         />
 
         <motion.div
           animate={{
-            scale: [1.15, 0.9, 1.25, 0.95, 1.15],
-            x: ["25%", "-15%", "10%", "-20%", "25%"],
-            y: ["15%", "-10%", "-15%", "15%", "15%"],
+            scale: [1.1, 0.95, 1.18, 0.96, 1.1],
+            x: ["18%", "-10%", "8%", "-14%", "18%"],
+            y: ["10%", "-8%", "-10%", "10%", "10%"],
           }}
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-          style={{ backgroundColor: secondaryColor, opacity: glowOpacity * 0.85 }}
-          className="absolute -bottom-36 -right-36 w-[700px] h-[700px] rounded-full blur-[160px] transition-all duration-700"
+          style={{ backgroundColor: secondaryColor, opacity: glowOpacity * 0.75 }}
+          className="absolute -bottom-24 -right-24 w-[520px] h-[520px] rounded-full blur-[80px] will-change-transform transform-gpu transition-all duration-700 motion-reduce:animate-none"
         />
       </div>
 

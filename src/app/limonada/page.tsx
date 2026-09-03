@@ -85,8 +85,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchPhotos = async (albumId: string) => {
-    setPhotosLoading(true);
+  const fetchPhotos = async (albumId: string, silent: boolean = false) => {
+    if (!silent) setPhotosLoading(true);
     try {
       const { data, error } = await supabase
         .from("photos")
@@ -99,7 +99,7 @@ export default function AdminPage() {
     } catch (err: any) {
       toast.error(`Error loading photos: ${err.message}`);
     } finally {
-      setPhotosLoading(false);
+      if (!silent) setPhotosLoading(false);
     }
   };
 
@@ -462,7 +462,11 @@ export default function AdminPage() {
                 onSetCoverPhoto={handleSetCoverPhoto}
                 onDeletePhoto={handleDeletePhoto}
                 onUpdatePhoto={handleUpdatePhoto}
-                onSaveSuccess={() => fetchPhotos(selectedAlbumId)}
+                onSaveSuccess={(updatedPhotos) => {
+                  if (updatedPhotos) {
+                    setPhotos(updatedPhotos);
+                  }
+                }}
               />
             </>
           ) : (

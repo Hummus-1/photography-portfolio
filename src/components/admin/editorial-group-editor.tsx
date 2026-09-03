@@ -42,7 +42,7 @@ interface EditorialGroupEditorProps {
     photoId: string,
     updates: { tags: string[]; score: number | null; description: string | null }
   ) => Promise<void>;
-  onSaveSuccess: () => void;
+  onSaveSuccess?: (updatedPhotos?: Photo[]) => void;
 }
 
 export function EditorialGroupEditor({
@@ -59,6 +59,8 @@ export function EditorialGroupEditor({
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isInternalUpdateRef = useRef(false);
   const [viewMode, setViewMode] = useState<"story" | "masonry">("story");
 
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
@@ -77,6 +79,10 @@ export function EditorialGroupEditor({
   const [dragOverBlockIndex, setDragOverBlockIndex] = useState<number | null>(null);
 
   useEffect(() => {
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false;
+      return;
+    }
     setPhotos(initialPhotos || []);
   }, [initialPhotos]);
 
@@ -155,7 +161,8 @@ export function EditorialGroupEditor({
       saveTimeoutRef.current = setTimeout(() => {
         setSaveStatus("idle");
       }, 2000);
-      onSaveSuccess();
+      isInternalUpdateRef.current = true;
+      onSaveSuccess?.(photoList);
     } catch (err: any) {
       setSaveStatus("error");
       toast.error(`Auto-save failed: ${err.message}`);
@@ -165,7 +172,11 @@ export function EditorialGroupEditor({
   const updatePhotosWithAutoSave = (newPhotos: Photo[]) => {
     const cleaned = cleanupGroups(newPhotos);
     setPhotos(cleaned);
-    saveLayoutToDb(cleaned);
+
+    if (autoSaveDebounceRef.current) clearTimeout(autoSaveDebounceRef.current);
+    autoSaveDebounceRef.current = setTimeout(() => {
+      saveLayoutToDb(cleaned);
+    }, 350);
   };
 
   const toggleSelectPhoto = (id: string) => {
@@ -325,7 +336,7 @@ export function EditorialGroupEditor({
     }
   };
 
-  if (photosLoading) {
+  if (photosLoading && photos.length === 0) {
     return (
       <div className="flex py-20 justify-center items-center flex-col gap-3">
         <ThinkingOrb state="thinking" size="lg" label="Loading Photos" sublabel="Fetching collection stills" />
@@ -491,7 +502,7 @@ export function EditorialGroupEditor({
 
               return (
                 <div
-                  key={`block-${block.groupId}-${blockIndex}`}
+                  key={`group-${block.groupId}`}
                   draggable
                   onDragStart={(e) => {
                     e.stopPropagation();
@@ -605,7 +616,7 @@ export function EditorialGroupEditor({
             const { photo, originalIndex } = block.items[0];
             return (
               <PhotoCardTile
-                key={`block-single-${photo.id}`}
+                key={`single-${photo.id}`}
                 photo={photo}
                 originalIndex={originalIndex}
                 totalPhotos={photos.length}
