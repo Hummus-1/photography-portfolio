@@ -118,7 +118,30 @@ export function getContrastRatio(hex1: string, hex2: string): number {
 }
 
 /**
- * Adjusts color lightness to guarantee minimum WCAG contrast against background.
+ * Determines the optimal foreground text color (pure black or pure white)
+ * to guarantee maximum WCAG contrast on top of a dynamic accent background fill.
+ */
+export function getOnAccentColor(
+  accentHex: string,
+  darkText: string = "#000000",
+  lightText: string = "#ffffff"
+): string {
+  const contrastWithWhite = getContrastRatio(accentHex, lightText);
+  const contrastWithDark = getContrastRatio(accentHex, darkText);
+
+  // Return whichever provides greater contrast, prioritizing WCAG >= 4.5
+  if (contrastWithWhite >= 4.5 && contrastWithWhite >= contrastWithDark) {
+    return lightText;
+  }
+  if (contrastWithDark >= 4.5 && contrastWithDark >= contrastWithWhite) {
+    return darkText;
+  }
+  return contrastWithWhite >= contrastWithDark ? lightText : darkText;
+}
+
+/**
+ * Adjusts color lightness and saturation to guarantee minimum WCAG contrast against a background
+ * while preventing the color from bleaching into pure white or sinking into dull black.
  */
 export function ensureAccessibleContrast(
   hex: string,
@@ -129,26 +152,41 @@ export function ensureAccessibleContrast(
   if (!rgb) return hex;
 
   let { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
-  const currentRatio = getContrastRatio(hex, bgHex);
-  if (currentRatio >= minRatio) return hex;
-
   const bgLum = getRelativeLuminance(bgHex);
   const isDarkBg = bgLum < 0.5;
 
-  // Step lightness in direction that improves contrast
-  for (let step = 0; step < 25; step++) {
-    l = isDarkBg ? Math.min(95, l + 3) : Math.max(5, l - 3);
-    const candidateHex = hslToHex(h, s, l);
+  // Guarantee minimum saturation so the color doesn't look like dull monochrome gray/white
+  s = Math.max(s, 38);
+
+  // Clamp initial lightness into a vibrant, punchy band before fine contrast adjustment
+  if (isDarkBg) {
+    // For dark canvas: keep lightness in healthy vibrant range (48% - 74%)
+    l = Math.max(48, Math.min(74, l));
+  } else {
+    // For light canvas: keep lightness in healthy vibrant range (26% - 52%)
+    l = Math.max(26, Math.min(52, l));
+  }
+
+  let candidateHex = hslToHex(h, s, l);
+  if (getContrastRatio(candidateHex, bgHex) >= minRatio) {
+    return candidateHex;
+  }
+
+  // Step lightness in direction that improves contrast against the canvas
+  for (let step = 0; step < 20; step++) {
+    l = isDarkBg ? Math.min(80, l + 2) : Math.max(18, l - 2);
+    candidateHex = hslToHex(h, s, l);
     if (getContrastRatio(candidateHex, bgHex) >= minRatio) {
       return candidateHex;
     }
   }
 
-  return hex;
+  return candidateHex;
 }
 
 /**
- * Evaluates an album's color palette and selects the punchiest, most vibrant accent color.
+ * Evaluates an album's color palette and selects the punchiest, most vibrant accent color
+ * tailored to contrast properly against the specified canvas background.
  * Supports explicit custom hero color overrides and respects background contrast.
  */
 export function selectBestAccentColor(
@@ -163,11 +201,18 @@ export function selectBestAccentColor(
     return ensureAccessibleContrast(formatted, bgHex, 3.0);
   }
 
-  if (!palette || palette.length === 0) return fallback;
+  if (!palette || palette.length === 0) {
+    return ensureAccessibleContrast(fallback, bgHex, 3.0);
+  }
 
   // Clean and filter valid hex strings
   const validHexes = palette.filter((c) => typeof c === "string" && /^#?[0-9A-Fa-f]{3,6}$/.test(c));
-  if (validHexes.length === 0) return fallback;
+  if (validHexes.length === 0) {
+    return ensureAccessibleContrast(fallback, bgHex, 3.0);
+  }
+
+  const bgLum = getRelativeLuminance(bgHex);
+  const isDarkBg = bgLum < 0.5;
 
   const analyzed = validHexes.map((hex) => {
     const formattedHex = hex.startsWith("#") ? hex : `#${hex}`;
@@ -175,24 +220,32 @@ export function selectBestAccentColor(
     if (!rgb) return { hex: formattedHex, h: 0, s: 0, l: 0, score: 0 };
     const { h, s, l } = rgbToHsl(rgb.r, rgb.g, rgb.b);
 
-    // Primary score driver: saturation & balanced lightness
-    let score = s * 2.5;
+    // Primary score driver: high saturation
+    let score = s * 3.0;
 
-    // Favor balanced lightness range (30% to 75%)
-    if (l >= 30 && l <= 75) {
-      score += 30;
-    } else if (l < 20 || l > 85) {
-      score -= 45;
+    // Favor balanced lightness range relative to canvas
+    if (isDarkBg) {
+      if (l >= 45 && l <= 72) {
+        score += 40;
+      } else if (l < 25 || l > 85) {
+        score -= 50;
+      }
+    } else {
+      if (l >= 28 && l <= 55) {
+        score += 40;
+      } else if (l < 15 || l > 75) {
+        score -= 50;
+      }
     }
 
     // Heavy penalty for near-monochrome grays/blacks/whites
-    if (s < 12) {
-      score -= 90;
+    if (s < 15) {
+      score -= 100;
     }
 
-    // Reward contrast ratio against background
+    // Reward contrast ratio against the actual background
     const contrast = getContrastRatio(formattedHex, bgHex);
-    score += Math.min(contrast * 5, 25);
+    score += Math.min(contrast * 6, 30);
 
     return { hex: formattedHex, h, s, l, score };
   });
@@ -200,11 +253,11 @@ export function selectBestAccentColor(
   analyzed.sort((a, b) => b.score - a.score);
 
   const best = analyzed[0];
-  if (best && best.s >= 10) {
-    return ensureAccessibleContrast(best.hex, bgHex, 3.0);
+  if (best) {
+    return ensureAccessibleContrast(best.hex, bgHex, 3.2);
   }
 
-  return fallback;
+  return ensureAccessibleContrast(fallback, bgHex, 3.0);
 }
 
 /**

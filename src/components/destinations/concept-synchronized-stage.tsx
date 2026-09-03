@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Album } from "@/lib/types";
-import { selectBestAccentColor } from "@/lib/color-utils";
+import { selectBestAccentColor, getOnAccentColor } from "@/lib/color-utils";
 import {
   MapPin,
   ArrowRight,
@@ -71,6 +71,10 @@ export function ConceptSynchronizedStage({
       activeAlbum.custom_hero_color
     );
   }, [activeAlbum]);
+
+  const buttonTextColor = useMemo(() => {
+    return getOnAccentColor(accentColor);
+  }, [accentColor]);
 
   // Keep active album in sync if allAlbums updates
   useEffect(() => {
@@ -241,8 +245,11 @@ export function ConceptSynchronizedStage({
                 <div className="pt-2">
                   <Link
                     href={`/album/${activeAlbum.slug}`}
-                    style={{ backgroundColor: accentColor }}
-                    className="w-full inline-flex items-center justify-center gap-2 group text-white py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold hover:brightness-110 active:scale-[0.99] transition-all shadow-md cursor-pointer"
+                    style={{ 
+                      backgroundColor: accentColor,
+                      color: buttonTextColor,
+                    }}
+                    className="w-full inline-flex items-center justify-center gap-2 group py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold hover:opacity-90 active:scale-[0.99] transition-all shadow-md cursor-pointer"
                   >
                     <span>Explore Photo Series</span>
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -469,8 +476,11 @@ export function ConceptSynchronizedStage({
 
                 <Link
                   href={`/album/${activeAlbum.slug}`}
-                  style={{ backgroundColor: accentColor }}
-                  className="px-3.5 py-2 rounded-xl text-white text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px] hover:brightness-110 transition-colors duration-500"
+                  style={{ 
+                    backgroundColor: accentColor,
+                    color: buttonTextColor,
+                  }}
+                  className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider font-bold flex items-center gap-1.5 shadow min-h-[40px] hover:opacity-90 transition-opacity duration-300"
                 >
                   <span>View</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -549,8 +559,11 @@ export function ConceptSynchronizedStage({
                     <div className="pt-3">
                       <Link
                         href={`/album/${activeAlbum.slug}`}
-                        style={{ backgroundColor: accentColor }}
-                        className="w-full inline-flex items-center justify-center gap-2 text-white py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold cursor-pointer shadow-md hover:brightness-110 transition-colors duration-500"
+                        style={{ 
+                          backgroundColor: accentColor,
+                          color: buttonTextColor,
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl text-xs font-mono uppercase tracking-widest font-semibold cursor-pointer shadow-md hover:opacity-90 transition-opacity duration-300"
                       >
                         <span>Explore Photo Series</span>
                         <ArrowRight className="h-4 w-4" />
