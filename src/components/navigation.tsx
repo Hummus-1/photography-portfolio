@@ -45,10 +45,10 @@ export function Navigation() {
         {/* Brand Logo Header */}
         <Link
           href="/"
-          className="group flex items-center gap-3 py-1 transition-all"
+          className="group flex items-center gap-2.5 sm:gap-3 py-1 transition-all"
         >
           {/* Viewfinder Icon Glass Container */}
-          <div className="relative p-1.5 sm:p-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:shadow-[0_0_15px_rgba(217,107,39,0.15)] transition-all duration-300 flex items-center justify-center">
+          <div className="relative p-1.5 sm:p-2 rounded-xl border border-foreground/10 bg-foreground/[0.03] group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:shadow-[0_0_15px_rgba(217,107,39,0.15)] transition-all duration-300 flex items-center justify-center shrink-0">
             <Logo className="h-5 w-5 sm:h-6 sm:w-6 text-foreground" />
             
             {/* Corner Tech Accents */}
@@ -57,20 +57,20 @@ export function Navigation() {
           </div>
 
           {/* Brand Name & Subtitle */}
-          <div className="flex flex-col">
-            <div className="flex items-center font-serif text-base sm:text-lg md:text-xl font-bold tracking-wider text-foreground group-hover:text-foreground/90 transition-colors leading-tight">
-              <span>DANI'S STILLS</span>
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center font-serif text-sm min-[380px]:text-base sm:text-lg md:text-xl font-bold tracking-wider text-foreground group-hover:text-foreground/90 transition-colors leading-tight truncate">
+              <span>DANI&apos;S STILLS</span>
             </div>
             
-            <div className="flex items-center gap-2 text-[9px] font-mono tracking-[0.2em] text-foreground/50 uppercase group-hover:text-primary/80 transition-colors leading-none mt-0.5">
+            <div className="flex items-center gap-2 text-[8px] min-[380px]:text-[9px] font-mono tracking-[0.18em] sm:tracking-[0.2em] text-foreground/50 uppercase group-hover:text-primary/80 transition-colors leading-none mt-0.5">
               <span>VISUAL ARCHIVE</span>
             </div>
           </div>
         </Link>
 
         {/* Desktop Links & Aperture Switcher */}
-        <div className="flex items-center gap-4 sm:gap-8">
-          <nav className="hidden sm:flex items-center gap-8 text-xs font-mono tracking-widest uppercase">
+        <div className="flex items-center gap-2.5 sm:gap-8">
+          <nav className="hidden sm:flex items-center gap-6 md:gap-8 text-xs font-mono tracking-widest uppercase">
             <Link
               href="/"
               className={`relative py-1 transition-colors duration-300 ${
@@ -142,7 +142,7 @@ export function Navigation() {
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="sm:hidden p-2 rounded-full border border-foreground/15 bg-background/80 text-foreground hover:border-primary transition-colors cursor-pointer"
+            className="sm:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-full border border-foreground/15 bg-background/80 text-foreground hover:border-primary active:scale-95 transition-all cursor-pointer flex items-center justify-center"
             aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

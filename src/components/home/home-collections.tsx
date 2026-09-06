@@ -36,10 +36,10 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
   };
 
   return (
-    <section id="featured-collections" className="w-full py-20 md:py-32 relative">
+    <section id="featured-collections" className="w-full pt-12 sm:pt-20 md:pt-32 relative">
       {/* Header Bar */}
       <div className="px-4 sm:px-6 md:px-12 max-w-7xl mx-auto space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline border-b border-foreground/10 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-baseline border-b border-foreground/10 pb-6 sm:pb-8">
           
           <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
             <span className="text-primary font-bold flex items-center gap-1">
@@ -49,12 +49,12 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
             <span>Exhibition Series</span>
           </div>
 
-          <div className="md:col-span-9 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="md:col-span-9 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
             <div>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+              <h2 className="font-serif text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
                 Curated Collections
               </h2>
-              <p className="text-xs font-mono text-foreground/50 uppercase tracking-widest pt-1.5">
+              <p className="text-[11px] sm:text-xs font-mono text-foreground/50 uppercase tracking-widest pt-1 sm:pt-1.5">
                 Expedition Archives ({albums.length} Photo Series)
               </p>
             </div>
@@ -67,7 +67,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
       </div>
 
       {/* Exhibition Collections Diptych List */}
-      <div className="divide-y divide-foreground/10 pt-4">
+      <div className="divide-y divide-foreground/10 pt-2 sm:pt-4">
         <AnimatePresence mode="popLayout">
           {albums.map((album, index) => {
             const isEven = index % 2 === 0;
@@ -97,7 +97,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                 style={{
                   "--album-highlight": highlightColor,
                 } as React.CSSProperties}
-                className={`w-full py-20 md:py-28 flex items-center justify-center transition-colors duration-300 relative group/section scroll-mt-20 ${
+                className={`w-full py-12 sm:py-16 md:py-24 flex items-center justify-center transition-colors duration-300 relative group/section scroll-mt-20 ${
                   isEven ? "bg-foreground/[0.01]" : "bg-transparent"
                 }`}
               >
@@ -109,15 +109,15 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                   }}
                 />
 
-                <div className="px-4 sm:px-6 md:px-12 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                <div className="px-4 sm:px-6 md:px-12 max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-center">
                   
-                  {/* Text Details Side (5 cols) */}
-                  <div className={`space-y-6 lg:col-span-5 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
+                  {/* Text Details Side (5 cols on desktop) */}
+                  <div className={`space-y-4 sm:space-y-6 lg:col-span-5 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
                     
                     {/* Metadata Header */}
-                    <div className="flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/60 flex-wrap">
+                    <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-mono tracking-widest uppercase text-foreground/60 flex-wrap">
                       <span
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded font-semibold border transition-colors"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded font-semibold border transition-colors shrink-0"
                         style={{
                           backgroundColor: `${highlightColor}18`,
                           borderColor: `${highlightColor}40`,
@@ -126,31 +126,31 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                       >
                         {seriesTag}
                       </span>
-                      <span className="flex items-center gap-1.5 bg-foreground/5 border border-foreground/10 px-3 py-1 rounded-md">
-                        <Calendar className="h-3 w-3 text-foreground/70" />
+                      <span className="flex items-center gap-1.5 bg-foreground/5 border border-foreground/10 px-2.5 sm:px-3 py-1 rounded-md shrink-0">
+                        <Calendar className="h-3 w-3 text-foreground/70 shrink-0" />
                         {formatDate(album.date)}
                       </span>
-                      <span className="flex items-center gap-1.5 bg-foreground/5 border border-foreground/10 px-3 py-1 rounded-md">
-                        <MapPin className="h-3 w-3" style={{ color: highlightColor }} />
-                        {album.location_path && album.location_path.length > 0 ? (
-                          <span>
-                            {album.location_path.length >= 2 ? (
+                      <span className="flex items-center gap-1.5 bg-foreground/5 border border-foreground/10 px-2.5 sm:px-3 py-1 rounded-md max-w-full truncate">
+                        <MapPin className="h-3 w-3 shrink-0" style={{ color: highlightColor }} />
+                        <span className="truncate">
+                          {album.location_path && album.location_path.length > 0 ? (
+                            album.location_path.length >= 2 ? (
                               `${album.location_path[album.location_path.length - 1].name}, ${
                                 album.location_path.find((n) => n.type === "country")?.name || album.location_path[0].name
                               }`
                             ) : (
                               album.location_path[0].name
-                            )}
-                          </span>
-                        ) : (
-                          album.location || "Earth"
-                        )}
+                            )
+                          ) : (
+                            album.location || "Earth"
+                          )}
+                        </span>
                       </span>
                     </div>
 
                     {/* Collection Title */}
                     <Link href={`/album/${album.slug}`} className="block group/title">
-                      <h3 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground group-hover/title:text-[var(--album-highlight)] transition-colors leading-[1.05]">
+                      <h3 className="font-serif text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground group-hover/title:text-[var(--album-highlight)] transition-colors leading-[1.08] sm:leading-[1.05]">
                         {album.title}
                       </h3>
                     </Link>
@@ -161,23 +161,23 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                     )}
 
                     {/* Description */}
-                    <p className="text-foreground/75 leading-relaxed text-sm md:text-base font-sans">
+                    <p className="text-foreground/75 leading-relaxed text-sm sm:text-base font-sans">
                       {album.description}
                     </p>
 
                     {/* Action Button & Photos Count */}
-                    <div className="pt-6 flex items-center justify-between gap-4 border-t border-foreground/10">
+                    <div className="pt-4 sm:pt-6 flex flex-wrap items-center justify-between gap-3 border-t border-foreground/10">
                       <Link
                         href={`/album/${album.slug}`}
-                        className="inline-flex items-center gap-2 group/btn text-xs font-mono uppercase tracking-widest font-semibold border-b-2 border-foreground/30 hover:border-[var(--album-highlight)] hover:text-[var(--album-highlight)] pb-1 transition-all duration-300"
+                        className="inline-flex items-center gap-2 group/btn min-h-[44px] text-xs font-mono uppercase tracking-widest font-semibold border-b-2 border-foreground/30 hover:border-[var(--album-highlight)] hover:text-[var(--album-highlight)] pb-1 transition-all duration-300"
                       >
                         <span>Open Series</span>
-                        <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                        <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform duration-300 shrink-0" />
                       </Link>
 
                       {album.photos && album.photos.length > 0 && (
                         <span className="text-[11px] font-mono text-foreground/50 flex items-center gap-1.5">
-                          <Images className="h-3.5 w-3.5" />
+                          <Images className="h-3.5 w-3.5 shrink-0" />
                           {album.photos.length} Stills
                         </span>
                       )}
@@ -185,33 +185,33 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
 
                   </div>
 
-                  {/* Image Frame Side (7 cols) */}
+                  {/* Image Frame Side (7 cols on desktop) */}
                   <div className={`lg:col-span-7 ${isEven ? "lg:order-2" : "lg:order-1"}`}>
                     
                     {/* Primary Cover Image Frame with Safelight Bloom Glow */}
-                    <div className="p-2 rounded-3xl border border-foreground/15 bg-background/80 shadow-xl backdrop-blur-md transition-all duration-500 group-hover/section:border-[var(--album-highlight)]/60 group-hover/section:shadow-[0_0_45px_-5px_var(--album-highlight)]">
+                    <div className="p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border border-foreground/15 bg-background/80 shadow-xl backdrop-blur-md transition-all duration-500 group-hover/section:border-[var(--album-highlight)]/60 group-hover/section:shadow-[0_0_45px_-5px_var(--album-highlight)]">
                       <Link
                         href={`/album/${album.slug}`}
-                        className="block relative overflow-hidden group/img aspect-[16/10] bg-foreground/5 rounded-2xl"
+                        className="block relative overflow-hidden group/img aspect-[16/10] bg-foreground/5 rounded-xl sm:rounded-2xl"
                       >
                         {/* Pristine Unaltered Default Image -> Subtly Enriched on Hover */}
                         <Image
                           src={album.cover_image_url || "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=1600"}
                           alt={album.title}
                           fill
-                          sizes="(max-width: 1024px) 100vw, 850px"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 850px"
                           priority={index === 0}
                           className="object-cover scale-100 group-hover/img:scale-[1.02] group-hover/img:saturate-[1.12] group-hover/img:contrast-[1.05] transition-all duration-700 ease-out"
                         />
 
                         {/* Rangefinder Viewfinder 35mm Reticle Brackets */}
-                        <div className="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
-                        <div className="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
-                        <div className="absolute bottom-4 left-4 w-5 h-5 border-b-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
-                        <div className="absolute bottom-4 right-4 w-5 h-5 border-b-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
+                        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
+                        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
+                        <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
+                        <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
 
                         {/* Real Photo EXIF Spec Badge */}
-                        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 text-[9px] font-mono tracking-widest text-white/90 bg-black/80 px-2.5 py-0.5 rounded border border-white/20 uppercase pointer-events-none whitespace-nowrap">
+                        <div className="absolute top-2.5 sm:top-3 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 text-[8px] sm:text-[9px] font-mono tracking-widest text-white/90 bg-black/80 px-2 sm:px-2.5 py-0.5 rounded border border-white/20 uppercase pointer-events-none max-w-[90%] truncate">
                           {exifSpec}
                         </div>
                       </Link>

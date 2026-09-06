@@ -44,6 +44,7 @@ export function ColorPalettePill({ colors, size = "md" }: ColorPalettePillProps)
           setIsPillHovered(false);
           setHoveredIndex(null);
         }}
+        onClick={() => setIsPillHovered((prev) => !prev)}
         layout
         transition={{ type: "spring", stiffness: 350, damping: 30 }}
       >

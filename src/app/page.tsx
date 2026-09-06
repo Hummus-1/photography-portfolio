@@ -98,45 +98,45 @@ export default async function HomePage() {
       <HomeCollections albums={featuredAlbums} />
 
       {/* 03 / SPATIAL INDEX - Spatial Locations */}
-      <SpatialAtlasTeaser albums={featuredAlbums} />
+      {/* <SpatialAtlasTeaser albums={featuredAlbums} /> */}
 
       {/* 04 / ARTIST STATEMENT - Visual Notes */}
-      <CuratorialManifesto />
+      {/* <CuratorialManifesto /> */}
 
       {/* 05 / COLOPHON - Footer */}
-      <footer className="w-full py-20 px-6 md:px-12 border-t border-foreground/10 bg-background relative">
-        <div className="max-w-7xl mx-auto space-y-16">
+      <footer className="w-full py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 border-t border-foreground/10 bg-background relative">
+        <div className="max-w-7xl mx-auto space-y-10 sm:space-y-16">
           
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-baseline">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-baseline">
             <div className="md:col-span-3 flex items-center gap-3 text-xs font-mono tracking-widest uppercase text-foreground/50">
               <span className="text-primary font-bold">05</span>
               <span className="w-6 h-px bg-foreground/20" />
               <span>Colophon</span>
             </div>
 
-            <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div className="md:col-span-9 grid grid-cols-1 min-[480px]:grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8">
               <div className="space-y-3">
                 <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                   Navigation
                 </div>
                 <ul className="space-y-2 text-xs font-mono uppercase tracking-widest">
                   <li>
-                    <Link href="/" className="hover:text-primary transition-colors">
+                    <Link href="/" className="hover:text-primary transition-colors py-0.5 inline-block">
                       Exhibition Gallery
                     </Link>
                   </li>
                   <li>
-                    <Link href="/destinations" className="hover:text-primary transition-colors">
+                    <Link href="/destinations" className="hover:text-primary transition-colors py-0.5 inline-block">
                       Spatial Index
                     </Link>
                   </li>
                   <li>
-                    <Link href="/how-it-works" className="hover:text-primary transition-colors">
+                    <Link href="/how-it-works" className="hover:text-primary transition-colors py-0.5 inline-block">
                       How It Works
                     </Link>
                   </li>
                   <li>
-                    <Link href="/about" className="hover:text-primary transition-colors">
+                    <Link href="/about" className="hover:text-primary transition-colors py-0.5 inline-block">
                       About & Contact
                     </Link>
                   </li>
@@ -155,7 +155,7 @@ export default async function HomePage() {
                 </ul>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 min-[480px]:col-span-2 sm:col-span-1">
                 <div className="text-[11px] font-mono uppercase tracking-widest text-primary font-semibold">
                   Personal Site
                 </div>
@@ -164,7 +164,7 @@ export default async function HomePage() {
                     href="https://www.danigh.dev/"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest border-b border-foreground/30 hover:border-primary hover:text-primary transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest border-b border-foreground/30 hover:border-primary hover:text-primary transition-colors py-0.5"
                   >
                     <span>danigh.dev</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -174,14 +174,14 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-foreground/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono uppercase tracking-widest text-foreground/40">
+          <div className="pt-6 sm:pt-8 border-t border-foreground/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 text-xs font-mono uppercase tracking-widest text-foreground/40">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
               <span>© {new Date().getFullYear()} Daniel García. All Rights Reserved.</span>
               <span className="hidden sm:inline text-foreground/20">•</span>
               <span className="text-[10px] text-foreground/35 normal-case tracking-normal">No AI Training / Text & Data Mining Reserved</span>
             </div>
             <div className="flex items-center gap-2 text-[10px]">
-              <Globe className="h-3.5 w-3.5 text-primary" />
+              <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
               <span>Personal Photography Portfolio</span>
             </div>
           </div>

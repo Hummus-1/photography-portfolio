@@ -76,11 +76,11 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
     .slice(0, 4);
 
   return (
-    <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-24 md:py-32 bg-foreground/[0.015] border-b border-foreground/10 relative overflow-hidden">
+    <section className="px-4 sm:px-6 md:px-12 py-12 sm:py-20 md:py-28 bg-foreground/[0.015] border-b border-foreground/10 relative overflow-hidden">
       {/* Ambient Grid Background */}
       <div className="absolute inset-0 bg-[radial-gradient(#888888_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.08] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto space-y-10 sm:space-y-16 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12 md:space-y-16 relative z-10">
         
         {/* Specimen Header */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-baseline border-b border-foreground/10 pb-6 sm:pb-8">
@@ -94,13 +94,13 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
             <span>Spatial Index</span>
           </div>
 
-          <div className="md:col-span-9 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-            <div className="space-y-2.5 max-w-2xl">
-              <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary font-semibold">
+          <div className="md:col-span-9 flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
+            <div className="space-y-2 sm:space-y-2.5 max-w-2xl">
+              <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono uppercase tracking-widest text-primary font-semibold">
                 <Compass className="h-4 w-4 shrink-0" />
                 <span>Geographic Index • Expedition Coordinates</span>
               </div>
-              <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+              <h2 className="font-serif text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tracking-tight">
                 Expedition Coordinates & Locations
               </h2>
               <p className="text-xs sm:text-sm md:text-base font-sans text-foreground/75 leading-relaxed">
@@ -108,14 +108,14 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
               </p>
             </div>
 
-            <div>
+            <div className="w-full sm:w-auto">
               <Link
                 href="/destinations"
                 className="inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group min-h-[44px] w-full sm:w-auto"
               >
-                <Globe2 className="h-4 w-4" />
+                <Globe2 className="h-4 w-4 shrink-0" />
                 <span>Destinations Index</span>
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform shrink-0" />
               </Link>
             </div>
           </div>
@@ -123,7 +123,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
         </div>
 
         {/* Featured Spatial Coordinates Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 min-[520px]:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5 lg:gap-6">
           {realSpots.map((spot, idx) => (
             <motion.div
               key={spot.id || idx}
@@ -134,7 +134,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
             >
               <Link
                 href={`/album/${spot.slug}`}
-                className="block p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-background/70 backdrop-blur-md hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group h-full flex flex-col justify-between"
+                className="block p-4 sm:p-5 lg:p-6 rounded-2xl border border-foreground/15 bg-background/70 backdrop-blur-md hover:border-primary/50 hover:shadow-lg transition-all active:scale-[0.99] group h-full flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between text-xs font-mono text-foreground/60 uppercase tracking-widest mb-3">
@@ -145,7 +145,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
                     <Navigation className="h-3.5 w-3.5 text-foreground/30 group-hover:text-primary transition-colors shrink-0" />
                   </div>
 
-                  <h3 className="font-serif text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                  <h3 className="font-serif text-base sm:text-lg lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
                     {spot.name}
                   </h3>
 
@@ -154,7 +154,7 @@ export function SpatialAtlasTeaser({ albums = [] }: SpatialAtlasTeaserProps) {
                   </p>
                 </div>
 
-                <div className="mt-5 pt-3.5 border-t border-foreground/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-foreground/60">
+                <div className="mt-4 sm:mt-5 pt-3 sm:pt-3.5 border-t border-foreground/10 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-foreground/60">
                   <span>LAT: {spot.latFormatted}</span>
                   <span>LNG: {spot.lngFormatted}</span>
                 </div>

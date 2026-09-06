@@ -21,7 +21,7 @@ export function HeroShowcase({ featuredAlbums = [] }: HeroShowcaseProps) {
   };
 
   return (
-    <section className="relative w-full border-b border-foreground/10 bg-foreground/[0.01] overflow-hidden pt-16 md:pt-24 pb-8 md:pb-12">
+    <section className="relative w-full border-b border-foreground/10 bg-foreground/[0.01] overflow-hidden pt-8 sm:pt-14 md:pt-20 pb-8 md:pb-12">
       {/* Hairline Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(var(--foreground-rgb),0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(var(--foreground-rgb),0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 
@@ -32,71 +32,66 @@ export function HeroShowcase({ featuredAlbums = [] }: HeroShowcaseProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col sm:flex-row sm:items-center pb-4 justify-between gap-2 border-b border-foreground/10 text-xs font-mono tracking-widest uppercase text-foreground/60"
+          className="flex flex-col sm:flex-row sm:items-center pb-4 justify-between gap-2.5 sm:gap-4 border-b border-foreground/10 text-xs font-mono tracking-widest uppercase text-foreground/60"
         >
           <div className="flex items-center gap-2 text-primary font-bold">
             <Aperture className="h-4 w-4 shrink-0" />
             <span>01 — Visual Journal</span>
           </div>
 
-          <div className="flex items-center gap-2 text-[11px] text-foreground/70">
-            <Radio className="h-3 w-3 text-primary animate-pulse" />
+          <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-foreground/70 flex-wrap">
             <span>Spatial Radar Telemetry</span>
-            <span className="text-foreground/30">•</span>
-            <span className="text-foreground font-semibold bg-foreground/5 px-2 py-0.5 rounded border border-foreground/10">
-              Expedition Index
-            </span>
           </div>
         </motion.div>
 
         {/* Main Grid: Typography & Expedition Radar Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          {/* Left Column: Title & Copy (5 Cols) */}
+          {/* Left Column: Title & Copy (7 Cols on desktop) */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="lg:col-span-7 space-y-6 sm:space-y-8 py-8 sm:py-14 md:py-16"
+            className="lg:col-span-7 space-y-5 sm:space-y-8 py-4 sm:py-10 md:py-14"
           >
-            <div className="space-y-4 sm:space-y-6">
-              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.88] text-foreground">
+            <div className="space-y-3 sm:space-y-5">
+              <h1 className="font-serif text-4xl min-[400px]:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.94] sm:leading-[0.88] text-foreground">
                 Daniel García
                 <br />
                 <span className="opacity-40 font-normal italic">Visual Journal.</span>
               </h1>
 
-              <p className="text-base md:text-lg font-sans text-foreground/75 leading-relaxed max-w-xl pt-1">
-                A personal archive documenting remote landscapes, architectural geometries, and expedition series across volcanic islands and sub-arctic terrain.
+              <p className="text-sm sm:text-base md:text-lg font-sans text-foreground/75 leading-relaxed max-w-xl pt-1">
+                A personal photography collection documenting journeys through wild landscapes, coastal atmospheres, and quiet spaces.
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1 sm:pt-2">
               <button
                 onClick={handleScrollToCollections}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-foreground text-background px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-foreground text-background min-h-[44px] px-6 sm:px-7 py-3.5 sm:py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary hover:text-white active:scale-[0.98] transition-all shadow-md cursor-pointer group"
               >
                 <span>View Collections</span>
-                <ArrowDown className="h-3.5 w-3.5 group-hover:translate-y-1 transition-transform duration-300" />
+                <ArrowDown className="h-3.5 w-3.5 group-hover:translate-y-1 transition-transform duration-300 shrink-0" />
               </button>
 
               <Link
                 href="/destinations"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 border border-foreground/25 hover:border-primary px-7 py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary/5 active:scale-[0.98] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 border border-foreground/25 hover:border-primary min-h-[44px] px-6 sm:px-7 py-3.5 sm:py-4 rounded-full text-xs font-mono uppercase tracking-widest font-semibold hover:bg-primary/5 active:scale-[0.98] transition-all"
               >
-                <Globe className="h-4 w-4 text-foreground/70" />
+                <Globe className="h-4 w-4 text-foreground/70 shrink-0" />
                 <span>Spatial Index</span>
               </Link>
             </div>
           </motion.div>
 
-          {/* Right Column: Exhaustive Expedition Radar Hero (7 Cols) */}
+          {/* Right Column: Exhaustive Expedition Radar Hero (5 Cols on desktop) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:col-span-5 relative flex items-center justify-center w-full py-4 lg:py-16"
+            className="lg:col-span-5 relative flex items-center justify-center w-full py-2 sm:py-6 lg:py-12"
           >
             <ExpeditionRadarHero albums={featuredAlbums} />
           </motion.div>

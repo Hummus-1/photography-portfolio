@@ -88,8 +88,8 @@ export function HomeView({ featuredAlbums }: HomeViewProps) {
       {/* Homepage Sections passing hoverEffect */}
       <HeroShowcase featuredAlbums={featuredAlbums} hoverEffect={hoverEffect} />
       <HomeCollections albums={featuredAlbums} hoverEffect={hoverEffect} />
-      <SpatialAtlasTeaser albums={featuredAlbums} />
-      <CuratorialManifesto />
+      {/* <SpatialAtlasTeaser albums={featuredAlbums} />
+      <CuratorialManifesto /> */}
     </div>
   );
 }
