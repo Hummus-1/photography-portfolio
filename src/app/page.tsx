@@ -2,7 +2,6 @@
 
 import { supabase } from "@/lib/supabase";
 import { Navigation } from "@/components/navigation";
-import { MOCK_ALBUMS_LIST } from "@/lib/mock-data";
 import { HeroShowcase } from "@/components/home/hero-showcase";
 import { HomeCollections, AlbumWithPhotos } from "@/components/home/home-collections";
 import { SpatialAtlasTeaser } from "@/components/home/spatial-atlas-teaser";
@@ -60,14 +59,14 @@ async function getFeaturedAlbums(): Promise<AlbumWithPhotos[]> {
         .limit(6);
 
       if (!fallbackData || fallbackData.length === 0) {
-        return MOCK_ALBUMS_LIST as AlbumWithPhotos[];
+        return [];
       }
       return processAlbumPhotos(fallbackData);
     }
 
     return processAlbumPhotos(data);
   } catch {
-    return MOCK_ALBUMS_LIST as AlbumWithPhotos[];
+    return [];
   }
 }
 

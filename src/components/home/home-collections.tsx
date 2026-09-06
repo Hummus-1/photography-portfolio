@@ -89,6 +89,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
             return (
               <motion.div
                 key={album.id}
+                id={`album-${album.slug || album.id}`}
                 initial={{ opacity: 0, y: 25 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -96,7 +97,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                 style={{
                   "--album-highlight": highlightColor,
                 } as React.CSSProperties}
-                className={`w-full py-20 md:py-28 flex items-center justify-center transition-colors duration-300 relative group/section ${
+                className={`w-full py-20 md:py-28 flex items-center justify-center transition-colors duration-300 relative group/section scroll-mt-20 ${
                   isEven ? "bg-foreground/[0.01]" : "bg-transparent"
                 }`}
               >
