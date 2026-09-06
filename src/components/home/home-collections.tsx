@@ -169,7 +169,7 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                     <div className="pt-4 sm:pt-6 flex flex-wrap items-center justify-between gap-3 border-t border-foreground/10">
                       <Link
                         href={`/album/${album.slug}`}
-                        className="inline-flex items-center gap-2 group/btn min-h-[44px] text-xs font-mono uppercase tracking-widest font-semibold border-b-2 border-foreground/30 hover:border-[var(--album-highlight)] hover:text-[var(--album-highlight)] pb-1 transition-all duration-300"
+                        className="inline-flex items-center gap-2 group/btn text-xs font-mono uppercase tracking-widest font-semibold border-b-2 border-foreground/30 hover:border-[var(--album-highlight)] hover:text-[var(--album-highlight)] pb-1 transition-all duration-300"
                       >
                         <span>Open Series</span>
                         <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform duration-300 shrink-0" />

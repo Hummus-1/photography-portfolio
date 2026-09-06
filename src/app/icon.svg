@@ -4,14 +4,14 @@
     .vf-border { stroke: rgba(240, 237, 230, 0.2); stroke-width: 1px; fill: none; }
     .vf-guide { stroke: #f0ede6; opacity: 0.35; }
     .vf-reticle { stroke: #ffffff; }
-    .vf-dot { fill: #e67e3a; }
+    .vf-dot { fill: #6184D8; }
     
     @media (prefers-color-scheme: light) {
       .vf-bg { fill: #151618; }
       .vf-border { stroke: rgba(255, 255, 255, 0.2); }
       .vf-guide { stroke: #faf8f5; opacity: 0.35; }
       .vf-reticle { stroke: #ffffff; }
-      .vf-dot { fill: #d96b27; }
+      .vf-dot { fill: #6184D8; }
     }
   </style>
 
