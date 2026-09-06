@@ -57,7 +57,7 @@ export function HeroShowcase({ featuredAlbums = [] }: HeroShowcaseProps) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="lg:col-span-5 space-y-6 sm:space-y-8 py-8 sm:py-14 md:py-16"
+            className="lg:col-span-7 space-y-6 sm:space-y-8 py-8 sm:py-14 md:py-16"
           >
             <div className="space-y-4 sm:space-y-6">
               <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.88] text-foreground">
@@ -96,7 +96,7 @@ export function HeroShowcase({ featuredAlbums = [] }: HeroShowcaseProps) {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:col-span-7 relative flex items-center justify-center w-full py-4 lg:py-8"
+            className="lg:col-span-5 relative flex items-center justify-center w-full py-4 lg:py-16"
           >
             <ExpeditionRadarHero albums={featuredAlbums} />
           </motion.div>

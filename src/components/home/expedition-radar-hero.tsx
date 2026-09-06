@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Compass, Play, Pause, ZoomIn, ZoomOut, ArrowDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Compass } from "lucide-react";
 import { Album, Photo } from "@/lib/types";
 import { selectBestAccentColor } from "@/lib/color-utils";
 
@@ -10,96 +10,46 @@ export interface ExpeditionRadarHeroProps {
   albums?: (Album & { photos?: Photo[] })[];
 }
 
-export interface RealRadarWaypoint {
+export interface SimulatedRadarWaypoint {
   id: string;
   name: string;
   region: string;
   country: string;
   countryCode: string;
-  coords: string;
-  lat: number | null;
-  lng: number | null;
-  hasGps: boolean;
   bearing: number; // degrees 0-360
-  distanceKm: number; // distance in km from dynamic centroid
-  photoUrl: string | null;
+  radiusPercent: number; // distance percentage from center (20% - 41%)
+  x: number; // percentage X on radar
+  y: number; // percentage Y on radar
   albumSlug: string;
-  palette: string[];
   accentColor: string;
-  photoCount: number;
 }
 
-// Calculate spherical distance (Haversine) and initial bearing from reference center
-function calculateBearingAndDistance(
-  targetLat: number,
-  targetLng: number,
-  refLat: number,
-  refLng: number
-): { bearing: number; distanceKm: number } {
-  const dLat = ((targetLat - refLat) * Math.PI) / 180;
-  const dLng = ((targetLng - refLng) * Math.PI) / 180;
-  const lat1 = (refLat * Math.PI) / 180;
-  const lat2 = (targetLat * Math.PI) / 180;
-
-  // Haversine formula
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distanceKm = Math.round(6371 * c);
-
-  // Initial geodesic bearing
-  const y = Math.sin(dLng) * Math.cos(lat2);
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
-  let brng = (Math.atan2(y, x) * 180) / Math.PI;
-  brng = (brng + 360) % 360;
-
-  return { bearing: Math.round(brng), distanceKm };
-}
-
-// Format coordinates into standard latitude / longitude display
-function formatCoords(lat: number | null, lng: number | null): string {
-  if (lat == null || lng == null) return "GPS Pending";
-  const latStr = lat >= 0 ? `${lat.toFixed(2)}°N` : `${Math.abs(lat).toFixed(2)}°S`;
-  const lngStr = lng >= 0 ? `${lng.toFixed(2)}°E` : `${Math.abs(lng).toFixed(2)}°W`;
-  return `${latStr} · ${lngStr}`;
-}
+// Alternating radial depth pattern guaranteeing staggered distribution across range rings
+const RADIUS_PATTERN = [24, 38, 20, 35, 27, 41];
 
 export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
-  // 1. Extract real data directly from published database albums
-  const { waypoints, centroidLat, centroidLng, maxRealDistance } = useMemo(() => {
-    if (!albums || albums.length === 0) {
-      return { waypoints: [], centroidLat: 0, centroidLng: 0, maxRealDistance: 1000 };
-    }
+  // 1. Generate collision-free simulated radial distribution for published database albums
+  const waypoints: SimulatedRadarWaypoint[] = useMemo(() => {
+    if (!albums || albums.length === 0) return [];
 
-    // Step A: Extract all coordinate points to calculate dynamic centroid
-    const validGpsList: { lat: number; lng: number }[] = [];
+    const total = albums.length;
+    // Step angle evenly distributed around 360° with a starting offset
+    const angleStep = 360 / total;
 
-    const rawParsed = albums.map((alb, index) => {
-      // Find GPS from album fields or location_path or photos EXIF
+    return albums.map((alb, index) => {
+      // Distinct angle for each album guaranteeing angular separation
+      const angle = (index * angleStep + 38) % 360;
+      // Staggered radius from pattern
+      const radiusPercent = RADIUS_PATTERN[index % RADIUS_PATTERN.length];
+
+      // Cartesian coordinates on the radar disk (origin 50%, 50%)
+      const angleRad = ((angle - 90) * Math.PI) / 180; // 0° is North (top)
+      const x = 50 + radiusPercent * Math.cos(angleRad);
+      const y = 50 + radiusPercent * Math.sin(angleRad);
+
       const locPath = alb.location_path || [];
-      const spotNode = locPath.length > 0 ? locPath[locPath.length - 1] : null;
       const countryNode = locPath.find((n) => n.type === "country" || n.type === "sub-region");
       const regionNode = locPath.find((n) => n.type === "region" || n.type === "island");
-
-      // Extract latitude & longitude
-      let lat: number | null = alb.lat ?? spotNode?.lat ?? regionNode?.lat ?? countryNode?.lat ?? null;
-      let lng: number | null = alb.lng ?? spotNode?.lng ?? regionNode?.lng ?? countryNode?.lng ?? null;
-
-      // Fallback to photo EXIF GPS if album lacks coordinates
-      if ((lat == null || lng == null) && alb.photos && alb.photos.length > 0) {
-        for (const p of alb.photos) {
-          if (p.exif?.gps?.latitude != null && p.exif?.gps?.longitude != null) {
-            lat = p.exif.gps.latitude;
-            lng = p.exif.gps.longitude;
-            break;
-          }
-        }
-      }
-
-      if (lat != null && lng != null) {
-        validGpsList.push({ lat, lng });
-      }
 
       const coverPhoto = alb.photos?.find((p) => p.url === alb.cover_image_url) || alb.photos?.[0];
       const palette =
@@ -110,113 +60,36 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
           : ["#6184D8", "#1f2937", "#9ca3af"];
 
       const accentColor = selectBestAccentColor(palette, "#6184D8", alb.custom_hero_color);
-
-      const spotName = spotNode ? spotNode.name : alb.location || alb.title;
       const countryName = countryNode ? countryNode.name : alb.country_code || "Expedition";
       const countryCode = alb.country_code || countryNode?.iso_code || "EX";
 
       return {
-        alb,
-        index,
-        lat,
-        lng,
-        hasGps: lat != null && lng != null,
-        spotName,
-        regionName: regionNode ? regionNode.name : alb.location || countryName,
-        countryName,
+        id: alb.id,
+        name: alb.title,
+        region: regionNode ? regionNode.name : alb.location || countryName,
+        country: countryName,
         countryCode,
-        coverPhotoUrl: alb.cover_image_url || coverPhoto?.url || coverPhoto?.thumbnail_url || null,
-        palette,
+        bearing: Math.round(angle),
+        radiusPercent,
+        x,
+        y,
+        albumSlug: alb.slug || alb.id,
         accentColor,
-        photoCount: alb.photos?.length || 0,
       };
     });
-
-    // Step B: Compute dynamic centroid (mean latitude & longitude of real user data)
-    let cLat = 0;
-    let cLng = 0;
-    if (validGpsList.length > 0) {
-      cLat = validGpsList.reduce((sum, p) => sum + p.lat, 0) / validGpsList.length;
-      cLng = validGpsList.reduce((sum, p) => sum + p.lng, 0) / validGpsList.length;
-    }
-
-    // Step C: Calculate real bearing and distance relative to centroid
-    let maxDist = 500;
-
-    const list: RealRadarWaypoint[] = rawParsed.map((item) => {
-      let bearing = 0;
-      let distanceKm = 100;
-
-      if (item.lat != null && item.lng != null && validGpsList.length > 0) {
-        const calc = calculateBearingAndDistance(item.lat, item.lng, cLat, cLng);
-        bearing = calc.bearing;
-        distanceKm = calc.distanceKm;
-        if (distanceKm > maxDist) maxDist = distanceKm;
-      } else {
-        // Deterministic radial distribution for albums with coordinates pending
-        bearing = (item.index * (360 / Math.max(rawParsed.length, 1))) % 360;
-        distanceKm = 400 + (item.index % 3) * 250;
-      }
-
-      return {
-        id: item.alb.id,
-        name: item.alb.title,
-        region: item.regionName,
-        country: item.countryName,
-        countryCode: item.countryCode,
-        coords: formatCoords(item.lat, item.lng),
-        lat: item.lat,
-        lng: item.lng,
-        hasGps: item.hasGps,
-        bearing,
-        distanceKm: Math.max(50, distanceKm),
-        photoUrl: item.coverPhotoUrl,
-        albumSlug: item.alb.slug || item.alb.id,
-        palette: item.palette.slice(0, 4),
-        accentColor: item.accentColor,
-        photoCount: item.photoCount,
-      };
-    });
-
-    return {
-      waypoints: list,
-      centroidLat: cLat,
-      centroidLng: cLng,
-      maxRealDistance: Math.max(maxDist, 1000),
-    };
   }, [albums]);
 
   const [activeWaypointId, setActiveWaypointId] = useState<string | null>(null);
-  const [isScanning, setIsScanning] = useState<boolean>(true);
   const [sweepAngle, setSweepAngle] = useState<number>(0);
-  const [zoomMultiplier, setZoomMultiplier] = useState<number>(1);
-  const [mouseBearing, setMouseBearing] = useState<number | null>(null);
-  const [mouseRange, setMouseRange] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const radarDiskRef = useRef<HTMLDivElement>(null);
 
-  // Set default active waypoint
-  useEffect(() => {
-    if (waypoints.length > 0 && !activeWaypointId) {
-      setActiveWaypointId(waypoints[0].id);
-    }
-  }, [waypoints, activeWaypointId]);
-
-  // Check prefers-reduced-motion to pause sweep by default if requested
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches) {
-      setIsScanning(false);
-    }
-  }, []);
-
-  const activeWaypoint = waypoints.find((w) => w.id === activeWaypointId) || waypoints[0] || null;
+  const activeWaypoint = waypoints.find((w) => w.id === activeWaypointId) || null;
+  const currentColor = activeWaypoint?.accentColor || "var(--primary)";
 
   // Continuous 360° Radar Sweep RAF Loop
   useEffect(() => {
-    if (!isScanning) return;
     let animId: number;
     let lastTime = performance.now();
 
@@ -229,71 +102,19 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, [isScanning]);
-
-  // Scaled radar range
-  const maxRangeKm = Math.round(maxRealDistance * zoomMultiplier * 1.15);
-
-  // Cartesian coordinate projection onto the radar disc (50%, 50% origin)
-  // Ensures minimum radius of 14% so blips never get covered by center datum hub
-  const getWaypointCoordinates = useCallback(
-    (wp: RealRadarWaypoint) => {
-      const clampedDist = Math.min(wp.distanceKm, maxRangeKm);
-      const normalizedRatio = clampedDist / maxRangeKm;
-      const radiusPercent = 14 + normalizedRatio * 29;
-      const angleRad = ((wp.bearing - 90) * Math.PI) / 180; // 0° is North (top)
-      const x = 50 + radiusPercent * Math.cos(angleRad);
-      const y = 50 + radiusPercent * Math.sin(angleRad);
-      return { x, y, radiusPercent };
-    },
-    [maxRangeKm]
-  );
+  }, []);
 
   // Check if sweep beam is currently scanning over this waypoint
   const isBeamOverWaypoint = useCallback(
     (wpBearing: number) => {
-      if (!isScanning) return false;
       const diff = Math.abs(((sweepAngle - wpBearing + 180) % 360) - 180);
       return diff < 16;
     },
-    [isScanning, sweepAngle]
+    [sweepAngle]
   );
 
-  const activeCoord = activeWaypoint ? getWaypointCoordinates(activeWaypoint) : null;
-
-  // Interactive mouse tracking with strict boundary clamping
-  const handleRadarMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!radarDiskRef.current) return;
-    const rect = radarDiskRef.current.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = e.clientX - cx;
-    const dy = e.clientY - cy;
-    const distPx = Math.sqrt(dx * dx + dy * dy);
-    const maxRadiusPx = rect.width / 2;
-
-    // If mouse is outside the circular radar boundary, clear telemetry
-    if (distPx > maxRadiusPx) {
-      setMouseBearing(null);
-      setMouseRange(null);
-      return;
-    }
-
-    let deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
-    if (deg < 0) deg += 360;
-
-    const estimatedKm = Math.round((distPx / maxRadiusPx) * maxRangeKm);
-    setMouseBearing(Math.round(deg));
-    setMouseRange(Math.min(estimatedKm, maxRangeKm));
-  };
-
-  const handleRadarMouseLeave = () => {
-    setMouseBearing(null);
-    setMouseRange(null);
-  };
-
   // Scroll to the album position on page when clicked
-  const handleWaypointClick = (wp: RealRadarWaypoint) => {
+  const handleWaypointClick = (wp: SimulatedRadarWaypoint) => {
     setActiveWaypointId(wp.id);
 
     if (typeof window === "undefined") return;
@@ -340,30 +161,24 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
       ref={containerRef}
       role="region"
       aria-label="Expedition Spatial Radar Telemetry"
-      className="relative w-full max-w-xl mx-auto flex flex-col items-center select-none py-2 space-y-4 focus:outline-none"
+      className="relative w-full max-w-xl mx-auto flex flex-col items-center select-none py-2 focus:outline-none"
     >
-      {/* 1. Primary Darkroom Radar Instrument Housing */}
+      {/* Primary Darkroom Radar Instrument Housing */}
       <div
         ref={radarDiskRef}
-        onMouseMove={handleRadarMouseMove}
-        onMouseLeave={handleRadarMouseLeave}
         className="relative w-[340px] h-[340px] sm:w-[410px] sm:h-[410px] md:w-[450px] md:h-[450px] rounded-full border border-foreground/20 bg-background/95 shadow-2xl backdrop-blur-2xl flex items-center justify-center overflow-hidden transition-all duration-500 group"
       >
-        {/* Ambient Phosphor Glow matching active album's extracted color */}
+        {/* Ambient Phosphor Glow matching active album's extracted color or primary */}
         <div
           className="absolute inset-0 rounded-full opacity-25 pointer-events-none transition-colors duration-700"
           style={{
-            background: `radial-gradient(circle at center, ${activeWaypoint?.accentColor || "var(--primary)"} 0%, transparent 70%)`,
+            background: `radial-gradient(circle at center, ${currentColor} 0%, transparent 70%)`,
           }}
-        />
+        />x
 
-        {/* Concentric Polar Range Rings */}
+        {/* Concentric Polar Range Rings (Clean, without scale text) */}
         <div className="absolute w-[28%] h-[28%] rounded-full border border-foreground/15 border-dashed pointer-events-none" />
-        <div className="absolute w-[56%] h-[56%] rounded-full border border-foreground/15 pointer-events-none">
-          <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-mono text-foreground/50 tracking-wider">
-            {Math.round(maxRangeKm * 0.5)} KM
-          </span>
-        </div>
+        <div className="absolute w-[56%] h-[56%] rounded-full border border-foreground/15 pointer-events-none" />
 
         {/* Orthographic Hairline Crosshairs (LAT / LON Grid Axes) */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -373,20 +188,20 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
           <div className="absolute w-full h-px bg-foreground/[0.04] -rotate-45" />
         </div>
 
-        {/* Topographic Contour Iso-Elevation Lines */}
+        {/* Topographic Contour Wavy Elevation Lines */}
         <svg
-          className="absolute inset-0 w-full h-full opacity-25 pointer-events-none"
+          className="absolute inset-0 w-full h-full opacity-25 pointer-events-none text-foreground"
           viewBox="0 0 450 450"
           fill="none"
           stroke="currentColor"
         >
-          <path d="M 60,225 Q 130,140 225,180 T 390,160" strokeWidth="0.75" strokeDasharray="3 3" />
-          <path d="M 80,280 Q 160,210 250,260 T 400,240" strokeWidth="0.75" />
-          <path d="M 50,170 Q 130,90 225,120 T 380,100" strokeWidth="0.75" strokeDasharray="4 2" />
-          <path d="M 100,350 Q 180,300 270,340 T 370,310" strokeWidth="0.75" />
+          <path d="M 60,225 Q 130,140 225,180 T 390,160" strokeWidth="0.85" strokeDasharray="4 3" />
+          <path d="M 80,280 Q 160,210 250,260 T 400,240" strokeWidth="0.85" />
+          <path d="M 50,170 Q 130,90 225,120 T 380,100" strokeWidth="0.85" strokeDasharray="5 3" />
+          <path d="M 100,350 Q 180,300 270,340 T 370,310" strokeWidth="0.85" />
         </svg>
 
-        {/* 360° Compass Azimuth Milled Bezel, Degree Ticks & Integrated Clean Cardinal Badges */}
+        {/* 360° Compass Azimuth Milled Bezel & Cardinal Badges in Main Color */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 450 450">
           {/* Compass Bezel Ticks */}
           {Array.from({ length: 72 }).map((_, i) => {
@@ -395,7 +210,6 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
             const isMajor = angle % 30 === 0;
             const rad = ((angle - 90) * Math.PI) / 180;
             const rOuter = 221;
-            // Shorter cardinal ticks to avoid badge collisions
             const rInner = isCardinal ? 215 : isMajor ? 210 : 215;
             const x1 = 225 + rOuter * Math.cos(rad);
             const y1 = 225 + rOuter * Math.sin(rad);
@@ -416,7 +230,7 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
             );
           })}
 
-          {/* Integrated North Cardinal Badge (000° N) */}
+          {/* North Cardinal Badge (000° N) */}
           <g transform="translate(225, 23)">
             <rect
               x="-24"
@@ -425,9 +239,9 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               height="16"
               rx="4"
               fill="var(--background)"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              className="text-foreground/20"
+              stroke="var(--primary)"
+              strokeWidth="0.9"
+              strokeOpacity="0.45"
             />
             <text
               x="0"
@@ -443,7 +257,7 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
             </text>
           </g>
 
-          {/* Integrated East Cardinal Badge (090° E) */}
+          {/* East Cardinal Badge (090° E) */}
           <g transform="translate(424, 225)">
             <rect
               x="-23"
@@ -452,9 +266,9 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               height="16"
               rx="4"
               fill="var(--background)"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              className="text-foreground/20"
+              stroke="var(--primary)"
+              strokeWidth="0.9"
+              strokeOpacity="0.45"
             />
             <text
               x="0"
@@ -463,14 +277,14 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               fontSize="8.5"
               fontFamily="monospace"
               fontWeight="bold"
-              className="fill-foreground/80"
+              fill="var(--primary)"
               letterSpacing="0.8"
             >
               090° E
             </text>
           </g>
 
-          {/* Integrated South Cardinal Badge (180° S) */}
+          {/* South Cardinal Badge (180° S) */}
           <g transform="translate(225, 427)">
             <rect
               x="-24"
@@ -479,9 +293,9 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               height="16"
               rx="4"
               fill="var(--background)"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              className="text-foreground/20"
+              stroke="var(--primary)"
+              strokeWidth="0.9"
+              strokeOpacity="0.45"
             />
             <text
               x="0"
@@ -490,14 +304,14 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               fontSize="8.5"
               fontFamily="monospace"
               fontWeight="bold"
-              className="fill-foreground/80"
+              fill="var(--primary)"
               letterSpacing="0.8"
             >
               180° S
             </text>
           </g>
 
-          {/* Integrated West Cardinal Badge (270° W) */}
+          {/* West Cardinal Badge (270° W) */}
           <g transform="translate(26, 225)">
             <rect
               x="-23"
@@ -506,9 +320,9 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               height="16"
               rx="4"
               fill="var(--background)"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              className="text-foreground/20"
+              stroke="var(--primary)"
+              strokeWidth="0.9"
+              strokeOpacity="0.45"
             />
             <text
               x="0"
@@ -517,7 +331,7 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               fontSize="8.5"
               fontFamily="monospace"
               fontWeight="bold"
-              className="fill-foreground/80"
+              fill="var(--primary)"
               letterSpacing="0.8"
             >
               270° W
@@ -525,7 +339,7 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
           </g>
         </svg>
 
-        {/* 2. Rotating Radar Sweep Beam */}
+        {/* Rotating Radar Sweep Beam */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -549,27 +363,22 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
           />
         </div>
 
-        {/* 3. Dynamic Center Centroid Hub */}
+        {/* Dynamic Center Hub */}
         <div className="absolute w-7 h-7 rounded-full border border-foreground/30 bg-background/90 shadow-md flex items-center justify-center z-20 pointer-events-none">
           <div
             className="w-2 h-2 rounded-full transition-colors duration-500"
             style={{ backgroundColor: activeWaypoint?.accentColor || "var(--primary)" }}
           />
-          <div className="absolute -bottom-4 text-[7px] font-mono uppercase tracking-widest text-foreground/50 whitespace-nowrap">
-            {centroidLat !== 0
-              ? `${centroidLat.toFixed(1)}°N ${Math.abs(centroidLng).toFixed(1)}°W`
-              : "EXPEDITION HUB"}
-          </div>
         </div>
 
-        {/* 4. Active Target Vector Line */}
-        {activeCoord && activeWaypoint && (
+        {/* Active Target Vector Line */}
+        {activeWaypoint && (
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
             <line
               x1="50%"
               y1="50%"
-              x2={`${activeCoord.x}%`}
-              y2={`${activeCoord.y}%`}
+              x2={`${activeWaypoint.x}%`}
+              y2={`${activeWaypoint.y}%`}
               stroke={activeWaypoint.accentColor}
               strokeWidth="1.2"
               strokeDasharray="4 3"
@@ -578,15 +387,14 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
           </svg>
         )}
 
-        {/* 5. Real Waypoint Nodes with Overflow-Safe Label Anchor Geometry */}
+        {/* Separated Collision-Free Waypoint Nodes */}
         {waypoints.map((wp) => {
           const isSelected = activeWaypoint?.id === wp.id;
           const isSwept = isBeamOverWaypoint(wp.bearing);
-          const coord = getWaypointCoordinates(wp);
 
-          // Smart label placement: flips horizontally and vertically to prevent clipping inside the circle
-          const isRightHalf = coord.x > 58;
-          const isBottomHalf = coord.y > 68;
+          // Smart label placement: flips horizontally and vertically to prevent clipping
+          const isRightHalf = wp.x > 54;
+          const isBottomHalf = wp.y > 65;
 
           return (
             <button
@@ -594,8 +402,8 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
               onClick={() => handleWaypointClick(wp)}
               onMouseEnter={() => setActiveWaypointId(wp.id)}
               style={{
-                left: `${coord.x}%`,
-                top: `${coord.y}%`,
+                left: `${wp.x}%`,
+                top: `${wp.y}%`,
               }}
               className="absolute -translate-x-1/2 -translate-y-1/2 z-30 group cursor-pointer p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
               aria-label={`Jump to collection: ${wp.name}`}
@@ -613,7 +421,7 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
                 {/* Target Lock Reticle Brackets on Active Selection */}
                 {isSelected && (
                   <motion.div
-                    layoutId="radarTargetBracketReal"
+                    layoutId="radarTargetBracketSim"
                     className="absolute -inset-2 pointer-events-none"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   >
@@ -655,21 +463,32 @@ export function ExpeditionRadarHero({ albums = [] }: ExpeditionRadarHeroProps) {
                   />
                 </div>
 
-                {/* Overflow-Safe Dynamic Label */}
-                <div
-                  className={`absolute ${
-                    isRightHalf ? "right-5 text-right" : "left-5 text-left"
-                  } ${
-                    isBottomHalf ? "bottom-1" : "top-1/2 -translate-y-1/2"
-                  } text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded transition-all whitespace-nowrap shadow-sm pointer-events-none ${
-                    isSelected
-                      ? "bg-background/95 text-foreground border border-foreground/20 font-semibold opacity-100 scale-100 z-40"
-                      : "opacity-60 group-hover:opacity-100 bg-background/80 text-foreground/70 border border-foreground/10 hidden sm:block"
-                  }`}
-                >
-                  <span>{wp.name}</span>
-                  <span className="text-foreground/40 ml-1">· {wp.countryCode}</span>
-                </div>
+                {/* ONLY show the title of the selected album */}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: isBottomHalf ? 6 : -6 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.2 }}
+                      className={`absolute ${
+                        isRightHalf ? "right-6 text-right" : "left-6 text-left"
+                      } ${
+                        isBottomHalf ? "bottom-0" : "top-1/2 -translate-y-1/2"
+                      } text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-background/95 text-foreground border border-foreground/20 font-semibold shadow-lg z-40 whitespace-nowrap pointer-events-none flex items-center gap-1.5`}
+                      style={{
+                        borderColor: `${wp.accentColor}70`,
+                      }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full animate-pulse"
+                        style={{ backgroundColor: wp.accentColor }}
+                      />
+                      <span>{wp.name}</span>
+                      <span className="text-foreground/40 font-normal">· {wp.countryCode}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </button>
           );
