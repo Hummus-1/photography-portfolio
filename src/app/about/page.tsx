@@ -81,7 +81,8 @@ export default function AboutPage() {
                     src="/about-portrait.jpg"
                     alt="Daniel García portrait"
                     fill
-                    sizes="(max-width: 1024px) 100vw, 550px"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1200px"
+                    quality={90}
                     priority
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
                   />
