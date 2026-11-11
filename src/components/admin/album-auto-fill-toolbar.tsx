@@ -10,17 +10,23 @@ import { Album } from "@/lib/types";
 
 import { EditAlbumDialog } from "./edit-album-dialog";
 import { ThinkingOrb } from "./thinking-orb";
+import { CurateLayoutDialog } from "./curate-layout-dialog";
+import { Photo } from "@/lib/types";
 
 interface AlbumAutoFillToolbarProps {
   album: Album;
   photosCount: number;
+  photos?: Photo[];
   onAlbumUpdated: (updatedAlbum: Album) => void;
+  onPhotosUpdated?: (updatedPhotos: Photo[]) => void;
 }
 
 export function AlbumAutoFillToolbar({
   album,
   photosCount,
+  photos = [],
   onAlbumUpdated,
+  onPhotosUpdated,
 }: AlbumAutoFillToolbarProps) {
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<{
@@ -147,6 +153,19 @@ export function AlbumAutoFillToolbar({
             album={album}
             onAlbumUpdated={onAlbumUpdated}
           />
+
+          {photos && photos.length > 0 && (
+            <CurateLayoutDialog
+              album={album}
+              photos={photos}
+              onLayoutApplied={(newPhotos, newCoverUrl) => {
+                onPhotosUpdated?.(newPhotos);
+                if (newCoverUrl) {
+                  onAlbumUpdated({ ...album, cover_image_url: newCoverUrl });
+                }
+              }}
+            />
+          )}
 
           <Button
             size="sm"

@@ -438,7 +438,11 @@ export default function AdminPage() {
               <AlbumAutoFillToolbar
                 album={activeAlbum}
                 photosCount={photos.length}
+                photos={photos}
                 onAlbumUpdated={handleAlbumUpdated}
+                onPhotosUpdated={(updatedPhotos) => {
+                  setPhotos(updatedPhotos);
+                }}
               />
 
               {/* Drag & Drop Image Uploader */}

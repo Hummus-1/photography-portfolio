@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { ThinkingOrb } from "./thinking-orb";
+import { CurateLayoutDialog } from "./curate-layout-dialog";
 
 interface EditorialGroupEditorProps {
   album: Album;
@@ -405,6 +406,20 @@ export function EditorialGroupEditor({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* AI Curate Layout Dialog */}
+          <CurateLayoutDialog
+            album={album}
+            photos={photos}
+            onLayoutApplied={(newPhotos, newCoverUrl) => {
+              isInternalUpdateRef.current = true;
+              setPhotos(newPhotos);
+              if (newCoverUrl) {
+                onSetCoverPhoto(newCoverUrl);
+              }
+              onSaveSuccess?.(newPhotos);
+            }}
+          />
+
           {/* View Mode Switcher */}
           <div className="flex items-center p-0.5 bg-black/40 border border-white/10">
             <button
