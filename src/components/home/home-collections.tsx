@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Calendar, ArrowRight, Images, Sparkles } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Images } from "lucide-react";
 import { Album, Photo } from "@/lib/types";
 import { ColorPalettePill } from "@/components/color-palette-pill";
 import { selectBestAccentColor } from "@/lib/color-utils";
@@ -19,7 +19,7 @@ interface HomeCollectionsProps {
   hoverEffect?: HoverEffectMode;
 }
 
-export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectionsProps) {
+export function HomeCollections({ albums }: HomeCollectionsProps) {
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return "Date pending";
     try {
@@ -192,28 +192,31 @@ export function HomeCollections({ albums, hoverEffect = "focus" }: HomeCollectio
                     <div className="p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border border-foreground/15 bg-background/80 shadow-xl backdrop-blur-md transition-all duration-500 group-hover/section:border-[var(--album-highlight)]/60 group-hover/section:shadow-[0_0_45px_-5px_var(--album-highlight)]">
                       <Link
                         href={`/album/${album.slug}`}
-                        className="block relative overflow-hidden group/img aspect-[16/10] bg-foreground/5 rounded-xl sm:rounded-2xl"
+                        className="block relative overflow-hidden group/img rounded-xl sm:rounded-2xl"
                       >
-                        {/* Pristine Unaltered Default Image -> Subtly Enriched on Hover */}
-                        <Image
+                        <ProgressiveImage
                           src={album.cover_image_url || "https://images.unsplash.com/photo-1517783999520-f068d7431a60?auto=format&fit=crop&q=80&w=1600"}
+                          thumbnailSrc={album.photos?.[0]?.thumbnail_url}
+                          dominantColor={album.cover_color_palette?.[0] || album.photos?.[0]?.color_palette?.[0]}
                           alt={album.title}
-                          fill
+                          aspectRatio="16/10"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 850px"
                           priority={index === 0}
-                          className="object-cover scale-100 group-hover/img:scale-[1.02] group-hover/img:saturate-[1.12] group-hover/img:contrast-[1.05] transition-all duration-700 ease-out"
-                        />
+                          hoverEffect="editorial"
+                          containerClassName="rounded-xl sm:rounded-2xl"
+                          className="rounded-xl sm:rounded-2xl"
+                        >
+                          {/* Rangefinder Viewfinder 35mm Reticle Brackets */}
+                          <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
+                          <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
+                          <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
+                          <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
 
-                        {/* Rangefinder Viewfinder 35mm Reticle Brackets */}
-                        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
-                        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:translate-y-1 pointer-events-none" />
-                        <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-l-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
-                        <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-r-2 border-[var(--album-highlight)] opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:-translate-x-1 group-hover/img:-translate-y-1 pointer-events-none" />
-
-                        {/* Real Photo EXIF Spec Badge */}
-                        <div className="absolute top-2.5 sm:top-3 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 text-[8px] sm:text-[9px] font-mono tracking-widest text-white/90 bg-black/80 px-2 sm:px-2.5 py-0.5 rounded border border-white/20 uppercase pointer-events-none max-w-[90%] truncate">
-                          {exifSpec}
-                        </div>
+                          {/* Real Photo EXIF Spec Badge */}
+                          <div className="absolute top-2.5 sm:top-3 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 text-[8px] sm:text-[9px] font-mono tracking-widest text-white/90 bg-black/80 px-2 sm:px-2.5 py-0.5 rounded border border-white/20 uppercase pointer-events-none max-w-[90%] truncate">
+                            {exifSpec}
+                          </div>
+                        </ProgressiveImage>
                       </Link>
                     </div>
 

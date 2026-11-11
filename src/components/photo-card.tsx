@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Sliders, Camera, MapPin, Maximize2 } from "lucide-react";
 import { Album, Photo } from "@/lib/types";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 
 interface PhotoCardProps {
   photo: Photo;
@@ -34,69 +33,73 @@ export function PhotoCard({ photo, album, index, id, innerRef, onSelect, fillWid
         <div
           ref={innerRef}
           id={id}
-          data-protected-image
-          className="relative overflow-hidden rounded-3xl bg-foreground/5 w-full border border-foreground/10 shadow-lg hover:shadow-2xl transition-all duration-500 select-none"
+          className="relative overflow-hidden rounded-3xl w-full border border-foreground/10 shadow-lg hover:shadow-2xl transition-all duration-500 select-none"
         >
-          <Image
+          <ProgressiveImage
             src={photo.url}
+            thumbnailSrc={photo.thumbnail_url}
+            dominantColor={photo.color_palette?.[0]}
             alt={photo.location || album.title}
+            aspectRatio={photo.aspect_ratio || (photo.width && photo.height ? photo.width / photo.height : 1.5)}
             width={photo.width}
             height={photo.height}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
             priority={index < 2}
-            draggable={false}
-            className="w-full h-auto block transition-transform duration-700 ease-out group-hover:scale-[1.01] pointer-events-none rounded-3xl select-none"
-          />
-
-          {/* Elegant Dark/Light Glassmorphism overlay showing EXIF + Colors on Hover */}
-          <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8">
-            
-            {/* Location Tag */}
-            {photo.location && (
-              <div className="text-[10px] font-mono tracking-widest uppercase text-foreground/60 mb-2 flex items-center gap-1.5">
-                <MapPin className="h-3 w-3 text-foreground/60" />
-                {photo.location}
-              </div>
-            )}
-
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            variant="breathing"
+            hoverEffect="subtle"
+            containerClassName="rounded-3xl"
+            className="rounded-3xl"
+          >
+            {/* Elegant Dark/Light Glassmorphism overlay showing EXIF + Colors on Hover */}
+            <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8 pointer-events-none">
               
-              {/* EXIF Information */}
-              <div className="space-y-2">
-                {photo.exif.camera && (
-                  <div className="flex items-center gap-2 text-sm font-semibold tracking-wide">
-                    <Camera className="h-4 w-4 opacity-75" />
-                    <span>{photo.exif.camera}</span>
-                    {photo.exif.lens && (
-                      <span className="text-foreground/60 font-normal hidden lg:inline">
-                        • {photo.exif.lens}
-                      </span>
-                    )}
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-xs font-mono text-foreground/70">
-                  <Sliders className="h-3.5 w-3.5 opacity-75" />
-                  <span>
-                    {[
-                      photo.exif.focal_length,
-                      photo.exif.aperture,
-                      photo.exif.shutter,
-                      photo.exif.iso ? `ISO ${photo.exif.iso}` : null,
-                    ]
-                      .filter(Boolean)
-                      .join("  •  ")}
-                  </span>
+              {/* Location Tag */}
+              {photo.location && (
+                <div className="text-[10px] font-mono tracking-widest uppercase text-foreground/60 mb-2 flex items-center gap-1.5">
+                  <MapPin className="h-3 w-3 text-foreground/60" />
+                  {photo.location}
                 </div>
-              </div>
+              )}
 
-              {/* View Full Frame CTA */}
-              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-foreground/60 hover:text-foreground transition-colors">
-                <span>VIEW FRAME</span>
-                <Maximize2 className="h-3.5 w-3.5" />
-              </div>
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                
+                {/* EXIF Information */}
+                <div className="space-y-2">
+                  {photo.exif.camera && (
+                    <div className="flex items-center gap-2 text-sm font-semibold tracking-wide">
+                      <Camera className="h-4 w-4 opacity-75" />
+                      <span>{photo.exif.camera}</span>
+                      {photo.exif.lens && (
+                        <span className="text-foreground/60 font-normal hidden lg:inline">
+                          • {photo.exif.lens}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-xs font-mono text-foreground/70">
+                    <Sliders className="h-3.5 w-3.5 opacity-75" />
+                    <span>
+                      {[
+                        photo.exif.focal_length,
+                        photo.exif.aperture,
+                        photo.exif.shutter,
+                        photo.exif.iso ? `ISO ${photo.exif.iso}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join("  •  ")}
+                    </span>
+                  </div>
+                </div>
 
+                {/* View Full Frame CTA */}
+                <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-foreground/60 hover:text-foreground transition-colors">
+                  <span>VIEW FRAME</span>
+                  <Maximize2 className="h-3.5 w-3.5" />
+                </div>
+
+              </div>
             </div>
-          </div>
+          </ProgressiveImage>
         </div>
 
         {/* Photo labels shown underneath the photo */}

@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 import { createPortal } from "react-dom";
-import Image from "next/image";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import {
   Sliders,
@@ -16,9 +18,6 @@ import {
   Tag,
   Info,
   ChevronUp,
-  ChevronDown,
-  Sparkles,
-  Maximize2,
 } from "lucide-react";
 import { Album, Photo } from "@/lib/types";
 import { ColorPalettePill } from "@/components/color-palette-pill";
@@ -42,14 +41,10 @@ export function Lightbox({
   onIndexChange,
   showScore = false,
 }: LightboxProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [direction, setDirection] = useState<number>(0);
   const [isAutoplay, setIsAutoplay] = useState<boolean>(false);
   const [showMobileInfo, setShowMobileInfo] = useState<boolean>(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -246,19 +241,23 @@ export function Lightbox({
                   exit="exit"
                   className="absolute w-full h-full flex items-center justify-center p-2 sm:p-4 cursor-grab active:cursor-grabbing"
                 >
-                  <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl border border-foreground/15 bg-black/40 max-w-full max-h-full flex items-center justify-center select-none" data-protected-image>
-                    <Image
+                  <div className="relative w-full max-w-5xl max-h-[78dvh] md:max-h-[88dvh] flex items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl border border-foreground/15 bg-black/40 select-none" data-protected-image>
+                    <ProgressiveImage
+                      key={currentPhoto.id || currentPhoto.url}
                       src={currentPhoto.url}
+                      thumbnailSrc={currentPhoto.thumbnail_url}
+                      dominantColor={currentPhoto.color_palette?.[0]}
                       alt={currentPhoto.location || album?.title || "Photo"}
-                      width={currentPhoto.width || 2000}
-                      height={currentPhoto.height || 1500}
-                      className="w-auto h-auto max-w-full max-h-[78dvh] md:max-h-[88dvh] object-contain rounded-2xl sm:rounded-3xl pointer-events-none select-none"
-                      draggable={false}
+                      aspectRatio={currentPhoto.aspect_ratio || (currentPhoto.width && currentPhoto.height ? currentPhoto.width / currentPhoto.height : 1.5)}
+                      variant="fade"
+                      objectFit="contain"
+                      hoverEffect="none"
                       priority
+                      className="rounded-2xl sm:rounded-3xl pointer-events-none select-none"
                     />
                     {/* Transparent Click Shield */}
                     <div 
-                      className="absolute inset-0 z-10 select-none bg-transparent"
+                      className="absolute inset-0 z-20 select-none bg-transparent"
                       onContextMenu={(e) => e.preventDefault()}
                     />
                   </div>
@@ -453,7 +452,7 @@ export function Lightbox({
             {/* Footer Close Action */}
             <div className="mt-6 pt-4 border-t border-foreground/10 flex items-center justify-between text-xs font-mono text-foreground/60">
               <span className="text-[9px] text-foreground/35 uppercase tracking-widest">
-                DANI'S STILLS
+                DANI&apos;S STILLS
               </span>
               <button
                 onClick={onClose}

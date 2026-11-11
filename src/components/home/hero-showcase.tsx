@@ -36,7 +36,7 @@ export function HeroShowcase({ featuredAlbums = [] }: HeroShowcaseProps) {
         >
           <div className="flex items-center gap-2 text-primary font-bold">
             <Aperture className="h-4 w-4 shrink-0" />
-            <span>01 — Visual Journal</span>
+            <span>01 — Prelude</span>
           </div>
 
           <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-foreground/70 flex-wrap">
@@ -55,7 +55,7 @@ export function HeroShowcase({ featuredAlbums = [] }: HeroShowcaseProps) {
             className="lg:col-span-7 space-y-5 sm:space-y-8 py-4 sm:py-10 md:py-14"
           >
             <div className="space-y-3 sm:space-y-5">
-              <h1 className="font-serif text-4xl min-[400px]:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.94] sm:leading-[0.88] text-foreground">
+              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.94] sm:leading-[0.88] text-foreground">
                 Daniel García
                 <br />
                 <span className="opacity-40 font-normal italic">Visual Journal.</span>

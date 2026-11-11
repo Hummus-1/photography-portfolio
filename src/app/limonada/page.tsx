@@ -335,7 +335,7 @@ export default function AdminPage() {
           onDeleteAlbum={handleDeleteAlbum}
         />
 
-        {/* Main Section: Drag & Drop Upload and Interactive Collage Editor */}
+        {/* Main Section: Drag & Drop Upload and Editorial Group Editor */}
         <div className="lg:col-span-3 space-y-8">
           {activeAlbum ? (
             <>

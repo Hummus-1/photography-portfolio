@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Navigation } from "@/components/navigation";
-import Image from "next/image";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 import {
   Camera,
   MapPin,
@@ -75,19 +75,20 @@ export default function AboutPage() {
             <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-28">
               
               {/* Archival Portrait Frame */}
-              <div className="relative p-2 rounded-3xl border border-foreground/15 bg-background/80 shadow-2xl backdrop-blur-md group transition-all duration-500 hover:border-primary/60 hover:ring hover:ring-primary/70 hover:ring-offset-background">
-                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-foreground/5">
-                  <Image
-                    src="/about-portrait.jpg"
-                    alt="Daniel García portrait"
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1200px"
-                    quality={90}
-                    priority
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                  />
-                </div>
-              </div>
+              <ProgressiveImage
+                src="/about-portrait.jpg"
+                blurDataURL="data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAADQAQCdASoQAAsABUB8JZQCdAEOnyEjgAD+00y3G7Hn+7c8MOqe5oC3l9znO77od8iu8vympGMAAA=="
+                dominantColor="#b2bbc7"
+                alt="Daniel García portrait"
+                aspectRatio="4/5"
+                frame="archival"
+                ringColor="#6184D8"
+                glow
+                hoverEffect="subtle"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1200px"
+                quality={90}
+                priority
+              />
 
               {/* Quick Connect & Links Box */}
               <div className="p-5 sm:p-6 rounded-2xl border border-foreground/15 bg-foreground/[0.015] space-y-5">

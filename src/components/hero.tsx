@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useRef, useState } from "react";
+import { ProgressiveImage } from "@/components/ui/progressive-image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Calendar, MapPin, ChevronDown, Aperture, Images } from "lucide-react";
+import { MapPin, ChevronDown, Aperture } from "lucide-react";
 import { Album, Photo } from "@/lib/types";
 import { ColorPalettePill } from "@/components/color-palette-pill";
 import { selectBestAccentColor, selectBestSecondaryColor, getHeroGlowOpacity } from "@/lib/color-utils";
@@ -184,17 +184,18 @@ export function Hero({
             onClick={() => onPhotoSelect(0)}
             className="p-2 rounded-3xl border bg-background/80 shadow-xl backdrop-blur-md transition-all duration-500 w-full aspect-[16/10] overflow-hidden cursor-pointer group/img"
           >
-            <div className="relative w-full h-full rounded-2xl overflow-hidden bg-foreground/5">
-              {/* Cover Photo */}
-              <Image
-                src={displayUrl}
-                alt={album.title}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 850px"
-                className="object-cover scale-100 group-hover/img:scale-[1.02] group-hover/img:saturate-[1.12] group-hover/img:contrast-[1.05] transition-all duration-700 ease-out"
-              />
-
+            <ProgressiveImage
+              src={displayUrl}
+              thumbnailSrc={coverPhoto?.thumbnail_url}
+              dominantColor={accentColor}
+              alt={album.title}
+              aspectRatio="16/10"
+              priority
+              sizes="(max-width: 1024px) 100vw, 850px"
+              hoverEffect="editorial"
+              containerClassName="rounded-2xl"
+              className="rounded-2xl"
+            >
               {/* Rangefinder Viewfinder 35mm Reticle Brackets (Animated on Hover) */}
               <div
                 className="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20 group-hover/img:translate-x-1 group-hover/img:translate-y-1 pointer-events-none"
@@ -217,7 +218,7 @@ export function Hero({
               <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 text-[9px] font-mono tracking-widest text-white/90 bg-black/80 px-2.5 py-0.5 rounded border border-white/20 uppercase pointer-events-none whitespace-nowrap">
                 {exifSpec}
               </div>
-            </div>
+            </ProgressiveImage>
           </motion.div>
 
         </div>
