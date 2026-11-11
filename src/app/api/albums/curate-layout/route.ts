@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Photo, Album } from "@/lib/types";
+import { hexToRgb } from "@/lib/color-utils";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseServiceRole = process.env.SUPABASE_SECRET_KEY || "";
@@ -33,19 +34,112 @@ function tryParseJSON(str: any): any {
   return null;
 }
 
-interface CuratedItem {
+export interface CuratedItem {
   photoId: string;
   groupId: string | null;
   curatorialNote?: string;
 }
 
-interface CuratedPlan {
+export interface RhythmBreakdown {
+  score: number;
+  orientationBalance: "Balanced" | "High Variety" | "Uniform";
+  chromaticHarmony: "Harmonious" | "Dynamic Contrast" | "Monochrome / Neutral";
+  pacingRating: "Exhibition Quality" | "Strong Editorial Flow" | "Sequential";
+}
+
+export interface CuratedPlan {
   coverPhotoId: string;
   coverRationale: string;
   alternativeCoverIds: string[];
   openingPhotoId: string;
   curatorialSummary: string;
+  rhythm: RhythmBreakdown;
   layout: CuratedItem[];
+}
+
+/**
+ * Calculates chromatic similarity between the primary tones of two palettes (0 to 1).
+ */
+function calculatePaletteSimilarity(p1?: string[], p2?: string[]): number {
+  if (!p1?.length || !p2?.length) return 0.5;
+  const rgb1 = hexToRgb(p1[0]);
+  const rgb2 = hexToRgb(p2[0]);
+  if (!rgb1 || !rgb2) return 0.5;
+  const dist = Math.sqrt(
+    Math.pow(rgb1.r - rgb2.r, 2) +
+    Math.pow(rgb1.g - rgb2.g, 2) +
+    Math.pow(rgb1.b - rgb2.b, 2)
+  );
+  return Math.max(0, 1 - dist / 442);
+}
+
+/**
+ * Calculates time difference in seconds between two EXIF date strings.
+ */
+function getTimeDeltaSeconds(dateA?: string | null, dateB?: string | null): number | null {
+  if (!dateA || !dateB) return null;
+  const tA = new Date(dateA).getTime();
+  const tB = new Date(dateB).getTime();
+  if (isNaN(tA) || isNaN(tB)) return null;
+  return Math.abs(tA - tB) / 1000;
+}
+
+/**
+ * Evaluates the visual rhythm and editorial pacing score (0-100) of a sequence.
+ */
+function evaluateVisualRhythm(layout: CuratedItem[], photosMap: Map<string, Photo>): RhythmBreakdown {
+  if (layout.length <= 1) {
+    return {
+      score: 85,
+      orientationBalance: "Uniform",
+      chromaticHarmony: "Harmonious",
+      pacingRating: "Strong Editorial Flow",
+    };
+  }
+
+  let landscapeCount = 0;
+  let portraitCount = 0;
+  let groupCount = 0;
+  let colorHarmonyTotal = 0;
+  let colorPairs = 0;
+
+  for (let i = 0; i < layout.length; i++) {
+    const p = photosMap.get(layout[i].photoId);
+    if (!p) continue;
+    const ar = p.aspect_ratio || 1.5;
+    if (ar >= 1.15) landscapeCount++;
+    else portraitCount++;
+
+    if (layout[i].groupId) {
+      groupCount++;
+      if (i > 0 && layout[i - 1].groupId === layout[i].groupId) {
+        const prev = photosMap.get(layout[i - 1].photoId);
+        if (prev) {
+          colorHarmonyTotal += calculatePaletteSimilarity(prev.color_palette, p.color_palette);
+          colorPairs++;
+        }
+      }
+    }
+  }
+
+  const orientationRatio = Math.min(landscapeCount, portraitCount) / Math.max(1, Math.max(landscapeCount, portraitCount));
+  const avgHarmony = colorPairs > 0 ? colorHarmonyTotal / colorPairs : 0.65;
+  const groupRatio = groupCount / Math.max(1, layout.length);
+
+  // Ideal group ratio is ~20% to ~50%
+  const pacingBonus = groupRatio >= 0.15 && groupRatio <= 0.6 ? 20 : 12;
+  const orientationBonus = orientationRatio >= 0.35 ? 25 : 15;
+  const harmonyBonus = Math.round(avgHarmony * 30);
+  const baseScore = 25;
+
+  const totalScore = Math.min(98, Math.max(72, baseScore + pacingBonus + orientationBonus + harmonyBonus));
+
+  return {
+    score: totalScore,
+    orientationBalance: orientationRatio >= 0.4 ? "Balanced" : orientationRatio >= 0.2 ? "High Variety" : "Uniform",
+    chromaticHarmony: avgHarmony >= 0.6 ? "Harmonious" : avgHarmony >= 0.4 ? "Dynamic Contrast" : "Monochrome / Neutral",
+    pacingRating: totalScore >= 90 ? "Exhibition Quality" : totalScore >= 80 ? "Strong Editorial Flow" : "Sequential",
+  };
 }
 
 /**
@@ -55,7 +149,8 @@ interface CuratedPlan {
 function curateHeuristically(
   photos: Photo[],
   album: Album,
-  style: "editorial" | "visual" | "chronological" = "editorial"
+  style: "editorial" | "visual" | "minimalist" | "chronological" = "editorial",
+  density: "spacious" | "balanced" | "dense" = "balanced"
 ): CuratedPlan {
   if (photos.length === 0) {
     return {
@@ -64,13 +159,22 @@ function curateHeuristically(
       alternativeCoverIds: [],
       openingPhotoId: "",
       curatorialSummary: "Empty album.",
+      rhythm: {
+        score: 0,
+        orientationBalance: "Uniform",
+        chromaticHarmony: "Harmonious",
+        pacingRating: "Sequential",
+      },
       layout: [],
     };
   }
 
+  const photosMap = new Map<string, Photo>();
+  photos.forEach((p) => photosMap.set(p.id, p));
+
   // 1. Determine Cover Photo Candidates
   // High preference for landscape / wide orientation (aspect_ratio >= 1.15)
-  // and highest score or rich visual tags
+  // and highest visual score + vibrant color palette + rich visual tags
   const scoredPhotos = [...photos].map((p) => {
     let weight = (p.score ?? 5) * 10;
     const ar = p.aspect_ratio || (p.width && p.height ? p.width / p.height : 1.5);
@@ -83,10 +187,16 @@ function curateHeuristically(
     // Keyword bonus
     const tagsLower = (p.tags || []).map((t) => t.toLowerCase()).join(" ");
     const descLower = (p.description || "").toLowerCase();
-    const heroKeywords = ["landscape", "sunset", "horizon", "wide", "view", "ocean", "mountain", "sky", "architecture", "city"];
+    const heroKeywords = [
+      "landscape", "sunset", "horizon", "wide", "view", "ocean", "mountain", "sky",
+      "architecture", "city", "establishing", "scenic", "panoramic"
+    ];
     heroKeywords.forEach((kw) => {
       if (tagsLower.includes(kw) || descLower.includes(kw)) weight += 8;
     });
+
+    // Palette bonus if rich
+    if (p.color_palette && p.color_palette.length >= 3) weight += 5;
 
     return { photo: p, weight, ar };
   });
@@ -107,20 +217,32 @@ function curateHeuristically(
       return dateA.localeCompare(dateB);
     });
   } else if (style === "visual") {
-    // Balance visual rhythm: alternate orientations (landscape vs portrait)
+    // Balance visual rhythm: alternate orientations (landscape vs portrait) with color harmony
     const landscapes = photos.filter((p) => (p.aspect_ratio || 1.5) >= 1.1);
     const portraits = photos.filter((p) => (p.aspect_ratio || 1.5) < 1.1);
     const interleaved: Photo[] = [];
     let l = 0;
     let p = 0;
+
     while (l < landscapes.length || p < portraits.length) {
       if (l < landscapes.length) interleaved.push(landscapes[l++]);
       if (p < portraits.length) {
         interleaved.push(portraits[p++]);
-        if (p < portraits.length) interleaved.push(portraits[p++]); // Often pair 2 portraits
+        // Pair another portrait if density allows
+        if (density !== "spacious" && p < portraits.length) {
+          interleaved.push(portraits[p++]);
+        }
       }
     }
     orderedList = interleaved.length === photos.length ? interleaved : photos;
+  } else if (style === "minimalist") {
+    // Fine Art / Minimalist: spacious solo frames, highlighting highest scoring stills
+    orderedList.sort((a, b) => {
+      const dateA = a.exif?.date_taken || "";
+      const dateB = b.exif?.date_taken || "";
+      if (dateA && dateB) return dateA.localeCompare(dateB);
+      return (b.score ?? 5) - (a.score ?? 5);
+    });
   } else {
     // Default: "editorial" (Narrative Arc)
     // - Opener: Establishing wide scene (bestCover or wide landscape)
@@ -143,7 +265,13 @@ function curateHeuristically(
     let closingShot: Photo | null = null;
     const closingIdx = pool.findIndex((p) => {
       const text = `${p.tags?.join(" ")} ${p.description || ""}`.toLowerCase();
-      return text.includes("sunset") || text.includes("dusk") || text.includes("night") || text.includes("silhouette");
+      return (
+        text.includes("sunset") ||
+        text.includes("dusk") ||
+        text.includes("night") ||
+        text.includes("twilight") ||
+        text.includes("silhouette")
+      );
     });
     if (closingIdx !== -1 && pool.length > 2) {
       closingShot = pool.splice(closingIdx, 1)[0];
@@ -162,9 +290,7 @@ function curateHeuristically(
     orderedList = sequence;
   }
 
-  // 3. Editorial Grouping: Side-by-Side Rows
-  // Pair consecutive portrait-oriented photos (aspect_ratio < 1.1) into diptychs
-  // Keep wide panoramic/landscape photos standalone as solo hero statements
+  // 3. Editorial Grouping with Burst Detection & Color Harmony
   const layout: CuratedItem[] = [];
   let groupCounter = 1;
   let idx = 0;
@@ -174,23 +300,63 @@ function curateHeuristically(
     const currentAr = current.aspect_ratio || 1.5;
     const isPortrait = currentAr < 1.1;
 
-    // Check if next photo can form a diptych with current
-    if (isPortrait && idx + 1 < orderedList.length) {
+    // Check for Burst / Triptych possibility (3 photos close in time or portrait)
+    if (
+      density === "dense" &&
+      idx + 2 < orderedList.length &&
+      style !== "minimalist"
+    ) {
+      const p2 = orderedList[idx + 1];
+      const p3 = orderedList[idx + 2];
+      const delta1 = getTimeDeltaSeconds(current.exif?.date_taken, p2.exif?.date_taken);
+      const delta2 = getTimeDeltaSeconds(p2.exif?.date_taken, p3.exif?.date_taken);
+
+      const isTimeBurst = delta1 !== null && delta2 !== null && delta1 <= 90 && delta2 <= 90;
+      const areAllPortraits = isPortrait && (p2.aspect_ratio || 1.5) < 1.15 && (p3.aspect_ratio || 1.5) < 1.15;
+
+      if (isTimeBurst || areAllPortraits) {
+        const groupId = `row_ai_${Date.now().toString(36)}_${groupCounter++}`;
+        const note = isTimeBurst ? "Burst sequence triptych" : "Editorial vertical triptych";
+        layout.push({ photoId: current.id, groupId, curatorialNote: `${note} (1/3)` });
+        layout.push({ photoId: p2.id, groupId, curatorialNote: `${note} (2/3)` });
+        layout.push({ photoId: p3.id, groupId, curatorialNote: `${note} (3/3)` });
+        idx += 3;
+        continue;
+      }
+    }
+
+    // Check for Diptych possibility (2 photos: portraits or burst timestamp)
+    if (idx + 1 < orderedList.length && density !== "spacious") {
       const next = orderedList[idx + 1];
       const nextAr = next.aspect_ratio || 1.5;
       const nextIsPortrait = nextAr < 1.15;
+      const timeDelta = getTimeDeltaSeconds(current.exif?.date_taken, next.exif?.date_taken);
+      const isBurstPair = timeDelta !== null && timeDelta <= 120;
+      const colorSim = calculatePaletteSimilarity(current.color_palette, next.color_palette);
 
-      if (nextIsPortrait) {
+      // Pair if both are portraits, or if burst pair, or if color similarity is high (>0.75) and neither is panoramic
+      const shouldPair =
+        (isPortrait && nextIsPortrait) ||
+        (isBurstPair && currentAr < 1.6 && nextAr < 1.6) ||
+        (colorSim >= 0.78 && currentAr <= 1.35 && nextAr <= 1.35 && density === "dense");
+
+      if (shouldPair) {
         const groupId = `row_ai_${Date.now().toString(36)}_${groupCounter++}`;
+        const rationale = isBurstPair
+          ? "Sequential action diptych"
+          : isPortrait && nextIsPortrait
+          ? "Paired vertical diptych — Geometric balance"
+          : "Color harmony diptych";
+
         layout.push({
           photoId: current.id,
           groupId,
-          curatorialNote: "Paired diptych (Left) — Balanced vertical composition",
+          curatorialNote: `${rationale} (Left)`,
         });
         layout.push({
           photoId: next.id,
           groupId,
-          curatorialNote: "Paired diptych (Right) — Visual dialogue pair",
+          curatorialNote: `${rationale} (Right)`,
         });
         idx += 2;
         continue;
@@ -204,22 +370,31 @@ function curateHeuristically(
       curatorialNote:
         currentAr >= 1.6
           ? "Cinematic panoramic frame (Standalone)"
-          : currentAr >= 1.2
+          : currentAr >= 1.25
           ? "Wide environmental feature (Standalone)"
-          : "Focal portrait stillness (Standalone)",
+          : "Focal still moment (Standalone)",
     });
     idx++;
   }
 
   const openingPhoto = layout[0]?.photoId || bestCover.id;
-  const diptychCount = layout.filter((item) => item.groupId !== null).length / 2;
+  const groupsCreated = new Set(layout.map((item) => item.groupId).filter(Boolean)).size;
+  const rhythm = evaluateVisualRhythm(layout, photosMap);
+
+  const styleDescriptions = {
+    editorial: "an editorial narrative arc with an establishing opener, intimate diptychs, and an evocative finale",
+    visual: "a geometrically rhythmic layout balancing horizontal breathers and portrait diptychs with color harmony",
+    minimalist: "a fine-art gallery flow offering generous full-width space for each composition",
+    chronological: "a documentary timeline sequence preserving authentic moments as they unfolded",
+  };
 
   return {
     coverPhotoId: bestCover.id,
     coverRationale: `Selected for its strong composition, optimal landscape aspect ratio (${bestCover.aspect_ratio || "3:2"}), and dynamic color depth that elevates the album hero banner.`,
     alternativeCoverIds: altCovers,
     openingPhotoId: openingPhoto,
-    curatorialSummary: `Curated ${photos.length} stills into a ${style} flow: opening with an establishing frame, pairing ${Math.floor(diptychCount)} vertical diptychs for visual rhythm, and letting wide cinematic shots breathe as full-width hero moments.`,
+    curatorialSummary: `Curated ${photos.length} stills into ${styleDescriptions[style]}. Formed ${groupsCreated} multi-column editorial rows while letting grand landscapes command standalone focus.`,
+    rhythm,
     layout,
   };
 }
@@ -241,7 +416,8 @@ export async function POST(request: NextRequest) {
     // 2. Parse request body
     const {
       albumId,
-      style = "editorial", // "editorial" | "visual" | "chronological"
+      style = "editorial", // "editorial" | "visual" | "minimalist" | "chronological"
+      density = "balanced", // "spacious" | "balanced" | "dense"
       applyImmediately = false,
     } = await request.json();
 
@@ -278,6 +454,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const photosMap = new Map<string, Photo>();
+    photos.forEach((p) => photosMap.set(p.id, p));
+
     let plan: CuratedPlan | null = null;
 
     // 4. Attempt AI Curation using Cloudflare Workers AI if configured
@@ -295,6 +474,7 @@ export async function POST(request: NextRequest) {
           score: p.score ?? null,
           description: p.description || "",
           tags: (p.tags || []).slice(0, 6),
+          colorPalette: (p.color_palette || []).slice(0, 3),
           dateTaken: p.exif?.date_taken || null,
         }));
 
@@ -303,7 +483,8 @@ Album Context:
 - Title: "${album.title || "Untitled"}"
 - Description: "${album.description || "N/A"}"
 - Location: "${album.location || "N/A"}"
-- Curation Style requested: "${style}"
+- Curatorial Philosophy requested: "${style}" (Options: editorial, visual, minimalist, chronological)
+- Grouping Density requested: "${density}" (Options: spacious, balanced, dense)
 
 Photos Collection (${photos.length} stills):
 ${JSON.stringify(photoMetadataSummary, null, 2)}
@@ -322,23 +503,24 @@ ${JSON.stringify(photoMetadataSummary, null, 2)}
               messages: [
                 {
                   role: "system",
-                  content: `You are an expert photography exhibition curator and art director.
-Curate the sequence, cover, and grouping for this photo collection into an engaging editorial story.
+                  content: `You are an expert photography exhibition curator, art director, and visual editor.
+Curate the sequence, cover, and grouping for this photo collection into an engaging exhibition.
 
 Principles:
 1. Cover Photo ("coverPhotoId"):
    - Choose the most striking, evocative image that represents the heart of the album.
-   - Strongly prefer landscape orientation (aspectRatio >= 1.2) with high score to look stunning in the hero banner.
-   - Also provide 2 runner-up alternative cover photo IDs in "alternativeCoverIds".
+   - Strongly prefer landscape orientation (aspectRatio >= 1.2) with high quality score.
+   - Provide 2-3 runner-up alternative cover photo IDs in "alternativeCoverIds".
 2. Gallery Opener ("openingPhotoId"):
    - The first photo displayed in the gallery feed. Usually an establishing wide shot or contextual entrance.
 3. Sequencing & Narrative Pacing:
    - Order the photos thoughtfully ("layout" array). Progression should feel intentional: establishing context -> intimate details / portraits -> sunset / climax.
-   - Avoid monotonous repetitions of the same framing.
+   - Respect the chosen philosophy (${style}) and density (${density}).
 4. Editorial Grouping:
-   - Group photos into side-by-side rows by giving them matching "groupId" strings (e.g. "group_1", "group_2").
-   - Maximum 3 photos per group; minimum 2 photos per group.
-   - Pair portrait orientation photos (aspectRatio < 1.0) into 2-photo diptychs.
+   - Group photos into side-by-side rows by assigning matching "groupId" strings (e.g. "group_1", "group_2").
+   - 2 photos for diptychs; 3 photos for burst triptychs. Minimum 2, maximum 3.
+   - Pair portrait orientation photos (aspectRatio < 1.0) into diptychs.
+   - Pair photos with complementary or matching color palettes and close timestamps.
    - Keep panoramic or wide landscape shots standalone with "groupId": null.
    - Every photo must be included exactly once in the "layout" array.
 
@@ -374,12 +556,10 @@ Output ONLY a raw JSON object strictly matching this schema:
           const parsed = tryParseJSON(responseText);
 
           if (parsed && parsed.coverPhotoId && Array.isArray(parsed.layout)) {
-            // Validate that returned layout contains valid photo IDs
             const validIds = new Set(photos.map((p) => p.id));
             const seenIds = new Set<string>();
             const sanitizedLayout: CuratedItem[] = [];
 
-            // Group mapping from LLM's group names (e.g. "group_1") to unique row IDs
             const groupMap = new Map<string, string>();
             let rowIdx = 1;
 
@@ -415,7 +595,7 @@ Output ONLY a raw JSON object strictly matching this schema:
               }
             }
 
-            // Filter out groups that have fewer than 2 items
+            // Filter out groups with fewer than 2 items
             const groupCounts: Record<string, number> = {};
             sanitizedLayout.forEach((item) => {
               if (item.groupId) {
@@ -428,6 +608,8 @@ Output ONLY a raw JSON object strictly matching this schema:
               groupId: item.groupId && groupCounts[item.groupId] >= 2 ? item.groupId : null,
             }));
 
+            const rhythm = evaluateVisualRhythm(finalizedLayout, photosMap);
+
             plan = {
               coverPhotoId: validIds.has(parsed.coverPhotoId) ? parsed.coverPhotoId : photos[0].id,
               coverRationale: parsed.coverRationale || "Selected for exceptional composition and thematic resonance.",
@@ -436,6 +618,7 @@ Output ONLY a raw JSON object strictly matching this schema:
                 : [],
               openingPhotoId: validIds.has(parsed.openingPhotoId) ? parsed.openingPhotoId : finalizedLayout[0].photoId,
               curatorialSummary: parsed.curatorialSummary || "Curated for narrative flow and visual rhythm.",
+              rhythm,
               layout: finalizedLayout,
             };
           }
@@ -447,8 +630,8 @@ Output ONLY a raw JSON object strictly matching this schema:
 
     // 5. Fallback to heuristic curation if AI didn't run or failed
     if (!plan) {
-      console.log("Applying smart heuristic layout curation...");
-      plan = curateHeuristically(photos, album, style);
+      console.log("Applying smart heuristic layout curation with burst detection & color harmony...");
+      plan = curateHeuristically(photos, album, style, density);
     }
 
     // 6. If requested, apply changes directly to database
@@ -456,15 +639,18 @@ Output ONLY a raw JSON object strictly matching this schema:
     let updatedPhotos = photos;
 
     if (applyImmediately && plan) {
-      // Find cover photo URL
       const chosenCoverPhoto = photos.find((p) => p.id === plan?.coverPhotoId);
       const coverUrl = chosenCoverPhoto ? chosenCoverPhoto.url : album.cover_image_url;
+      const coverPalette = chosenCoverPhoto?.color_palette || album.cover_color_palette || [];
 
-      // Update album cover if changed
+      // Update album cover and its synchronized color palette
       if (coverUrl && coverUrl !== album.cover_image_url) {
         const { data: refreshedAlbum, error: albumUpdateErr } = await supabaseAdmin
           .from("albums")
-          .update({ cover_image_url: coverUrl })
+          .update({
+            cover_image_url: coverUrl,
+            cover_color_palette: coverPalette,
+          })
           .eq("id", albumId)
           .select()
           .single();
@@ -499,7 +685,6 @@ Output ONLY a raw JSON object strictly matching this schema:
       }
     }
 
-    // Calculate grouping count
     const groupsSet = new Set(plan.layout.map((item) => item.groupId).filter(Boolean));
 
     return NextResponse.json({

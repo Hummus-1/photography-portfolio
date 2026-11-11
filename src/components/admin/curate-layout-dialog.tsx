@@ -12,10 +12,16 @@ import {
   Star,
   Compass,
   Clock,
-  ArrowRight,
   Shuffle,
   Flame,
   LayoutGrid,
+  Feather,
+  Sliders,
+  Maximize2,
+  Palette,
+  ArrowRightLeft,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import {
   Dialog,
@@ -30,28 +36,14 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Album, Photo } from "@/lib/types";
 import { ThinkingOrb, OrbState } from "./thinking-orb";
-
-interface CuratedItem {
-  photoId: string;
-  groupId: string | null;
-  curatorialNote?: string;
-}
-
-interface CuratedPlan {
-  coverPhotoId: string;
-  coverRationale: string;
-  alternativeCoverIds: string[];
-  openingPhotoId: string;
-  curatorialSummary: string;
-  layout: CuratedItem[];
-}
+import { CuratedPlan, CuratedItem } from "@/app/api/albums/curate-layout/route";
 
 interface CurateLayoutDialogProps {
   album: Album;
   photos: Photo[];
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onLayoutApplied: (newPhotos: Photo[], newCoverUrl?: string) => void;
+  onLayoutApplied: (newPhotos: Photo[], newCoverUrl?: string, previousSnapshot?: { photos: Photo[]; coverUrl?: string | null }) => void;
   trigger?: React.ReactNode;
 }
 
@@ -75,12 +67,15 @@ export function CurateLayoutDialog({
     }
   };
 
-  const [style, setStyle] = useState<"editorial" | "visual" | "chronological">("editorial");
+  const [style, setStyle] = useState<"editorial" | "visual" | "minimalist" | "chronological">("editorial");
+  const [density, setDensity] = useState<"spacious" | "balanced" | "dense">("balanced");
   const [loading, setLoading] = useState(false);
   const [orbState, setOrbState] = useState<OrbState>("idle");
   const [plan, setPlan] = useState<CuratedPlan | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string>("");
   const [applying, setApplying] = useState(false);
+  const [activeTab, setActiveTab] = useState<"curated" | "current">("curated");
+  const [showAllCoverOptions, setShowAllCoverOptions] = useState(false);
 
   const photoMap = React.useMemo(() => {
     const map = new Map<string, Photo>();
@@ -88,7 +83,10 @@ export function CurateLayoutDialog({
     return map;
   }, [photos]);
 
-  const handleCurate = async (selectedStyle: "editorial" | "visual" | "chronological" = style) => {
+  const handleCurate = async (
+    curationStyle: "editorial" | "visual" | "minimalist" | "chronological" = style,
+    curationDensity: "spacious" | "balanced" | "dense" = density
+  ) => {
     if (photos.length === 0) {
       toast.error("Upload photos first before curating a layout!");
       return;
@@ -116,7 +114,8 @@ export function CurateLayoutDialog({
         },
         body: JSON.stringify({
           albumId: album.id,
-          style: selectedStyle,
+          style: curationStyle,
+          density: curationDensity,
           applyImmediately: false,
         }),
       });
@@ -146,11 +145,18 @@ export function CurateLayoutDialog({
 
     setApplying(true);
     try {
-      // 1. Identify chosen cover photo
+      // 1. Snapshot previous state for instant Undo
+      const previousSnapshot = {
+        photos: [...photos],
+        coverUrl: album.cover_image_url,
+      };
+
+      // 2. Identify chosen cover photo & its color palette
       const chosenCover = photoMap.get(selectedCoverId);
       const chosenCoverUrl = chosenCover ? chosenCover.url : album.cover_image_url;
+      const chosenCoverPalette = chosenCover?.color_palette || album.cover_color_palette || [];
 
-      // 2. Build updated photos array matching the curated sequence
+      // 3. Build updated photos array matching the curated sequence
       const reorderedPhotos: Photo[] = [];
       const planItems = plan.layout;
 
@@ -178,11 +184,14 @@ export function CurateLayoutDialog({
         }
       }
 
-      // 3. Persist new cover photo to Supabase if changed
-      if (chosenCoverUrl && chosenCoverUrl !== album.cover_image_url) {
+      // 4. Persist new cover photo & its synchronized palette to Supabase if changed
+      if (chosenCoverUrl && (chosenCoverUrl !== album.cover_image_url || chosenCoverPalette !== album.cover_color_palette)) {
         const { error: coverErr } = await supabase
           .from("albums")
-          .update({ cover_image_url: chosenCoverUrl })
+          .update({
+            cover_image_url: chosenCoverUrl,
+            cover_color_palette: chosenCoverPalette,
+          })
           .eq("id", album.id);
 
         if (coverErr) {
@@ -190,7 +199,7 @@ export function CurateLayoutDialog({
         }
       }
 
-      // 4. Batch update photo sort_orders and group_ids in Supabase
+      // 5. Batch update photo sort_orders and group_ids in Supabase
       const updatePromises = reorderedPhotos.map((p, idx) =>
         supabase
           .from("photos")
@@ -203,9 +212,8 @@ export function CurateLayoutDialog({
 
       await Promise.all(updatePromises);
 
-      // 5. Notify parent component
-      onLayoutApplied(reorderedPhotos, chosenCoverUrl || undefined);
-      toast.success("Curated layout and cover applied successfully!");
+      // 6. Notify parent component with previous snapshot for undo
+      onLayoutApplied(reorderedPhotos, chosenCoverUrl || undefined, previousSnapshot);
       setIsOpen(false);
     } catch (err: any) {
       console.error("Apply error:", err);
@@ -218,7 +226,7 @@ export function CurateLayoutDialog({
   const coverPhotoObj = photoMap.get(selectedCoverId) || photoMap.get(plan?.coverPhotoId || "") || photos[0];
   const openingPhotoObj = photoMap.get(plan?.openingPhotoId || "") || photos[0];
 
-  // Group visual stats
+  // Group stats
   const groupsCount = plan
     ? new Set(plan.layout.map((item) => item.groupId).filter(Boolean)).size
     : 0;
@@ -245,7 +253,7 @@ export function CurateLayoutDialog({
         />
       )}
 
-      <DialogContent className="max-w-4xl max-h-[88vh] overflow-y-auto bg-card border border-border p-6 font-sans">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card border border-border p-6 font-sans">
         <DialogHeader className="border-b border-border pb-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -258,73 +266,118 @@ export function CurateLayoutDialog({
                   </span>
                 </DialogTitle>
                 <DialogDescription className="text-xs font-mono uppercase tracking-widest text-muted-foreground mt-0.5">
-                  Automated editorial storytelling, cover selection, diptych grouping & rhythmic pacing
+                  Editorial storytelling • Rhythm & color harmony • Cover selection • Diptych & triptych grouping
                 </DialogDescription>
               </div>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Style Selector Toolbar */}
+        {/* Style & Density Controls */}
         <div className="space-y-4 pt-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-foreground/[0.02] border border-border">
-            <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-foreground/80 font-bold block">
-                Curatorial Philosophy
-              </span>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Choose the guiding principle the AI will use to sequence and group your stills.
-              </p>
+          <div className="p-4 bg-foreground/[0.02] border border-border space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-foreground/80 font-bold block">
+                  Curatorial Philosophy
+                </span>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Guides how the AI sequences narrative tension, pacing, and subject focus.
+                </p>
+              </div>
+
+              {/* Style selector pills */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStyle("editorial");
+                    if (plan) handleCurate("editorial", density);
+                  }}
+                  className={`px-2.5 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
+                    style === "editorial"
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
+                      : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
+                  }`}
+                >
+                  <Compass className="h-3.5 w-3.5" />
+                  <span>Story Arc</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStyle("visual");
+                    if (plan) handleCurate("visual", density);
+                  }}
+                  className={`px-2.5 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
+                    style === "visual"
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
+                      : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
+                  }`}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                  <span>Visual Rhythm</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStyle("minimalist");
+                    if (plan) handleCurate("minimalist", density);
+                  }}
+                  className={`px-2.5 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
+                    style === "minimalist"
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
+                      : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
+                  }`}
+                >
+                  <Feather className="h-3.5 w-3.5" />
+                  <span>Fine Art</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStyle("chronological");
+                    if (plan) handleCurate("chronological", density);
+                  }}
+                  className={`px-2.5 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
+                    style === "chronological"
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
+                      : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
+                  }`}
+                >
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Timeline</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setStyle("editorial");
-                  if (plan) handleCurate("editorial");
-                }}
-                className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
-                  style === "editorial"
-                    ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
-                    : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
-                }`}
-              >
-                <Compass className="h-3.5 w-3.5" />
-                <span>Editorial Story</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setStyle("visual");
-                  if (plan) handleCurate("visual");
-                }}
-                className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
-                  style === "visual"
-                    ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
-                    : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
-                }`}
-              >
-                <LayoutGrid className="h-3.5 w-3.5" />
-                <span>Visual Harmony</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setStyle("chronological");
-                  if (plan) handleCurate("chronological");
-                }}
-                className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
-                  style === "chronological"
-                    ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
-                    : "bg-foreground/5 border-border text-foreground/70 hover:text-foreground hover:bg-foreground/10"
-                }`}
-              >
-                <Clock className="h-3.5 w-3.5" />
-                <span>Chronological</span>
-              </button>
+            {/* Density setting */}
+            <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-border/50 text-xs font-mono">
+              <span className="text-muted-foreground uppercase tracking-widest text-[11px] flex items-center gap-1.5">
+                <Sliders className="h-3 w-3 text-primary" /> Grouping Density:
+              </span>
+              <div className="flex items-center gap-1 bg-black/30 p-0.5 border border-border">
+                {(["spacious", "balanced", "dense"] as const).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => {
+                      setDensity(d);
+                      if (plan) handleCurate(style, d);
+                    }}
+                    className={`px-2.5 py-1 uppercase text-[10px] tracking-wider transition-all ${
+                      density === d
+                        ? "bg-primary/20 text-primary font-bold border border-primary/30"
+                        : "text-foreground/50 hover:text-foreground"
+                    }`}
+                  >
+                    {d === "spacious" ? "Spacious (Solo)" : d === "balanced" ? "Balanced" : "Magazine (Dense)"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -337,7 +390,7 @@ export function CurateLayoutDialog({
                   Ready to Curate {photos.length} Stills
                 </p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  The AI Curator will inspect each photo's visual quality score, aspect ratio, orientation, EXIF timestamps, and semantic descriptions to craft a compelling visual narrative.
+                  The AI Curator evaluates color harmony, burst timestamps, aspect ratios, and visual quality scores to assemble a cohesive exhibition layout.
                 </p>
               </div>
 
@@ -356,24 +409,46 @@ export function CurateLayoutDialog({
           {/* Plan Results View */}
           {plan && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              {/* Curatorial Vision Summary */}
-              <div className="p-4 bg-primary/5 border border-primary/30 space-y-2">
-                <div className="flex items-center justify-between">
+              {/* Curatorial Vision Summary & Rhythm Index */}
+              <div className="p-4 bg-primary/5 border border-primary/30 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <span className="text-[11px] font-mono uppercase tracking-widest text-primary font-bold flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" /> Curatorial Vision & Narrative Arc
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleCurate()}
-                    disabled={loading}
-                    className="text-[10px] font-mono uppercase text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-                  >
-                    <Shuffle className="h-3 w-3" /> Re-curate
-                  </button>
+
+                  {/* Rhythm Score Badge */}
+                  {plan.rhythm && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-black/40 border border-primary/30 text-xs font-mono">
+                        <span className="text-primary font-bold">{plan.rhythm.score}/100</span>
+                        <span className="text-muted-foreground text-[10px] uppercase">Rhythm Score</span>
+                      </div>
+                      <span className="text-[9px] font-mono uppercase px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary">
+                        {plan.rhythm.pacingRating}
+                      </span>
+                    </div>
+                  )}
                 </div>
+
                 <p className="text-xs text-foreground/90 leading-relaxed font-sans">
                   {plan.curatorialSummary}
                 </p>
+
+                {plan.rhythm && (
+                  <div className="flex items-center gap-3 pt-1 text-[10px] font-mono uppercase tracking-wider text-muted-foreground flex-wrap">
+                    <span>Orientation: <strong className="text-foreground/80">{plan.rhythm.orientationBalance}</strong></span>
+                    <span>•</span>
+                    <span>Palette Flow: <strong className="text-foreground/80">{plan.rhythm.chromaticHarmony}</strong></span>
+                    <button
+                      type="button"
+                      onClick={() => handleCurate()}
+                      disabled={loading}
+                      className="ml-auto text-[10px] font-mono uppercase text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    >
+                      <Shuffle className="h-3 w-3" /> Re-curate
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Cover Image & Opening Frame Highlights */}
@@ -385,9 +460,18 @@ export function CurateLayoutDialog({
                       <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
                       Suggested Hero Cover
                     </span>
-                    <span className="text-[10px] font-mono text-primary bg-primary/10 border border-primary/20 px-2 py-0.5">
-                      Aspect Ratio: {coverPhotoObj?.aspect_ratio || "3:2"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {coverPhotoObj?.color_palette && coverPhotoObj.color_palette.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          {coverPhotoObj.color_palette.slice(0, 4).map((c, i) => (
+                            <span key={i} className="w-2.5 h-2.5 rounded-full border border-black/40" style={{ backgroundColor: c }} />
+                          ))}
+                        </div>
+                      )}
+                      <span className="text-[10px] font-mono text-primary bg-primary/10 border border-primary/20 px-2 py-0.5">
+                        Ratio: {coverPhotoObj?.aspect_ratio || "3:2"}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 items-start">
@@ -408,46 +492,91 @@ export function CurateLayoutDialog({
                       </p>
 
                       {/* Alternative Cover Picks */}
-                      {plan.alternativeCoverIds && plan.alternativeCoverIds.length > 0 && (
-                        <div className="pt-2 border-t border-border/40">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">
-                            Alternative Cover Options:
+                      <div className="pt-2 border-t border-border/40">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block">
+                            Cover Alternatives:
                           </span>
-                          <div className="flex items-center gap-2">
-                            {plan.alternativeCoverIds.map((altId) => {
-                              const altPhoto = photoMap.get(altId);
-                              if (!altPhoto) return null;
-                              const isSelected = selectedCoverId === altId;
+                          <button
+                            type="button"
+                            onClick={() => setShowAllCoverOptions(!showAllCoverOptions)}
+                            className="text-[9px] font-mono uppercase text-primary hover:underline flex items-center gap-0.5"
+                          >
+                            <span>{showAllCoverOptions ? "Show Less" : "Choose Any Still"}</span>
+                            {showAllCoverOptions ? <ChevronUp className="h-2.5 w-2.5" /> : <ChevronDown className="h-2.5 w-2.5" />}
+                          </button>
+                        </div>
+
+                        {/* Top 3 AI alternative covers */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {plan.alternativeCoverIds && plan.alternativeCoverIds.map((altId) => {
+                            const altPhoto = photoMap.get(altId);
+                            if (!altPhoto) return null;
+                            const isSelected = selectedCoverId === altId;
+                            return (
+                              <button
+                                key={altId}
+                                type="button"
+                                onClick={() => setSelectedCoverId(altId)}
+                                className={`relative w-14 h-10 border transition-all overflow-hidden ${
+                                  isSelected
+                                    ? "border-primary ring-2 ring-primary/40 scale-105"
+                                    : "border-border hover:border-foreground/50 opacity-70 hover:opacity-100"
+                                }`}
+                                title="Click to select this as album cover"
+                              >
+                                <Image
+                                  src={altPhoto.url}
+                                  alt="Alternative cover"
+                                  fill
+                                  sizes="60px"
+                                  className="object-cover"
+                                />
+                                {isSelected && (
+                                  <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
+                                    <Check className="h-3 w-3 text-white" />
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Expandable all-photos cover tray */}
+                        {showAllCoverOptions && (
+                          <div className="pt-2 mt-2 border-t border-border/30 max-h-28 overflow-y-auto flex items-center gap-1.5 flex-wrap">
+                            {photos.map((p) => {
+                              const isSelected = selectedCoverId === p.id;
                               return (
                                 <button
-                                  key={altId}
+                                  key={p.id}
                                   type="button"
-                                  onClick={() => setSelectedCoverId(altId)}
-                                  className={`relative w-14 h-10 border transition-all overflow-hidden ${
+                                  onClick={() => setSelectedCoverId(p.id)}
+                                  className={`relative w-12 h-9 border transition-all overflow-hidden ${
                                     isSelected
                                       ? "border-primary ring-2 ring-primary/40 scale-105"
-                                      : "border-border hover:border-foreground/50 opacity-70 hover:opacity-100"
+                                      : "border-border/60 hover:border-foreground/50 opacity-60 hover:opacity-100"
                                   }`}
-                                  title="Click to select this as album cover"
+                                  title={p.description || "Set as cover"}
                                 >
                                   <Image
-                                    src={altPhoto.url}
-                                    alt="Alternative cover"
+                                    src={p.url}
+                                    alt="Photo still"
                                     fill
-                                    sizes="60px"
+                                    sizes="48px"
                                     className="object-cover"
                                   />
                                   {isSelected && (
                                     <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-                                      <Check className="h-3 w-3 text-white" />
+                                      <Check className="h-2.5 w-2.5 text-white" />
                                     </div>
                                   )}
                                 </button>
                               );
                             })}
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -469,8 +598,8 @@ export function CurateLayoutDialog({
                         />
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      Sets the tone as visitors scroll into the exhibition.
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      First frame seen when visitors enter the exhibition feed.
                     </p>
                   </div>
 
@@ -480,110 +609,179 @@ export function CurateLayoutDialog({
                 </div>
               </div>
 
-              {/* Layout Rhythm Stats Pill Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-foreground/[0.02] border border-border text-xs font-mono">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <span className="flex items-center gap-1.5 text-foreground/80">
-                    <Rows className="h-3.5 w-3.5 text-primary" />
-                    <strong>{plan.layout.length}</strong> Stills Sequenced
+              {/* View Switcher: Curated Plan vs Current Layout */}
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("curated")}
+                    className={`px-3 py-1 text-xs font-mono uppercase tracking-wider border transition-all ${
+                      activeTab === "curated"
+                        ? "bg-primary text-primary-foreground border-primary font-bold"
+                        : "bg-foreground/5 border-border text-foreground/60 hover:text-foreground"
+                    }`}
+                  >
+                    Curated Story Plan ({plan.layout.length} stills)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("current")}
+                    className={`px-3 py-1 text-xs font-mono uppercase tracking-wider border transition-all flex items-center gap-1.5 ${
+                      activeTab === "current"
+                        ? "bg-primary text-primary-foreground border-primary font-bold"
+                        : "bg-foreground/5 border-border text-foreground/60 hover:text-foreground"
+                    }`}
+                  >
+                    <ArrowRightLeft className="h-3 w-3" />
+                    <span>Compare to Current</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Layers className="h-3 w-3 text-primary" />
+                    <strong>{groupsCount}</strong> Editorial Rows ({groupedPhotosCount} paired)
                   </span>
-                  <span className="text-border">•</span>
-                  <span className="flex items-center gap-1.5 text-foreground/80">
-                    <Layers className="h-3.5 w-3.5 text-primary" />
-                    <strong>{groupsCount}</strong> Diptych / Multi-Rows ({groupedPhotosCount} paired)
-                  </span>
-                  <span className="text-border">•</span>
-                  <span className="flex items-center gap-1.5 text-foreground/80">
-                    <Star className="h-3.5 w-3.5 text-primary" />
-                    <strong>{soloPhotosCount}</strong> Standalone Features
-                  </span>
+                  <span>•</span>
+                  <span><strong>{soloPhotosCount}</strong> Solos</span>
                 </div>
               </div>
 
               {/* Visual Sequence Preview Strip */}
-              <div className="space-y-2">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block">
-                  Curated Visual Flow (Sequence Order):
-                </span>
-                <div className="p-3 bg-foreground/[0.02] border border-border max-h-56 overflow-y-auto space-y-2">
-                  {/* Group items for preview */}
-                  {(() => {
-                    const previewBlocks: { type: "single" | "group"; items: typeof plan.layout }[] = [];
-                    let i = 0;
-                    while (i < plan.layout.length) {
-                      const cur = plan.layout[i];
-                      if (cur.groupId) {
-                        const gId = cur.groupId;
-                        const gItems = [cur];
-                        let j = i + 1;
-                        while (j < plan.layout.length && plan.layout[j].groupId === gId) {
-                          gItems.push(plan.layout[j]);
-                          j++;
+              {activeTab === "curated" ? (
+                <div className="space-y-2">
+                  <div className="p-3 bg-foreground/[0.02] border border-border max-h-60 overflow-y-auto space-y-2">
+                    {(() => {
+                      const previewBlocks: { type: "single" | "group"; items: CuratedItem[] }[] = [];
+                      let i = 0;
+                      while (i < plan.layout.length) {
+                        const cur = plan.layout[i];
+                        if (cur.groupId) {
+                          const gId = cur.groupId;
+                          const gItems = [cur];
+                          let j = i + 1;
+                          while (j < plan.layout.length && plan.layout[j].groupId === gId) {
+                            gItems.push(plan.layout[j]);
+                            j++;
+                          }
+                          previewBlocks.push({ type: "group", items: gItems });
+                          i = j;
+                          continue;
                         }
-                        previewBlocks.push({ type: "group", items: gItems });
-                        i = j;
-                        continue;
+                        previewBlocks.push({ type: "single", items: [cur] });
+                        i++;
                       }
-                      previewBlocks.push({ type: "single", items: [cur] });
-                      i++;
-                    }
 
-                    return previewBlocks.map((block, bIdx) => (
-                      <div
-                        key={bIdx}
-                        className={`p-2 border flex items-center justify-between gap-3 text-xs font-mono ${
-                          block.type === "group"
-                            ? "bg-primary/5 border-primary/30"
-                            : "bg-foreground/[0.01] border-border/50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-muted-foreground w-6">#{bIdx + 1}</span>
-                          <span
-                            className={`text-[9px] uppercase px-1.5 py-0.5 border ${
-                              block.type === "group"
-                                ? "bg-primary/20 text-primary border-primary/30 font-bold"
-                                : "bg-foreground/5 text-foreground/60 border-border"
+                      return previewBlocks.map((block, bIdx) => (
+                        <div
+                          key={bIdx}
+                          className={`p-2.5 border flex items-center justify-between gap-3 text-xs font-mono transition-all ${
+                            block.type === "group"
+                              ? "bg-primary/5 border-primary/30"
+                              : "bg-foreground/[0.01] border-border/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-muted-foreground w-6">#{bIdx + 1}</span>
+                            <span
+                              className={`text-[9px] uppercase px-1.5 py-0.5 border ${
+                                block.type === "group"
+                                  ? block.items.length === 3
+                                    ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/30 font-bold"
+                                    : "bg-primary/20 text-primary border-primary/30 font-bold"
+                                  : "bg-foreground/5 text-foreground/60 border-border"
+                              }`}
+                            >
+                              {block.type === "group"
+                                ? block.items.length === 3
+                                  ? "Triptych (3 Paired)"
+                                  : "Diptych (2 Paired)"
+                                : "Full-Width Solo"}
+                            </span>
+                            <span className="text-[11px] text-foreground/70 hidden sm:inline max-w-xs truncate">
+                              {block.items[0]?.curatorialNote || ""}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {block.items.map((item) => {
+                              const p = photoMap.get(item.photoId);
+                              if (!p) return null;
+                              const isCover = p.id === selectedCoverId;
+                              return (
+                                <div
+                                  key={item.photoId}
+                                  className={`relative w-12 h-9 border overflow-hidden ${
+                                    isCover ? "ring-2 ring-amber-400 border-amber-400" : "border-border"
+                                  }`}
+                                  title={item.curatorialNote || p.description || ""}
+                                >
+                                  <Image
+                                    src={p.url}
+                                    alt={p.description || ""}
+                                    fill
+                                    sizes="48px"
+                                    className="object-cover"
+                                  />
+                                  {isCover && (
+                                    <span className="absolute bottom-0 right-0 bg-amber-400 text-black text-[7px] font-bold px-0.5">
+                                      ★
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              ) : (
+                /* Current Layout Compare Tab */
+                <div className="space-y-2">
+                  <div className="p-3 bg-foreground/[0.02] border border-border max-h-60 overflow-y-auto space-y-2">
+                    {photos.map((p, idx) => {
+                      const isCover = p.url === album.cover_image_url;
+                      return (
+                        <div
+                          key={p.id}
+                          className="p-2 border border-border/40 flex items-center justify-between gap-3 text-xs font-mono"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-muted-foreground w-6">#{idx + 1}</span>
+                            <span className="text-[9px] uppercase px-1.5 py-0.5 border bg-foreground/5 text-foreground/60 border-border">
+                              {p.group_id ? "Grouped" : "Solo"}
+                            </span>
+                            <span className="text-[11px] text-foreground/70 max-w-sm truncate">
+                              {p.description || "Uncaptioned still"}
+                            </span>
+                          </div>
+
+                          <div
+                            className={`relative w-12 h-9 border overflow-hidden ${
+                              isCover ? "ring-2 ring-amber-400 border-amber-400" : "border-border"
                             }`}
                           >
-                            {block.type === "group" ? `Diptych (${block.items.length} paired)` : "Full-Width Single"}
-                          </span>
+                            <Image
+                              src={p.url}
+                              alt={p.description || ""}
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                            {isCover && (
+                              <span className="absolute bottom-0 right-0 bg-amber-400 text-black text-[7px] font-bold px-0.5">
+                                ★
+                              </span>
+                            )}
+                          </div>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          {block.items.map((item, itmIdx) => {
-                            const p = photoMap.get(item.photoId);
-                            if (!p) return null;
-                            const isCover = p.id === selectedCoverId;
-                            return (
-                              <div
-                                key={item.photoId}
-                                className={`relative w-12 h-9 border overflow-hidden ${
-                                  isCover ? "ring-2 ring-amber-400 border-amber-400" : "border-border"
-                                }`}
-                                title={item.curatorialNote || p.description || ""}
-                              >
-                                <Image
-                                  src={p.url}
-                                  alt={p.description || ""}
-                                  fill
-                                  sizes="48px"
-                                  className="object-cover"
-                                />
-                                {isCover && (
-                                  <span className="absolute bottom-0 right-0 bg-amber-400 text-black text-[7px] font-bold px-0.5">
-                                    ★
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ));
-                  })()}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Bottom Apply Controls */}
               <div className="flex items-center justify-between pt-4 border-t border-border">

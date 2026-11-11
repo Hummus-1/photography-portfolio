@@ -161,7 +161,12 @@ export function AlbumAutoFillToolbar({
               onLayoutApplied={(newPhotos, newCoverUrl) => {
                 onPhotosUpdated?.(newPhotos);
                 if (newCoverUrl) {
-                  onAlbumUpdated({ ...album, cover_image_url: newCoverUrl });
+                  const coverPhoto = newPhotos.find((p) => p.url === newCoverUrl);
+                  onAlbumUpdated({
+                    ...album,
+                    cover_image_url: newCoverUrl,
+                    cover_color_palette: coverPhoto?.color_palette || album.cover_color_palette,
+                  });
                 }
               }}
             />

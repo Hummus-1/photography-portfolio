@@ -26,6 +26,7 @@ import {
   Grid,
   CheckSquare,
   Sparkles,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -78,6 +79,25 @@ export function EditorialGroupEditor({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggedBlockIndex, setDraggedBlockIndex] = useState<number | null>(null);
   const [dragOverBlockIndex, setDragOverBlockIndex] = useState<number | null>(null);
+
+  // Snapshot of previous layout for instant undo
+  const [previousLayoutSnapshot, setPreviousLayoutSnapshot] = useState<{
+    photos: Photo[];
+    coverUrl?: string | null;
+  } | null>(null);
+
+  const handleRevertLayout = async () => {
+    if (!previousLayoutSnapshot) return;
+    const { photos: prevPhotos, coverUrl: prevCover } = previousLayoutSnapshot;
+    isInternalUpdateRef.current = true;
+    setPhotos(prevPhotos);
+    if (prevCover) {
+      onSetCoverPhoto(prevCover);
+    }
+    await saveLayoutToDb(prevPhotos);
+    setPreviousLayoutSnapshot(null);
+    toast.info("Reverted to previous layout.");
+  };
 
   useEffect(() => {
     if (isInternalUpdateRef.current) {
@@ -410,15 +430,48 @@ export function EditorialGroupEditor({
           <CurateLayoutDialog
             album={album}
             photos={photos}
-            onLayoutApplied={(newPhotos, newCoverUrl) => {
+            onLayoutApplied={(newPhotos, newCoverUrl, snapshot) => {
+              if (snapshot) {
+                setPreviousLayoutSnapshot(snapshot);
+              }
               isInternalUpdateRef.current = true;
               setPhotos(newPhotos);
               if (newCoverUrl) {
                 onSetCoverPhoto(newCoverUrl);
               }
               onSaveSuccess?.(newPhotos);
+              toast.success("AI curated layout applied!", {
+                action: {
+                  label: "Undo",
+                  onClick: () => {
+                    if (snapshot) {
+                      isInternalUpdateRef.current = true;
+                      setPhotos(snapshot.photos);
+                      if (snapshot.coverUrl) {
+                        onSetCoverPhoto(snapshot.coverUrl);
+                      }
+                      saveLayoutToDb(snapshot.photos);
+                      setPreviousLayoutSnapshot(null);
+                      toast.info("Layout reverted.");
+                    }
+                  },
+                },
+              });
             }}
           />
+
+          {/* Quick Revert Button (shows when a curated layout was applied) */}
+          {previousLayoutSnapshot && (
+            <button
+              type="button"
+              onClick={handleRevertLayout}
+              className="px-2.5 py-1.5 font-mono text-xs uppercase tracking-wider border border-white/20 text-white/70 hover:text-white hover:bg-white/10 flex items-center gap-1.5 transition-all"
+              title="Revert to layout before AI curation"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Revert Layout</span>
+            </button>
+          )}
 
           {/* View Mode Switcher */}
           <div className="flex items-center p-0.5 bg-black/40 border border-white/10">
