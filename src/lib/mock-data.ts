@@ -45,6 +45,7 @@ export const MOCK_ALBUMS_MAP: { [key: string]: { album: Album; photos: Photo[] }
       },
       {
         id: "g2",
+        group_id: "grp-greenland-stills",
         url: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80&w=800",
         thumbnail_url: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&q=80&w=300",
         width: 800,
@@ -65,6 +66,7 @@ export const MOCK_ALBUMS_MAP: { [key: string]: { album: Album; photos: Photo[] }
       },
       {
         id: "g3",
+        group_id: "grp-greenland-stills",
         url: "https://images.unsplash.com/photo-1520637695736-3d36881c1626?auto=format&fit=crop&q=80&w=1600",
         thumbnail_url: "https://images.unsplash.com/photo-1520637695736-3d36881c1626?auto=format&fit=crop&q=80&w=300",
         width: 1600,

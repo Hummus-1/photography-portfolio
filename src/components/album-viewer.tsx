@@ -161,24 +161,30 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
                     key={`chunk-${chunk.groupId}-${chunkIdx}`}
                     className={`w-full grid ${gridColsClass} gap-6 md:gap-8 items-start`}
                   >
-                    {chunk.items.map(({ photo, globalIndex }) => (
-                      <div key={photo.id} className="w-full">
-                        <PhotoCard
-                          photo={photo}
-                          album={album}
-                          index={globalIndex}
-                          id={`photo-${photo.id}`}
-                          innerRef={(el) => {
-                            photoRefs.current[`photo-${photo.id}`] = el;
-                          }}
-                          onSelect={() => {
-                            setSelectedPhotoIndex(globalIndex);
-                            setIsLightboxOpen(true);
-                          }}
-                          fillWidth={true}
-                        />
-                      </div>
-                    ))}
+                    {chunk.items.map(({ photo, globalIndex }, itemIndex) => {
+                      const colIndex = itemIndex % colCount;
+                      return (
+                        <div key={photo.id} className="w-full">
+                          <PhotoCard
+                            photo={photo}
+                            album={album}
+                            index={globalIndex}
+                            id={`photo-${photo.id}`}
+                            innerRef={(el) => {
+                              photoRefs.current[`photo-${photo.id}`] = el;
+                            }}
+                            onSelect={() => {
+                              setSelectedPhotoIndex(globalIndex);
+                              setIsLightboxOpen(true);
+                            }}
+                            fillWidth={true}
+                            isInRow={true}
+                            colIndex={colIndex}
+                            colCount={colCount}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               }
@@ -208,6 +214,9 @@ export function AlbumViewer({ album, photos }: AlbumViewerProps) {
                       setSelectedPhotoIndex(globalIndex);
                       setIsLightboxOpen(true);
                     }}
+                    isInRow={false}
+                    colIndex={0}
+                    colCount={1}
                   />
                 </div>
               );
