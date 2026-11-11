@@ -14,7 +14,7 @@ export const metadata = {
   description: "Curated photography collections documenting landscapes, architectural studies, and travel series.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: revalidate at most once every hour
 
 async function getFeaturedAlbums(): Promise<AlbumWithPhotos[]> {
   try {

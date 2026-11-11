@@ -9,7 +9,7 @@ export const metadata = {
   description: "Browse photo collections by continent, country, island, and specific geographic spots around the world.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: revalidate at most once every hour
 
 async function getAlbumsWithLocations() {
   try {

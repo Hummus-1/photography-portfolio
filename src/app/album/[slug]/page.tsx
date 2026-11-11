@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { Metadata } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { supabase as publicSupabase } from "@/lib/supabase";
 import { Navigation } from "@/components/navigation";
@@ -6,6 +8,27 @@ import { notFound } from "next/navigation";
 import { Album, Photo } from "@/lib/types";
 import { MOCK_ALBUMS_MAP } from "@/lib/mock-data";
 import { Eye } from "lucide-react";
+
+export const revalidate = 86400; // ISR: revalidate published albums at most once every 24 hours
+
+export async function generateStaticParams() {
+  try {
+    const { data: albums } = await publicSupabase
+      .from("albums")
+      .select("slug")
+      .eq("is_published", true);
+
+    if (!albums || albums.length === 0) {
+      return Object.keys(MOCK_ALBUMS_MAP).map((slug) => ({ slug }));
+    }
+
+    return albums.map((album) => ({
+      slug: album.slug,
+    }));
+  } catch {
+    return Object.keys(MOCK_ALBUMS_MAP).map((slug) => ({ slug }));
+  }
+}
 
 function getSupabaseClient(isPreview: boolean) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -20,7 +43,7 @@ function getSupabaseClient(isPreview: boolean) {
   return publicSupabase;
 }
 
-async function getAlbumData(slug: string, isPreview: boolean = false) {
+const getAlbumData = cache(async (slug: string, isPreview: boolean = false) => {
   const db = getSupabaseClient(isPreview);
   try {
     const { data: album, error: albumError } = await db
@@ -66,7 +89,7 @@ async function getAlbumData(slug: string, isPreview: boolean = false) {
     }
     return null;
   }
-}
+});
 
 interface AlbumPageProps {
   params: Promise<{
@@ -75,6 +98,24 @@ interface AlbumPageProps {
   searchParams: Promise<{
     preview?: string;
   }>;
+}
+
+export async function generateMetadata({ params }: AlbumPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getAlbumData(slug, false);
+
+  if (!data) {
+    return {
+      title: "Album Not Found | Daniel García Photography",
+    };
+  }
+
+  return {
+    title: `${data.album.title} | Daniel García Photography`,
+    description:
+      data.album.description ||
+      `Photography exhibition of ${data.album.title} documented by Daniel García.`,
+  };
 }
 
 export default async function AlbumPage({ params, searchParams }: AlbumPageProps) {

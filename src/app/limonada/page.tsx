@@ -17,6 +17,7 @@ import { AlbumAutoFillToolbar } from "@/components/admin/album-auto-fill-toolbar
 import { ThinkingOrb } from "@/components/admin/thinking-orb";
 import { Album, Photo } from "@/lib/types";
 import { isoToDDMMYYYY } from "@/components/ui/date-selector";
+import { revalidateAlbumPaths } from "@/app/actions/revalidate";
 
 export default function AdminPage() {
   const [session, setSession] = useState<any>(null);
@@ -106,6 +107,7 @@ export default function AdminPage() {
   const handleAlbumCreated = (newAlbum: Album) => {
     setAlbums((prev) => [newAlbum, ...prev]);
     setSelectedAlbumId(newAlbum.id);
+    revalidateAlbumPaths(newAlbum.slug);
   };
 
   const handlePublishToggle = async (albumId: string, isPublished: boolean) => {
@@ -119,6 +121,8 @@ export default function AdminPage() {
       setAlbums((prev) =>
         prev.map((alb) => (alb.id === albumId ? { ...alb, is_published: isPublished } : alb))
       );
+      const targetAlbum = albums.find((alb) => alb.id === albumId);
+      revalidateAlbumPaths(targetAlbum?.slug);
       toast.success(isPublished ? "Album published" : "Album set to draft");
     } catch (err: any) {
       toast.error(`Failed to update publication: ${err.message}`);
@@ -133,6 +137,8 @@ export default function AdminPage() {
         .eq("id", albumId);
 
       if (error) throw error;
+      const targetAlbum = albums.find((alb) => alb.id === albumId);
+      revalidateAlbumPaths(targetAlbum?.slug);
       toast.success(isFeatured ? "Album featured on homepage" : "Album removed from homepage feature");
       setAlbums((prev) =>
         prev.map((alb) => (alb.id === albumId ? { ...alb, is_featured: isFeatured } : alb))
@@ -147,6 +153,7 @@ export default function AdminPage() {
     try {
       const { error } = await supabase.from("albums").delete().eq("id", albumId);
       if (error) throw error;
+      revalidateAlbumPaths();
       toast.success("Album deleted");
       setAlbums((prev) => prev.filter((alb) => alb.id !== albumId));
       if (selectedAlbumId === albumId) {
@@ -162,6 +169,8 @@ export default function AdminPage() {
     try {
       const { error } = await supabase.from("photos").delete().eq("id", photoId);
       if (error) throw error;
+      const currentAlbum = albums.find((a) => a.id === selectedAlbumId);
+      revalidateAlbumPaths(currentAlbum?.slug);
       toast.success("Photo deleted");
       setPhotos((prev) => prev.filter((p) => p.id !== photoId));
     } catch (err: any) {
@@ -186,6 +195,8 @@ export default function AdminPage() {
         .eq("id", photoId);
 
       if (error) throw error;
+      const currentAlbum = albums.find((a) => a.id === selectedAlbumId);
+      revalidateAlbumPaths(currentAlbum?.slug);
       toast.success("Photo updated successfully");
       
       setPhotos((prev) =>
@@ -208,6 +219,8 @@ export default function AdminPage() {
         .eq("id", selectedAlbumId);
 
       if (error) throw error;
+      const currentAlbum = albums.find((a) => a.id === selectedAlbumId);
+      revalidateAlbumPaths(currentAlbum?.slug);
       toast.success("Album cover updated!");
       handleAlbumCoverUpdated(selectedAlbumId, photoUrl);
     } catch (err: any) {
@@ -225,6 +238,7 @@ export default function AdminPage() {
     setAlbums((prev) =>
       prev.map((a) => (a.id === updatedAlbum.id ? { ...a, ...updatedAlbum } : a))
     );
+    revalidateAlbumPaths(updatedAlbum.slug);
   };
 
   const stats = useMemo(() => {
@@ -453,6 +467,9 @@ export default function AdminPage() {
                 onUploadComplete={() => {
                   fetchPhotos(selectedAlbumId);
                   fetchAlbums();
+                  if (activeAlbum) {
+                    revalidateAlbumPaths(activeAlbum.slug);
+                  }
                 }}
                 onAlbumCoverUpdated={handleAlbumCoverUpdated}
               />
@@ -469,6 +486,9 @@ export default function AdminPage() {
                 onSaveSuccess={(updatedPhotos) => {
                   if (updatedPhotos) {
                     setPhotos(updatedPhotos);
+                  }
+                  if (activeAlbum) {
+                    revalidateAlbumPaths(activeAlbum.slug);
                   }
                 }}
               />
